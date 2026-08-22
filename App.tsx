@@ -183,7 +183,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
-  // NUEVO: ESTADO DE IDIOMA (BILINGÜE EN MASTER ADMIN)
+  // NUEVO: ESTADO DE IDIOMA GLOBAL
   const [lang, setLang] = useState<'ES' | 'EN'>('ES');
 
   // OBJETOS DE TEMA DINÁMICO (Para proteger el contraste de colores)
@@ -198,9 +198,19 @@ export default function App() {
     headerBg: isDarkMode ? 'bg-slate-950/90' : 'bg-slate-50/90',
   };
 
-  // DICCIONARIO DE TRADUCCIÓN PARA EL MASTER ADMIN
+  // DICCIONARIO DE TRADUCCIÓN GLOBAL
   const t = (key: string) => {
     const dict: Record<string, { ES: string, EN: string }> = {
+      // Menú y Login
+      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant' },
+      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)' },
+      'Clínico': { ES: 'Clínico', EN: 'Clinical' },
+      'Agenda': { ES: 'Agenda', EN: 'Schedule' },
+      'Admin': { ES: 'Admin', EN: 'Admin' },
+      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access' },
+      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login' },
+      
+      // Admin
       'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console' },
       'Clave de Administrador': { ES: 'Clave de Administrador', EN: 'Administrator Password' },
       'Autenticar': { ES: 'Autenticar', EN: 'Authenticate' },
@@ -798,19 +808,23 @@ export default function App() {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-xl shrink-0">Ψ</div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight truncate">Asistente Clínica SaaS</h1>
-              <p className={`text-xs ${th.textMuted} truncate`}>Sistema Clínico e Historiales (Multi-tenant)</p>
+              <h1 className="text-xl font-bold tracking-tight truncate">{t('Asistente Clínica SaaS')}</h1>
+              <p className={`text-xs ${th.textMuted} truncate`}>{t('Sistema Clínico e Historiales (Multi-tenant)')}</p>
             </div>
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-2 ${th.card} p-1 rounded-xl border ${th.border} w-full sm:w-auto`}>
+            {/* NUEVO BOTÓN IDIOMA GLOBAL */}
+            <button onClick={() => setLang(lang === 'ES' ? 'EN' : 'ES')} className="px-3 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow hover:bg-indigo-500">
+              {lang === 'ES' ? '🌐 EN' : '🌐 ES'}
+            </button>
             {/* BOTÓN TEMA CLARO/OSCURO */}
             <button onClick={toggleTheme} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${th.border} ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'}`}>
               {isDarkMode ? '☀️' : '🌙'}
             </button>
             <div className="w-px h-6 bg-slate-500/30 mx-1"></div>
-            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex-1 sm:flex-none ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>🩺 Clínico</button>
-            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex-1 sm:flex-none ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>📅 Agenda</button>
-            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all w-full sm:w-auto ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>⚙️ Admin</button>
+            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex-1 sm:flex-none ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>🩺 {t('Clínico')}</button>
+            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex-1 sm:flex-none ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>📅 {t('Agenda')}</button>
+            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all w-full sm:w-auto ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white shadow' : `${th.textMuted} hover:${th.text}`}`}>⚙️ {t('Admin')}</button>
           </div>
         </div>
       </header>
@@ -828,13 +842,6 @@ export default function App() {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* BOTÓN TRADUCCIÓN (SOLO ADMIN) */}
-                <div className="flex justify-end">
-                  <button onClick={() => setLang(lang === 'ES' ? 'EN' : 'ES')} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md transition-colors">
-                    🌐 {lang === 'ES' ? 'Switch to English' : 'Cambiar a Español'}
-                  </button>
-                </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 lg:col-span-5`}>
                     <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Activar Nueva Licencia')}</h3>
@@ -965,12 +972,12 @@ export default function App() {
           <div className="space-y-6 flex-1 flex flex-col w-full">
             {!currentUser ? (
               <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 shadow-xl max-w-md mx-auto`}>
-                <h2 className={`text-lg font-semibold ${th.text} text-center`}>Acceso Profesional Clínico</h2>
+                <h2 className={`text-lg font-semibold ${th.text} text-center`}>{t('Acceso Profesional Clínico')}</h2>
                 <form onSubmit={handleLogin} className="space-y-3">
-                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder="Usuario" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
+                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder={t('Usuario')} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   <input type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   {loginError && <p className="text-xs text-red-500">{loginError}</p>}
-                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">Iniciar Sesión</button>
+                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">{t('Iniciar Sesión')}</button>
                 </form>
               </div>
             ) : (
