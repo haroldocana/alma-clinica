@@ -13,19 +13,26 @@ import {
 } from './services/geminiService';
 
 // ============================================================================
-// BATERÍA COMPLETA
+// BATERÍA COMPLETA INTERNACIONAL (PSICOLOGÍA Y PSIQUIATRÍA DE GRADO MÉDICO)
 // ============================================================================
 const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'BAI', name: 'BAI (Ansiedad de Beck)', questions: ['Hormigueo o entumecimiento', 'Sensación de calor', 'Temblores en las piernas', 'Incapacidad de relajarse', 'Miedo a que ocurra lo peor', 'Mareos', 'Palpitaciones', 'Sensación de ahogo', 'Sudoración', 'Miedo a perder el control'], options: ['En absoluto (0)', 'Levemente (1)', 'Moderadamente (2)', 'Severamente (3)'] },
   { id: 'BDI', name: 'BDI-II (Depresión de Beck)', questions: ['Tristeza', 'Pesimismo', 'Fracaso pasado', 'Pérdida de placer', 'Sentimiento de culpa', 'Sentimientos de castigo', 'Disconformidad con uno mismo', 'Pensamientos suicidas', 'Llanto', 'Pérdida de energía'], options: ['Ausente (0)', 'Leve (1)', 'Moderado (2)', 'Severo (3)'] },
-  { id: 'PHQ9', name: 'PHQ-9 (Depresión Mayor)', questions: ['Poco interés o alegría en hacer las cosas', 'Sensación de estar deprimido o sin esperanza', 'Problemas para dormir o dormir demasiado', 'Sensación de cansancio o falta de energía', 'Falta de apetito o comer en exceso', 'Sentirse mal consigo mismo / fracaso', 'Dificultad para concentrarse', 'Movimientos lentos o agitación', 'Pensamientos suicidas o autolesivos'], options: ['Nunca (0)', 'Varios días (1)', 'Más de la mitad (2)', 'Casi todos los días (3)'] },
-  { id: 'GAD7', name: 'GAD-7 (Ansiedad Generalizada)', questions: ['Nerviosismo, ansiedad o nervios de punta', 'No poder dejar de preocuparse', 'Preocuparse demasiado por diferentes cosas', 'Dificultad para relajarse', 'Estar tan inquieto que es difícil quedarse quieto', 'Irritabilidad o enfado fácil', 'Sentir miedo a que pase algo terrible'], options: ['Nunca (0)', 'Varios días (1)', 'Más de la mitad (2)', 'Casi todos los días (3)'] },
-  { id: 'MSIBPD', name: 'MSI-BPD (Trastorno Límite de Personalidad - TLP)', questions: ['¿Ha tenido relaciones interpersonales muy intensas pero inestables con altibajos emocionales?', '¿Ha realizado actos impulsivos de riesgo?', '¿Se ha autolesionado deliberadamente o ha tenido conductas o amenazas suicidas?', '¿Experimenta cambios de humor repentinos y extremos?', '¿Siente con frecuencia una sensación persistente e incómoda de vacío interior?', '¿Siente un miedo intenso e irrazonable al rechazo o abandono?', '¿Tiene episodios de ira intensa, fuera de control?', '¿Cambia dramáticamente la opinión sobre sí mismo, sus metas o sus valores de forma repentina?'], options: ['No (0)', 'Sí (1)'] },
-  { id: 'MDQ', name: 'MDQ (Detección de Trastorno Bipolar)', questions: ['¿Ha habido periodos en los que se sentía tan feliz o lleno de energía que otros pensaban que no era usted mismo?', '¿Se sentía tan irritable que le gritaba a la gente o iniciaba peleas?', '¿Se sentía mucho más seguro de sí mismo que de costumbre?', '¿Dormía mucho menos de lo habitual y no echaba en falta el sueño?', '¿Hablaba mucho más o mucho más deprisa de lo habitual?', '¿Los pensamientos iban a toda velocidad por su cabeza?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'HAM_A', name: 'HAM-A (Escala de Ansiedad de Hamilton)', questions: ['Estado de ánimo ansioso (Preocupación, temor, irritabilidad)', 'Tensión (Sensación de tensión, llanto fácil, temblores)', 'Temores (A la oscuridad, a desconocidos, a quedarse solo)', 'Insomnio (Dificultad para conciliar el sueño, sueño interrumpido)', 'Funciones intelectuales (Dificultad de concentración, mala memoria)', 'Estado de ánimo deprimido (Pérdida de interés, insatisfacción)', 'Síntomas somáticos musculares (Dolores, rigidez, sacudidas)', 'Síntomas somáticos sensoriales (Zumbidos, visión borrosa)', 'Síntomas cardiovasculares (Taquicardia, palpitaciones, dolor torácico)', 'Síntomas respiratorios (Opresión torácica, sensación de ahogo)'], options: ['Ausente (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'HAM_D', name: 'HAM-D (Escala de Depresión de Hamilton)', questions: ['Depresión / Humor sombrío (Desesperanza, llanto)', 'Sentimientos de culpa (Autoacusación, sensación de pena)', 'Ideación suicida (Sentimiento de que la vida no vale la pena)', 'Insomnio precoz (Dificultad para conciliar el sueño)', 'Insomnio medio (Sueño inquieto durante la noche)', 'Insomnio tardío (Despertar precoz en la mañana)', 'Trabajo y actividades (Incapacidad/pérdida de productividad)', 'Inhibición psicomotora (Lentitud de pensamiento y palabra)', 'Agitación motora (Inquietud en manos o postura)', 'Ansiedad psíquica (Tensión, aprensión, irritabilidad)'], options: ['Ausente (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'PHQ9', name: 'PHQ-9 (Depresión Mayor - OMS)', questions: ['Poco interés o alegría en hacer las cosas', 'Sensación de estar deprimido o sin esperanza', 'Problemas para dormir o dormir demasiado', 'Sensación de cansancio o falta de energía', 'Falta de apetito o comer en exceso', 'Sentirse mal consigo mismo / fracaso', 'Dificultad para concentrarse', 'Movimientos lentos o agitación', 'Pensamientos suicidas o autolesivos'], options: ['Nunca (0)', 'Varios días (1)', 'Más de la mitad (2)', 'Casi todos los días (3)'] },
+  { id: 'GAD7', name: 'GAD-7 (Ansiedad Generalizada - APA)', questions: ['Nerviosismo, ansiedad o nervios de punta', 'No poder dejar de preocuparse', 'Preocuparse demasiado por diferentes cosas', 'Dificultad para relajarse', 'Estar tan inquieto que es difícil quedarse quieto', 'Irritabilidad o enfado fácil', 'Sentir miedo a que pase algo terrible'], options: ['Nunca (0)', 'Varios días (1)', 'Más de la mitad (2)', 'Casi todos los días (3)'] },
+  { id: 'YBOCS', name: 'Y-BOCS (Trastorno Obsesivo-Compulsivo - TOC)', questions: ['Tiempo ocupado por pensamientos obsesivos', 'Interferencia funcional de pensamientos obsesivos', 'Malestar/Angustia causada por obsesiones', 'Resistencia contra las obsesiones', 'Control percibido sobre los pensamientos obsesivos', 'Tiempo dedicado a conductas compulsivas', 'Interferencia funcional de las compulsiones', 'Malestar al no realizar la compulsión', 'Resistencia contra las compulsiones', 'Control percibido sobre las compulsiones'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Extremo (4)'] },
+  { id: 'CSSRS', name: 'C-SSRS (Escala Columbia - Riesgo Suicida)', questions: ['¿Ha deseado estar muerto o dormirse y no despertar?', '¿Ha tenido pensamientos de matarse sin método específico?', '¿Ha tenido pensamientos de matarse con algún método sin plan activo?', '¿Ha tenido intenciones e ideación suicida con algún plan en desarrollo?', '¿Ha realizado alguna conducta preparatoria o ensayo de intento suicida?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'MSIBPD', name: 'MSI-BPD (Trastorno Límite de Personalidad - TLP)', questions: ['¿Relaciones interpersonales muy intensas pero inestables?', '¿Actos impulsivos de riesgo (gastos, sexo, sustancias)?', '¿Conductas o amenazas suicidas / autolesiones deliberadas?', '¿Cambios de humor repentinos y extremos?', '¿Sensación persistente de vacío interior?', '¿Miedo intenso e irrazonable al rechazo o abandono?', '¿Episodios de ira intensa fuera de control?', '¿Cambio dramático sobre opinión propia o valores?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'MDQ', name: 'MDQ (Detección de Trastorno Bipolar)', questions: ['¿Se sintió tan feliz o lleno de energía que otros notaron cambios?', '¿Se sintió tan irritable que le gritaba a la gente o peleaba?', '¿Se sentía mucho más seguro de sí mismo que de costumbre?', '¿Dormía mucho menos de lo habitual y no extrañaba el sueño?', '¿Hablaba mucho más o más rápido de lo habitual?', '¿Los pensamientos iban a toda velocidad por su cabeza?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'MMSE', name: 'MMSE (Mini-Mental State - Evaluación Cognitiva)', questions: ['Orientación Temporal (Año, estación, fecha, día, mes)', 'Orientación Espacial (Lugar, hospital, ciudad, país)', 'Fijación y Registro (Repetición de 3 palabras clave)', 'Atención y Cálculo (Sustracción de 7 en 7 o deletreo inverso)', 'Memoria de Evocación (Recordar las 3 palabras fijadas)'], options: ['Incorrecto (0)', 'Correcto (1)'] },
+  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfacción con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'SPIN', name: 'SPIN (Inventario de Fobia Social)', questions: ['Tengo miedo a las personas con autoridad', 'Me molesta ruborizarme delante de la gente', 'Las fiestas y eventos me dan temor', 'Evito hablar con gente que no conozco', 'El temor a la crítica me paraliza'], options: ['Nada (0)', 'Un poco (1)', 'Moderado (2)', 'Mucho (3)', 'Extremadamente (4)'] },
   { id: 'EAT26', name: 'EAT-26 (Trastornos Conducta Alimentaria)', questions: ['Me aterroriza tener sobrepeso.', 'Evito comer cuando tengo hambre.', 'Me preocupo mucho por la comida.', 'Siento que los demás preferirían que yo comiese más.', 'Vomito después de haber comido.', 'Siento que la comida controla mi vida.'], options: ['Nunca (0)', 'A veces (1)', 'Siempre (2)'] },
-  { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas o fármacos no recetados fuera de las indicaciones médicas?', '¿Ha abusado de más de una sustancia o droga a la vez?', '¿Le resulta difícil dejar de consumir drogas o medicamentos cuando lo desea?', '¿Ha tenido lagunas de memoria o desmayos a causa del consumo de sustancias?', '¿Siente culpa, remordimiento o vergüenza por su manera de consumir sustancias?', '¿Ha desatendido sus responsabilidades familiares o laborales por consumir?', '¿Ha experimentado síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
-  { id: 'AUDIT', name: 'AUDIT (Trastornos por Alcohol - OMS)', questions: ['¿Con qué frecuencia consume bebidas alcohólicas?', '¿Cuántas copas o consumiciones suele tomar en un día ordinario de consumo?', '¿Con qué frecuencia toma 5 o más bebidas alcohólicas en un solo día?', '¿Ha sido incapaz de parar de beber una vez que había empezado?', '¿Incapacidad para recordar lo que sucedió la noche anterior debido al alcohol?', '¿Usted u otra persona ha resultado herido debido a su consumo de alcohol?'], options: ['Nunca (0)', 'Raramente (1)', 'Mensualmente (2)', 'Semanalmente (3)', 'Diariamente (4)'] },
-  { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en los detalles?', '¿Dificultad para mantener la atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Siente inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
+  { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su manera de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'AUDIT', name: 'AUDIT (Trastornos por Alcohol - OMS)', questions: ['¿Frecuencia con que consume bebidas alcohólicas?', '¿Consumiciones habituales en un día ordinario de consumo?', '¿Frecuencia de toma de 5 o más bebidas en un solo día?', '¿Incapaz de parar de beber una vez que había empezado?', '¿Incapacidad para recordar lo sucedido debido al alcohol?', '¿Usted u otra persona resultó herida debido a su consumo?'], options: ['Nunca (0)', 'Raramente (1)', 'Mensualmente (2)', 'Semanalmente (3)', 'Diariamente (4)'] },
+  { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en detalles?', '¿Dificultad para mantener atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
   { id: 'PCL5', name: 'PCL-5 (Trauma y TEPT)', questions: ['Recuerdos repetitivos e inquietantes de la experiencia estresante', 'Pesadillas de la experiencia', 'Evitar situaciones o lugares que le recuerden el evento', 'Creencias negativas fuertes sobre sí mismo', 'Estar muy alerta o vigilante'], options: ['Nada (0)', 'Un poco (1)', 'Moderadamente (2)', 'Bastante (3)', 'Extremadamente (4)'] }
 ];
 
@@ -33,16 +40,14 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
   ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
   : NUEVAS_EVALUACIONES;
 
-// ============================================================================
-// HELPERS GRÁFICOS Y DE CÁLCULO
-// ============================================================================
 const extractNumericScore = (scoreStr: string | undefined): number => {
-  if (!scoreStr || scoreStr === 'Pendiente') return 0;
+  if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
   const match = scoreStr.match(/\d+/);
   return match ? parseInt(match[0], 10) : 0;
 };
 
-const generateSpiderChartSVG = (areas: any) => {
+// SVG ARREGLADO CON PÍXELES EXACTOS PARA QUE SE IMPRIMA EN EL PDF
+const generateSpiderChartSVG = (areas: any, t: (key: string, overrideLang?: string) => string, targetLang?: string) => {
   const values = [areas.sleep || 5, areas.appetite || 5, areas.energy || 5, areas.social || 5, areas.concentration || 5];
   const angles = [0, 72, 144, 216, 288].map(deg => (deg * Math.PI) / 180);
   const getPoint = (val: number, angle: number, radiusMax: number = 40) => {
@@ -53,140 +58,28 @@ const generateSpiderChartSVG = (areas: any) => {
   const pointsData = values.map((v, i) => getPoint(v, angles[i], 40)).join(' ');
 
   return `
-    <svg viewBox="0 0 120 110" class="w-full h-full drop-shadow-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 110" width="250" height="230" style="font-family: sans-serif; display: block; margin: 0 auto;">
       <polygon points="${pointsMax}" fill="#1e293b" stroke="#334155" stroke-width="1" />
       ${angles.map(a => `<line x1="50" y1="50" x2="${50 + 40 * Math.sin(a)}" y2="${50 - 40 * Math.cos(a)}" stroke="#334155" stroke-width="0.5" />`).join('')}
       <polygon points="${pointsData}" fill="rgba(99, 102, 241, 0.4)" stroke="#6366f1" stroke-width="2" />
       ${angles.map((a, i) => `<circle cx="${50 + (values[i] / 10) * 40 * Math.sin(a)}" cy="${50 - (values[i] / 10) * 40 * Math.cos(a)}" r="2" fill="#818cf8" />`).join('')}
-      <text x="50" y="7" font-size="5" fill="#94a3b8" text-anchor="middle">Sueño</text>
-      <text x="96" y="38" font-size="5" fill="#94a3b8" text-anchor="start">Apetito</text>
-      <text x="80" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">Energía</text>
-      <text x="20" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">Social</text>
-      <text x="4" y="38" font-size="5" fill="#94a3b8" text-anchor="end">Atención</text>
+      <text x="50" y="7" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Sueño', targetLang)}</text>
+      <text x="96" y="38" font-size="5" fill="#94a3b8" text-anchor="start">${t('Apetito', targetLang)}</text>
+      <text x="80" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Energía', targetLang)}</text>
+      <text x="20" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Social', targetLang)}</text>
+      <text x="4" y="38" font-size="5" fill="#94a3b8" text-anchor="end">${t('Atención', targetLang)}</text>
     </svg>
   `;
 };
 
-// ============================================================================
-// COMPONENTE: Dashboard Estadístico
-// ============================================================================
-const PatientDashboard = ({ activeCase }: { activeCase: ClinicalCase }) => {
-  const sessions = activeCase.sessions || [];
-  const totalSessions = sessions.length;
-  const chartData = sessions.map(s => ({
-    session: `S${s.sessionNumber}`,
-    bai: extractNumericScore(s.baiScore),
-    bdi: extractNumericScore(s.bdiScore)
-  }));
-  const lastSessionAreas = sessions[totalSessions - 1]?.functionalAreas || { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 };
-  const firstSession = chartData[0] || { bai: 0, bdi: 0 };
-  const lastSession = chartData[totalSessions - 1] || { bai: 0, bdi: 0 };
-  const metaSesiones = 12;
-  const avanceBase = Math.min(100, (totalSessions / metaSesiones) * 100);
-  
-  const stressPromedio = (lastSession.bai + lastSession.bdi) / 2;
-  const sentimientoScore = totalSessions > 0 ? Math.max(0, 100 - (stressPromedio / 30) * 100) : 50; 
-
-  let sentimientoColor = 'text-red-400';
-  if (sentimientoScore >= 80) sentimientoColor = 'text-emerald-400';
-  else if (sentimientoScore >= 50) sentimientoColor = 'text-blue-400';
-  else if (sentimientoScore >= 25) sentimientoColor = 'text-amber-400';
-
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full overflow-hidden">
-      <div className="border-b border-slate-800 pb-3">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider break-words">📊 Business Intelligence Clínico</h3>
-        <p className="text-[11px] text-slate-400">Medición de adherencia, evolución de síntomas y áreas funcionales.</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center">
-          <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ Rueda Multiaxial</h4>
-          <div className="w-40 h-40" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas) }} />
-        </div>
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center w-full">
-          <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-4">📊 Eficacia: Pre vs Post</h4>
-          <div className="flex items-end justify-center gap-6 h-32 w-full px-4">
-            <div className="flex gap-1 h-full items-end">
-              <div className="w-8 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bai/63)*100}%` }}>
-                <span className="text-[9px] text-white font-bold mb-1">{firstSession.bai}</span>
-              </div>
-              <div className="w-8 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bai/63)*100}%` }}>
-                <span className="text-[9px] text-white font-bold mb-1">{lastSession.bai}</span>
-              </div>
-            </div>
-            <div className="flex gap-1 h-full items-end">
-              <div className="w-8 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bdi/63)*100}%` }}>
-                <span className="text-[9px] text-white font-bold mb-1">{firstSession.bdi}</span>
-              </div>
-              <div className="w-8 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bdi/63)*100}%` }}>
-                <span className="text-[9px] text-white font-bold mb-1">{lastSession.bdi}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-between w-full px-8 mt-2 text-[8px] text-slate-500 uppercase font-bold">
-            <span>Ansiedad</span>
-            <span>Depresión</span>
-          </div>
-        </div>
-        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
-          <div>
-            <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">🌡️ Adherencia Clínica</h4>
-            <div className="w-full bg-slate-800 rounded-full h-3">
-              <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-3 rounded-full" style={{ width: `${avanceBase}%` }}></div>
-            </div>
-            <p className="text-[9px] text-slate-400 mt-1">{Math.round(avanceBase)}% completado.</p>
-          </div>
-          <div className="pt-2 border-t border-slate-800">
-            <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 Sentimiento Congruente</h4>
-            <div className={`text-xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? 'Estable' : 'En Riesgo'}</div>
-            <p className="text-[9px] text-slate-400">Score IA: {Math.round(sentimientoScore)}/100</p>
-          </div>
-        </div>
-      </div>
-      <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-hidden w-full">
-        <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-4">📈 Curva de Tendencia (Síntomas)</h4>
-        {totalSessions < 2 ? (
-          <p className="text-[10px] text-slate-500 italic text-center py-6">Requiere 2+ sesiones para curva.</p>
-        ) : (
-          <div className="relative w-full h-40">
-            <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-              <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
-              <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
-              <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
-              <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bai / 63) * 40}`).join(' ')} />
-              <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bdi / 63) * 40}`).join(' ')} />
-              {chartData.map((d, i) => {
-                const cx = (i / (totalSessions - 1)) * 100;
-                return (
-                  <g key={i}>
-                    <circle cx={cx} cy={40 - (d.bai / 63) * 40} r="1.5" fill="#f59e0b" />
-                    <circle cx={cx} cy={40 - (d.bdi / 63) * 40} r="1.5" fill="#3b82f6" />
-                    <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// COMPONENTE PRINCIPAL APP
-// ============================================================================
 export default function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.CLINICAL);
-  
-  // NUEVO: ESTADO DE TEMA CLARO/OSCURO
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+  const [lang, setLang] = useState<'ES'|'EN'|'PT'|'IT'|'FR'>('ES');
+  const [pdfLang, setPdfLang] = useState<'ES'|'EN'|'PT'|'IT'|'FR'>('ES');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  // NUEVO: ESTADO DE IDIOMA GLOBAL
-  const [lang, setLang] = useState<'ES' | 'EN'>('ES');
-
-  // OBJETOS DE TEMA DINÁMICO (Para proteger el contraste de colores)
   const th = {
     bg: isDarkMode ? 'bg-slate-950' : 'bg-slate-50',
     card: isDarkMode ? 'bg-slate-900' : 'bg-white',
@@ -198,49 +91,319 @@ export default function App() {
     headerBg: isDarkMode ? 'bg-slate-950/90' : 'bg-slate-50/90',
   };
 
-  // DICCIONARIO DE TRADUCCIÓN GLOBAL
-  const t = (key: string) => {
-    const dict: Record<string, { ES: string, EN: string }> = {
-      // Menú y Login
-      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant' },
-      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)' },
-      'Clínico': { ES: 'Clínico', EN: 'Clinical' },
-      'Agenda': { ES: 'Agenda', EN: 'Schedule' },
-      'Admin': { ES: 'Admin', EN: 'Admin' },
-      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access' },
-      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login' },
+  const t = (key: string, overrideLang?: string) => {
+    const activeLang = overrideLang || lang;
+    const dict: Record<string, { ES: string, EN: string, PT: string, IT: string, FR: string }> = {
+      // General UI
+      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant', PT: 'Assistente Clínico SaaS', IT: 'Assistente Clinico SaaS', FR: 'Assistant Clinique SaaS' },
+      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)', PT: 'Sistema Clínico e Prontuários', IT: 'Sistema Clinico e Cartelle', FR: 'Système Clinique et Dossiers' },
+      'Clínico': { ES: 'Clínico', EN: 'Clinical', PT: 'Clínico', IT: 'Clinico', FR: 'Clinique' },
+      'Agenda': { ES: 'Agenda', EN: 'Schedule', PT: 'Agenda', IT: 'Agenda', FR: 'Agenda' },
+      'Admin': { ES: 'Admin', EN: 'Admin', PT: 'Admin', IT: 'Admin', FR: 'Admin' },
+      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access', PT: 'Acesso Profissional Clínico', IT: 'Accesso Professionale Clinico', FR: 'Accès Professionnel Clinique' },
+      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login', PT: 'Entrar', IT: 'Accedi', FR: 'Connexion' },
+      'Usuario': { ES: 'Usuario', EN: 'Username', PT: 'Usuário', IT: 'Utente', FR: 'Utilisateur' },
+      'Contraseña': { ES: 'Contraseña', EN: 'Password', PT: 'Senha', IT: 'Password', FR: 'Mot de passe' },
+      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console', PT: 'Console Mestre de Licenças', IT: 'Console Master Licenze', FR: 'Console Principale des Licences' },
+      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License', PT: 'Ativar Nova Licença', IT: 'Attiva Nuova Licenza', FR: 'Activer Nouvelle Licence' },
+      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support', PT: 'Auditoria e Suporte', IT: 'Audit e Supporto', FR: 'Audit et Support' },
+      'Búsqueda': { ES: 'Búsqueda', EN: 'Search', PT: 'Busca', IT: 'Ricerca', FR: 'Recherche' },
+      'Alertas': { ES: 'Alertas', EN: 'Alerts', PT: 'Alertas', IT: 'Avvisi', FR: 'Alertes' },
+      'Mi Perfil': { ES: 'Mi Perfil', EN: 'My Profile', PT: 'Meu Perfil', IT: 'Mio Profilo', FR: 'Mon Profil' },
+      'Respaldo JSON': { ES: 'Respaldo JSON', EN: 'JSON Backup', PT: 'Backup JSON', IT: 'Backup JSON', FR: 'Sauvegarde JSON' },
+      'Cerrar Sesión': { ES: 'Cerrar Sesión', EN: 'Logout', PT: 'Sair', IT: 'Esci', FR: 'Déconnexion' },
+      'BÚSQUEDA DE EXPEDIENTES': { ES: 'BÚSQUEDA DE EXPEDIENTES', EN: 'RECORD SEARCH', PT: 'BUSCA DE PRONTUÁRIOS', IT: 'RICERCA CARTELLE', FR: 'RECHERCHE DE DOSSIERS' },
+      'Nuevo Expediente': { ES: 'Nuevo Expediente', EN: 'New Record', PT: 'Novo Prontuário', IT: 'Nuova Cartella', FR: 'Nouveau Dossier' },
+      'Ocultar Formulario': { ES: 'Ocultar Formulario', EN: 'Hide Form', PT: 'Ocultar Formulário', IT: 'Nascondi Modulo', FR: 'Masquer le Formulaire' },
       
-      // Admin
-      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console' },
-      'Clave de Administrador': { ES: 'Clave de Administrador', EN: 'Administrator Password' },
-      'Autenticar': { ES: 'Autenticar', EN: 'Authenticate' },
-      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License' },
-      'Usuario': { ES: 'Usuario', EN: 'Username' },
-      'Contraseña': { ES: 'Contraseña', EN: 'Password' },
-      'Nombre Completo': { ES: 'Nombre Completo', EN: 'Full Name' },
-      'Colegiado': { ES: 'Colegiado', EN: 'License N°' },
-      'País / Región': { ES: 'País / Región', EN: 'Country / Region' },
-      'Plan de Licencia': { ES: 'Plan de Licencia', EN: 'License Plan' },
-      'Licencia ESTÁNDAR': { ES: 'Licencia ESTÁNDAR', EN: 'STANDARD License' },
-      'Licencia PREMIUM': { ES: 'Licencia PREMIUM', EN: 'PREMIUM License' },
-      'Licencia DEMO (15 Días)': { ES: 'Licencia DEMO (15 Días)', EN: 'DEMO License (15 Days)' },
-      'Activar Módulo de Voz (Vapi / IA)': { ES: 'Activar Módulo de Voz (Vapi / IA)', EN: 'Enable Voice Module (Vapi / AI)' },
-      'Actívelo solo si el doctor pagó el Setup o el Bolsón de Minutos.': { ES: 'Actívelo solo si el doctor pagó el Setup o el Bolsón de Minutos.', EN: 'Enable only if the doctor paid for Setup or Minute Bundle.' },
-      'Activar Licencia': { ES: 'Activar Licencia', EN: 'Activate License' },
-      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support' },
-      'País': { ES: 'País', EN: 'Country' },
-      'Plan': { ES: 'Plan', EN: 'Plan' },
-      'Vence': { ES: 'Vence', EN: 'Expires' },
-      'Vencida': { ES: 'Vencida', EN: 'Expired' },
-      'días restantes': { ES: 'días restantes', EN: 'days left' },
-      'Activo': { ES: 'Activo', EN: 'Active' },
-      'Inactivo': { ES: 'Inactivo', EN: 'Inactive' },
-      'Nueva clave...': { ES: 'Nueva clave...', EN: 'New password...' },
-      'Guardar': { ES: 'Guardar', EN: 'Save' },
-      'Renovar': { ES: 'Renovar', EN: 'Renew' },
-      'Fecha': { ES: 'Fecha', EN: 'Date' }
+      // Demográficos Variables (PDF y App)
+      'Edad': { ES: 'Edad', EN: 'Age', PT: 'Idade', IT: 'Età', FR: 'Âge' },
+      'Teléfono': { ES: 'Teléfono', EN: 'Phone', PT: 'Telefone', IT: 'Telefono', FR: 'Téléphone' },
+      'Religión': { ES: 'Religión', EN: 'Religion', PT: 'Religião', IT: 'Religione', FR: 'Religion' },
+      'Femenino': { ES: 'Femenino', EN: 'Female', PT: 'Feminino', IT: 'Femmina', FR: 'Féminin' },
+      'Masculino': { ES: 'Masculino', EN: 'Male', PT: 'Masculino', IT: 'Maschio', FR: 'Masculin' },
+      'Otro': { ES: 'Otro', EN: 'Other', PT: 'Outro', IT: 'Altro', FR: 'Autre' },
+      'Soltero(a)': { ES: 'Soltero(a)', EN: 'Single', PT: 'Solteiro(a)', IT: 'Celibe/Nubile', FR: 'Célibataire' },
+      'Casado(a)': { ES: 'Casado(a)', EN: 'Married', PT: 'Casado(a)', IT: 'Sposato(a)', FR: 'Marié(e)' },
+      'Divorciado(a)': { ES: 'Divorciado(a)', EN: 'Divorced', PT: 'Divorciado(a)', IT: 'Divorziato(a)', FR: 'Divorcé(e)' },
+      'Viudo(a)': { ES: 'Viudo(a)', EN: 'Widowed', PT: 'Viúvo(a)', IT: 'Vedovo(a)', FR: 'Veuf(ve)' },
+      'Unión Libre': { ES: 'Unión Libre', EN: 'Domestic Partnership', PT: 'União Estável', IT: 'Convivenza', FR: 'Union Libre' },
+      'Psicólogo(a) Clínico': { ES: 'Psicólogo(a) Clínico', EN: 'Clinical Psychologist', PT: 'Psicólogo(a) Clínico', IT: 'Psicologo(a) Clinico', FR: 'Psychologue Clinicien' },
+      'Médico Psiquiatra': { ES: 'Médico Psiquiatra', EN: 'Psychiatrist', PT: 'Médico Psiquiatra', IT: 'Medico Psichiatra', FR: 'Médecin Psychiatre' },
+      
+      // Detalles del Formulario
+      '1. Datos Personales Básicos': { ES: '1. Datos Personales Básicos', EN: '1. Basic Personal Data', PT: '1. Dados Pessoais Básicos', IT: '1. Dati Personali di Base', FR: '1. Données Personnelles de Base' },
+      'ID Expediente (Ej. PAC-001)': { ES: 'ID Expediente (Ej. PAC-001)', EN: 'Record ID (E.g. PAC-001)', PT: 'ID do Prontuário', IT: 'ID Cartella', FR: 'ID Dossier' },
+      '2. Contexto Sociodemográfico': { ES: '2. Contexto Sociodemográfico', EN: '2. Sociodemographic Context', PT: '2. Contexto Sociodemográfico', IT: '2. Contesto Sociodemografico', FR: '2. Contexte Sociodémographique' },
+      'Ocupación': { ES: 'Ocupación', EN: 'Occupation', PT: 'Ocupação', IT: 'Occupazione', FR: 'Profession' },
+      'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level', PT: 'Grau de Escolaridade', IT: 'Livello di Istruzione', FR: 'Niveau d\'Éducation' },
+      'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin', PT: 'Local de Origem', IT: 'Luogo di Origine', FR: 'Lieu d\'Origine' },
+      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)', PT: 'Dados dos Pais', IT: 'Dati dei Genitori', FR: 'Données Parentales' },
+      '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint', PT: '3. Anamnese e Queixa Principal', IT: '3. Anamnesi e Motivo del Consulto', FR: '3. Anamnèse et Motif de Consultation' },
+      'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...', PT: 'Antecedentes Médicos / Psicológicos...', IT: 'Precedenti Medici / Psicologici...', FR: 'Antécédents Médicaux / Psychologiques...' },
+      'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...', PT: 'Motivo da Consulta...', IT: 'Motivo del Consulto...', FR: 'Motif de Consultation...' },
+      'Guardar Expediente Clínico Completo': { ES: 'Guardar Expediente Clínico Completo', EN: 'Save Complete Clinical Record', PT: 'Salvar Prontuário Clínico Completo', IT: 'Salva Cartella Clinica Completa', FR: 'Enregistrer le Dossier Clinique Complet' },
+      'Busque por nombre o ID...': { ES: 'Busque por nombre o ID...', EN: 'Search by name or ID...', PT: 'Busque por nome ou ID...', IT: 'Cerca per nome o ID...', FR: 'Recherche par nom ou ID...' },
+      'Buscar': { ES: 'Buscar', EN: 'Search', PT: 'Buscar', IT: 'Cerca', FR: 'Chercher' },
+      
+      // Operaciones Médicas
+      'Constancia': { ES: 'Constancia', EN: 'Certificate', PT: 'Declaração', IT: 'Certificato', FR: 'Attestation' },
+      'Referencia': { ES: 'Referencia', EN: 'Referral', PT: 'Encaminhamento', IT: 'Impegnativa', FR: 'Référence' },
+      'Extender Receta': { ES: 'Extender Receta', EN: 'Prescription', PT: 'Receituário', IT: 'Ricetta', FR: 'Ordonnance' },
+      'Historial': { ES: 'Historial', EN: 'History', PT: 'Histórico', IT: 'Cronologia', FR: 'Historique' },
+      'KPIs Empresariales': { ES: 'KPIs Empresariales', EN: 'Business KPIs', PT: 'KPIs Empresariais', IT: 'KPI Aziendali', FR: 'KPIs d\'Entreprise' },
+      'Sesiones': { ES: 'Sesiones', EN: 'Sessions', PT: 'Sessões', IT: 'Sessioni', FR: 'Sessions' },
+      'Nueva': { ES: 'Nueva', EN: 'New', PT: 'Nova', IT: 'Nuova', FR: 'Nouvelle' },
+      
+      // Inteligencia Artificial y Consultas
+      'Generar Dictamen IA': { ES: 'Generar Dictamen IA', EN: 'Generate AI Report', PT: 'Gerar Parecer IA', IT: 'Genera Referto IA', FR: 'Générer Rapport IA' },
+      '⏳ Procesando con IA...': { ES: '⏳ Procesando con IA...', EN: '⏳ Processing with AI...', PT: '⏳ Processando com IA...', IT: '⏳ Elaborazione con IA...', FR: '⏳ Traitement avec IA...' },
+      'Consulta Académica / Científica': { ES: 'Consulta Académica / Científica', EN: 'Academic / Scientific Query', PT: 'Consulta Acadêmica / Científica', IT: 'Consultazione Accademica / Scientifica', FR: 'Consultation Académique / Scientifique' },
+      'Consulte dudas teóricas, criterios del DSM-5, medicamentos...': { ES: 'Consulte dudas teóricas, criterios del DSM-5, medicamentos...', EN: 'Consult theoretical doubts, DSM-5 criteria, medications...', PT: 'Consulte dúvidas teóricas...', IT: 'Consulta dubbi teorici, criteri DSM-5...', FR: 'Consultez des doutes théoriques, critères du DSM-5...' },
+      'Consultando Base de Datos...': { ES: 'Consultando Base de Datos...', EN: 'Querying Database...', PT: 'Consultando Banco de Dados...', IT: 'Consultazione Database...', FR: 'Interrogation de la Base de Données...' },
+      'Realizar Consulta': { ES: 'Realizar Consulta', EN: 'Run Query', PT: 'Realizar Consulta', IT: 'Esegui Query', FR: 'Exécuter la Requête' },
+      'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report', PT: 'Parecer Clínico Profissional', IT: 'Referto Clinico Professionale', FR: 'Rapport Clinique Professionnel' },
+      'Generar PDF': { ES: 'Generar PDF', EN: 'Generate PDF', PT: 'Gerar PDF', IT: 'Genera PDF', FR: 'Générer PDF' },
+      
+      // MÉTICAS DASHBOARD NUEVAS
+      'Nivel de Actividad Psicosocial (GAF / EEAG)': { ES: 'Nivel de Actividad Psicosocial (GAF / EEAG)', EN: 'Global Assessment of Functioning (GAF)', PT: 'Avaliação Global do Funcionamento (GAF)', IT: 'Valutazione Globale del Funzionamento (GAF)', FR: 'Évaluation Globale du Fonctionnement (GAF)' },
+      'GAF / EEAG': { ES: 'GAF / EEAG', EN: 'GAF Score', PT: 'Escore GAF', IT: 'Punteggio GAF', FR: 'Score GAF' },
+      'Estabilidad Neurovegetativa': { ES: 'Estabilidad Neurovegetativa', EN: 'Neurovegetative Stability', PT: 'Estabilidade Neurovegetativa', IT: 'Stabilità Neurovegetativa', FR: 'Stabilité Neurovégétative' },
+      'Respuesta Terapéutica (% Reducción)': { ES: 'Respuesta Terapéutica (% Reducción)', EN: 'Therapeutic Response (% Reduction)', PT: 'Resposta Terapêutica (% Redução)', IT: 'Risposta Terapeutica (% Riduzione)', FR: 'Réponse Thérapeutique (% Réduction)' },
+      'Riesgo Clínico Integrado': { ES: 'Riesgo Clínico Integrado', EN: 'Integrated Clinical Risk', PT: 'Risco Clínico Integrado', IT: 'Rischio Clinico Integrato', FR: 'Risque Clinique Intégré' },
+      'Funcionalidad Adaptativa': { ES: 'Funcionalidad Adaptativa', EN: 'Adaptive Functioning', PT: 'Funcionalidade Adaptativa', IT: 'Funzionalità Adattiva', FR: 'Fonctionnalité Adaptative' },
+
+      // PDF Etiquetas y Layout
+      'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO': { ES: 'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', EN: 'PSYCHOLOGICAL AND MEDICAL CLINICAL RECORD', PT: 'PRONTUÁRIO CLÍNICO PSICOLÓGICO E MÉDICO', IT: 'CARTELLA CLINICA PSICOLOGICA E MEDICA', FR: 'DOSSIER CLINIQUE PSYCHOLOGIQUE ET MÉDICAL' },
+      'Protocolo de Gestión de Salud': { ES: 'Protocolo de Gestión de Salud', EN: 'Health Management Protocol', PT: 'Protocolo de Gestão de Saúde', IT: 'Protocollo di Gestione Sanitaria', FR: 'Protocole de Gestion de la Santé' },
+      '1. FICHA DE IDENTIFICACIÓN': { ES: '1. FICHA DE IDENTIFICACIÓN', EN: '1. IDENTIFICATION DATA', PT: '1. FICHA DE IDENTIFICAÇÃO', IT: '1. DATI DI IDENTIFICAZIONE', FR: '1. FICHE D\'IDENTIFICATION' },
+      'Nombre:': { ES: 'Nombre:', EN: 'Name:', PT: 'Nome:', IT: 'Nome:', FR: 'Nom:' },
+      'Expediente ID:': { ES: 'Expediente ID:', EN: 'Record ID:', PT: 'ID do Prontuário:', IT: 'ID Cartella:', FR: 'ID Dossier:' },
+      'Teléfono:': { ES: 'Teléfono:', EN: 'Phone:', PT: 'Telefone:', IT: 'Telefono:', FR: 'Téléphone:' },
+      'Sexo:': { ES: 'Sexo:', EN: 'Sex:', PT: 'Sexo:', IT: 'Sesso:', FR: 'Sexe:' },
+      'Edad:': { ES: 'Edad:', EN: 'Age:', PT: 'Idade:', IT: 'Età:', FR: 'Âge:' },
+      'Ocupación:': { ES: 'Ocupación:', EN: 'Occupation:', PT: 'Ocupação:', IT: 'Occupazione:', FR: 'Profession:' },
+      'Estado Civil:': { ES: 'Estado Civil:', EN: 'Marital Status:', PT: 'Estado Civil:', IT: 'Stato Civile:', FR: 'État Civil:' },
+      'Origen / Procedencia:': { ES: 'Origen / Procedencia:', EN: 'Origin:', PT: 'Origem:', IT: 'Origine:', FR: 'Origine:' },
+      'Religión:': { ES: 'Religión:', EN: 'Religion:', PT: 'Religião:', IT: 'Religione:', FR: 'Religion:' },
+      'Datos de Progenitores:': { ES: 'Datos de Progenitores:', EN: 'Parental Data:', PT: 'Dados dos Genitores:', IT: 'Dati dei Genitori:', FR: 'Données Parentales:' },
+      'Motivo Textual:': { ES: 'Motivo Textual:', EN: 'Textual Reason:', PT: 'Motivo Textual:', IT: 'Motivo Testuale:', FR: 'Raison Textuelle:' },
+      'Antecedentes Clínicos:': { ES: 'Antecedentes Clínicos:', EN: 'Clinical History:', PT: 'Antecedentes Clínicos:', IT: 'Precedenti Clinici:', FR: 'Antécédents Cliniques:' },
+      'Sin antecedentes.': { ES: 'Sin antecedentes.', EN: 'No previous history.', PT: 'Sem antecedentes.', IT: 'Nessun precedente.', FR: 'Aucun antécédent.' },
+      '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS': { ES: '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', EN: '3. PSYCHOMETRIC EVALUATIONS PERFORMED', PT: '3. AVALIAÇÕES PSICOMÉTRICAS REALIZADAS', IT: '3. VALUTAZIONI PSICOMETRICHE ESEGUITE', FR: '3. ÉVALUATIONS PSYCHOMÉTRIQUES RÉALISÉES' },
+      'No se han aplicado baterías psicométricas formales aún.': { ES: 'No se han aplicado baterías psicométricas formales aún.', EN: 'No formal psychometric batteries applied yet.', PT: 'Nenhuma bateria psicométrica formal aplicada ainda.', IT: 'Nessuna batteria psicometrica formale applicata ancora.', FR: 'Aucune batterie psychométrique formelle appliquée pour le moment.' },
+      '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)': { ES: '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', EN: '4. DIAGNOSTIC IMPRESSION AND REPORT (AI)', PT: '4. PARECER E IMPRESSÃO DIAGNÓSTICA (IA)', IT: '4. REFERTO E IMPRESSIONE DIAGNOSTICA (IA)', FR: '4. RAPPORT ET IMPRESSION DIAGNOSTIQUE (IA)' },
+      'En proceso de evaluación clínica acumulada.': { ES: 'En proceso de evaluación clínica acumulada.', EN: 'In the process of cumulative clinical evaluation.', PT: 'Em processo de avaliação clínica acumulada.', IT: 'In corso di valutazione clinica accumulata.', FR: 'En cours d\'évaluation clinique cumulée.' },
+      '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)': { ES: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', EN: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', PT: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', IT: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', FR: '5. BUSINESS INTELLIGENCE CLINIQUE (KPIs)' },
+      'Termómetro de Adherencia (Avance)': { ES: 'Termómetro de Adherencia (Avance)', EN: 'Adherence Thermometer (Progress)', PT: 'Termômetro de Adesão (Avanço)', IT: 'Termometro di Aderenza (Progresso)', FR: 'Thermomètre d\'Adhérence (Progrès)' },
+      'Hacia el protocolo base de alta clínica (12 sesiones).': { ES: 'Hacia el protocolo base de alta clínica (12 sesiones).', EN: 'Towards the clinical discharge base protocol (12 sessions).', PT: 'Rumo ao protocolo base de alta clínica (12 sessões).', IT: 'Verso il protocollo base di dimissione clinica (12 sessioni).', FR: 'Vers le protocole de base de sortie clinique (12 sessions).' },
+      'Eficacia (Sesión 1 vs Actual)': { ES: 'Eficacia (Sesión 1 vs Actual)', EN: 'Efficacy (Session 1 vs Current)', PT: 'Eficácia (Sessão 1 vs Atual)', IT: 'Efficacia (Sessione 1 vs Attuale)', FR: 'Efficacité (Session 1 vs Actuelle)' },
+      'Ansiedad': { ES: 'Ansiedad', EN: 'Anxiety', PT: 'Ansiedade', IT: 'Ansia', FR: 'Anxiété' },
+      'Depresión': { ES: 'Depresión', EN: 'Depression', PT: 'Depressão', IT: 'Depressione', FR: 'Dépression' },
+      'Rueda Multiaxial de Vida (Última Evaluación)': { ES: 'Rueda Multiaxial de Vida (Última Evaluación)', EN: 'Multiaxial Wheel of Life (Last Evaluation)', PT: 'Roda Multiaxial de Vida (Última Avaliação)', IT: 'Ruota Multiassiale della Vita (Ultima Valutazione)', FR: 'Roue Multiaxiale de Vie (Dernière Évaluation)' },
+      'Sentimiento Congruente': { ES: 'Sentimiento Congruente', EN: 'Congruent Sentiment', PT: 'Sentimento Congruente', IT: 'Sentimento Congruente', FR: 'Sentiment Congruent' },
+      'Estable': { ES: 'Estable', EN: 'Stable', PT: 'Estável', IT: 'Stabile', FR: 'Stable' },
+      'En Riesgo': { ES: 'En Riesgo', EN: 'At Risk', PT: 'Em Risco', IT: 'A Rischio', FR: 'À Risque' },
+      'Especialidad:': { ES: 'Especialidad:', EN: 'Specialty:', PT: 'Especialidade:', IT: 'Specialità:', FR: 'Spécialité:' },
+      'Colegiado Activo:': { ES: 'Colegiado Activo:', EN: 'Active License:', PT: 'Registro Ativo:', IT: 'Licenza Attiva:', FR: 'Licence Active:' },
+      'Prueba:': { ES: 'Prueba:', EN: 'Test:', PT: 'Teste:', IT: 'Test:', FR: 'Test:' },
+      'Actual:': { ES: 'Actual:', EN: 'Current:', PT: 'Atual:', IT: 'Attuale:', FR: 'Actuel:' },
+      'N/A': { ES: 'N/A', EN: 'N/A', PT: 'N/A', IT: 'N/A', FR: 'N/A' },
+      'N/R': { ES: 'N/R', EN: 'N/R', PT: 'N/R', IT: 'N/R', FR: 'N/R' },
+      
+      // Gráfica
+      'Sueño': { ES: 'Sueño', EN: 'Sleep', PT: 'Sono', IT: 'Sonno', FR: 'Sommeil' },
+      'Apetito': { ES: 'Apetito', EN: 'Appetite', PT: 'Apetite', IT: 'Appetito', FR: 'Appétit' },
+      'Energía': { ES: 'Energía', EN: 'Energy', PT: 'Energia', IT: 'Energia', FR: 'Énergie' },
+      'Social': { ES: 'Social', EN: 'Social', PT: 'Social', IT: 'Sociale', FR: 'Social' },
+      'Atención': { ES: 'Atención', EN: 'Attention', PT: 'Atenção', IT: 'Attenzione', FR: 'Attention' },
+      
+      // Normas Legales
+      'HIPAA Compliance & Privacy Rule': { ES: 'HIPAA Compliance & Privacy Rule', EN: 'HIPAA Compliance & Privacy Rule', PT: 'Conformidade HIPAA e Regra de Privacidade', IT: 'Conformità HIPAA e Regola sulla Privacy', FR: 'Conformité HIPAA et Règle de Confidentialité' },
+      'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente': { ES: 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente', EN: 'GDPR Compliance (Europe) / Patient Autonomy Law', PT: 'Conformidade RGPD (Europa) / Lei de Autonomia do Paciente', IT: 'Conformità GDPR (Europa) / Legge sull\'Autonomia del Paziente', FR: 'Conformité RGPD (Europe) / Loi sur l\'Autonomie du Patient' },
+      'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)': { ES: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)', EN: 'NOM-004-SSA3-2012 (Official Mexican Standard for Clinical Records)', PT: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana do Prontuário Clínico)', IT: 'NOM-004-SSA3-2012 (Standard Ufficiale Messicano per Cartelle Cliniche)', FR: 'NOM-004-SSA3-2012 (Norme Officielle Mexicaine pour les Dossiers Cliniques)' },
+      'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)': { ES: 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)', EN: 'Resolution 1995 of 1999 and 839 of 2017 (Clinical History)', PT: 'Resolução 1995 de 1999 e 839 de 2017 (História Clínica)', IT: 'Risoluzione 1995 del 1999 e 839 del 2017 (Storia Clinica)', FR: 'Résolution 1995 de 1999 et 839 de 2017 (Dossier Médical)' },
+      'Ley N° 20.584 (Derechos y Deberes del Paciente)': { ES: 'Ley N° 20.584 (Derechos y Deberes del Paciente)', EN: 'Law N° 20.584 (Patient Rights and Duties)', PT: 'Lei N° 20.584 (Direitos e Deveres do Paciente)', IT: 'Legge N° 20.584 (Diritti e Doveri del Paziente)', FR: 'Loi N° 20.584 (Droits et Devoirs du Patient)' },
+      'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)': { ES: 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)', EN: 'NTS N° 139-MINSA/2018/DGAIN (Clinical History Management)', PT: 'NTS N° 139-MINSA/2018/DGAIN (Gestão da História Clínica)', IT: 'NTS N° 139-MINSA/2018/DGAIN (Gestione della Storia Clinica)', FR: 'NTS N° 139-MINSA/2018/DGAIN (Gestion du Dossier Médical)' },
+      'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)': { ES: 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)', EN: 'Law 26.529 (Patient Rights, Clinical History & Informed Consent)', PT: 'Lei 26.529 (Direitos do Paciente, História Clínica e Consentimento Informado)', IT: 'Legge 26.529 (Diritti del Paziente, Storia Clinica e Consenso Informato)', FR: 'Loi 26.529 (Droits du Patient, Dossier Médical et Consentement Éclairé)' },
+      'Código de Salud (Decreto 90-97) / Normativa MSPAS': { ES: 'Código de Salud (Decreto 90-97) / Normativa MSPAS', EN: 'Health Code (Decree 90-97) / MSPAS Regulations', PT: 'Código de Saúde (Decreto 90-97) / Normativas MSPAS', IT: 'Codice della Salute (Decreto 90-97) / Normative MSPAS', FR: 'Code de la Santé (Décret 90-97) / Réglementations MSPAS' },
+      'Cumplimiento de Confidencialidad y Ética Profesional Internacional': { ES: 'Cumplimiento de Confidencialidad y Ética Profesional Internacional', EN: 'Compliance with Confidentiality and International Professional Ethics', PT: 'Cumprimento de Confidencialidade e Ética Profissional Internacional', IT: 'Conformità alla Riservatezza ed Etica Professionale Internazionale', FR: 'Conformité à la Confidentialité et à l\'Éthique Professionnelle Internationale' },
+      'A QUIEN INTERESE:': { ES: 'A QUIEN INTERESE:', EN: 'TO WHOM IT MAY CONCERN:', PT: 'A QUEM POSSA INTERESSAR:', IT: 'A CHI DI COMPETENZA:', FR: 'À QUI DE DROIT:' },
+      'Por medio de la presente se hace constar que el/la paciente': { ES: 'Por medio de la presente se hace constar que el/la paciente', EN: 'This is to certify that the patient', PT: 'Por meio desta certifica-se que o/a paciente', IT: 'Si certifica con la presente che il/la paziente', FR: 'Par la présente, il est certifié que le/la patient(e)' },
+      'expediente': { ES: 'expediente', EN: 'record', PT: 'prontuário', IT: 'cartella', FR: 'dossier' },
+      'ha asistido a su proceso clínico.': { ES: 'ha asistido a su proceso clínico.', EN: 'has attended their clinical process.', PT: 'compareceu ao seu processo clínico.', IT: 'ha partecipato al suo processo clinico.', FR: 'a assisté à son processus clinique.' },
+      'Atentamente,': { ES: 'Atentamente,', EN: 'Sincerely,', PT: 'Atenciosamente,', IT: 'Cordiali saluti,', FR: 'Cordialement,' },
+      'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL': { ES: 'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL', EN: 'INTERNATIONAL PSYCHOMETRIC EVALUATION', PT: 'AVALIAÇÃO PSICOMÉTRICA INTERNACIONAL', IT: 'VALUTAZIONE PSICOMETRICA INTERNAZIONALE', FR: 'ÉVALUATION PSYCHOMÉTRIQUE INTERNATIONALE' },
+      'Instrumento:': { ES: 'Instrumento:', EN: 'Instrument:', PT: 'Instrumento:', IT: 'Strumento:', FR: 'Instrument:' },
+      'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:', PT: 'Avaliador:', IT: 'Valutatore:', FR: 'Évaluateur:' },
+      'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:', PT: 'RESULTADOS E PONTUAÇÕES:', IT: 'RISULTATI E PUNTEGGI:', FR: 'RÉSULTATS ET SCORES:' },
+      'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:', PT: 'PONTUAÇÃO AUTOMÁTICA:', IT: 'PUNTEGGIO AUTOMATICO:', FR: 'SCORE AUTOMATIQUE:' },
+      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.', PT: 'Desenvolvido por Harold.', IT: 'Sviluppato da Harold.', FR: 'Développé par Harold.' }
     };
-    return dict[key]?.[lang] || key;
+    return dict[key]?.[activeLang] || key;
+  };
+
+  const getLegalNorm = (countryCode: string) => {
+    switch(countryCode) {
+      case 'US': return 'HIPAA Compliance & Privacy Rule';
+      case 'ES': case 'FR': case 'DE': case 'IT': case 'GB': return 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente';
+      case 'MX': return 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)';
+      case 'CO': return 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)';
+      case 'CL': return 'Ley N° 20.584 (Derechos y Deberes del Paciente)';
+      case 'PE': return 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)';
+      case 'AR': return 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)';
+      case 'GT': return 'Código de Salud (Decreto 90-97) / Normativa MSPAS';
+      default: return 'Cumplimiento de Confidencialidad y Ética Profesional Internacional';
+    }
+  };
+
+  const PatientDashboard = ({ activeCase }: { activeCase: ClinicalCase }) => {
+    const sessions = activeCase.sessions || [];
+    const totalSessions = sessions.length;
+    const chartData = sessions.map(s => ({
+      session: `S${s.sessionNumber}`,
+      bai: extractNumericScore(s.baiScore),
+      bdi: extractNumericScore(s.bdiScore)
+    }));
+    
+    const lastSessionAreas = sessions[totalSessions - 1]?.functionalAreas || { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 };
+    const firstSession = chartData[0] || { bai: 0, bdi: 0 };
+    const lastSession = chartData[totalSessions - 1] || { bai: 0, bdi: 0 };
+    
+    // CÁLCULOS CLÍNICOS AVANZADOS
+    const metaSesiones = 12;
+    const avanceBase = Math.min(100, (totalSessions / metaSesiones) * 100);
+    
+    const promedioFuncional = (lastSessionAreas.sleep + lastSessionAreas.appetite + lastSessionAreas.energy + lastSessionAreas.social + lastSessionAreas.concentration) / 5;
+    const gafScore = Math.min(100, Math.round(promedioFuncional * 10));
+    
+    const neurovegetativoScore = Math.round(((lastSessionAreas.sleep + lastSessionAreas.appetite + lastSessionAreas.energy) / 30) * 100);
+    const adaptativaScore = Math.round(((lastSessionAreas.social + lastSessionAreas.concentration) / 20) * 100);
+
+    const severidadInicial = firstSession.bai + firstSession.bdi;
+    const severidadActual = lastSession.bai + lastSession.bdi;
+    let reduccionSintomatica = 0;
+    if (severidadInicial > 0) {
+      reduccionSintomatica = Math.max(0, Math.round(((severidadInicial - severidadActual) / severidadInicial) * 100));
+    }
+
+    const stressPromedio = (lastSession.bai + lastSession.bdi) / 2;
+    const sentimientoScore = totalSessions > 0 ? Math.max(0, 100 - (stressPromedio / 30) * 100) : 50; 
+
+    let sentimientoColor = 'text-red-400';
+    if (sentimientoScore >= 80) sentimientoColor = 'text-emerald-400';
+    else if (sentimientoScore >= 50) sentimientoColor = 'text-blue-400';
+    else if (sentimientoScore >= 25) sentimientoColor = 'text-amber-400';
+
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full overflow-hidden">
+        <div className="border-b border-slate-800 pb-3 flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider break-words">📊 {t('Business Intelligence Clínico')}</h3>
+            <p className="text-[11px] text-slate-400">{t('Medición de adherencia, evolución de síntomas y áreas funcionales.')}</p>
+          </div>
+          <div className="px-3 py-1 bg-indigo-950 border border-indigo-500/40 rounded-xl text-[10px] font-bold text-indigo-300 font-mono">
+             GAF / EEAG: {gafScore}/100
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+             <span className="text-[9px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
+             <div className="text-lg font-bold text-indigo-400 mt-1">{gafScore} / 100</div>
+             <p className="text-[9px] text-slate-500 mt-0.5">{gafScore >= 71 ? 'Síntomas leves / Buen funcionamiento' : gafScore >= 51 ? 'Dificultades moderadas' : 'Alteración grave'}</p>
+          </div>
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+             <span className="text-[9px] font-bold text-slate-400 uppercase block">{t('Estabilidad Neurovegetativa')}</span>
+             <div className="text-lg font-bold text-emerald-400 mt-1">{neurovegetativoScore}%</div>
+             <p className="text-[9px] text-slate-500 mt-0.5">Eje Sueño - Apetito - Energía</p>
+          </div>
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+             <span className="text-[9px] font-bold text-slate-400 uppercase block">{t('Respuesta Terapéutica (% Reducción)')}</span>
+             <div className="text-lg font-bold text-amber-400 mt-1">{reduccionSintomatica}%</div>
+             <p className="text-[9px] text-slate-500 mt-0.5">Alivio sintomático desde Sesión 1</p>
+          </div>
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+             <span className="text-[9px] font-bold text-slate-400 uppercase block">{t('Funcionalidad Adaptativa')}</span>
+             <div className="text-lg font-bold text-blue-400 mt-1">{adaptativaScore}%</div>
+             <p className="text-[9px] text-slate-500 mt-0.5">Desempeño Social & Atención</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center">
+            <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
+            <div className="w-40 h-40" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
+          </div>
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center w-full">
+            <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-4">📊 {t('Eficacia: Pre vs Post')}</h4>
+            <div className="flex items-end justify-center gap-6 h-32 w-full px-4">
+              <div className="flex gap-1 h-full items-end">
+                <div className="w-8 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bai/63)*100}%` }}>
+                  <span className="text-[9px] text-white font-bold mb-1">{firstSession.bai}</span>
+                </div>
+                <div className="w-8 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bai/63)*100}%` }}>
+                  <span className="text-[9px] text-white font-bold mb-1">{lastSession.bai}</span>
+                </div>
+              </div>
+              <div className="flex gap-1 h-full items-end">
+                <div className="w-8 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bdi/63)*100}%` }}>
+                  <span className="text-[9px] text-white font-bold mb-1">{firstSession.bdi}</span>
+                </div>
+                <div className="w-8 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bdi/63)*100}%` }}>
+                  <span className="text-[9px] text-white font-bold mb-1">{lastSession.bdi}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between w-full px-8 mt-2 text-[8px] text-slate-500 uppercase font-bold">
+              <span>{t('Ansiedad')}</span>
+              <span>{t('Depresión')}</span>
+            </div>
+          </div>
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+            <div>
+              <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">🌡️ {t('Adherencia Clínica')}</h4>
+              <div className="w-full bg-slate-800 rounded-full h-3">
+                <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-3 rounded-full" style={{ width: `${avanceBase}%` }}></div>
+              </div>
+              <p className="text-[9px] text-slate-400 mt-1">{Math.round(avanceBase)}% {t('completado.')}</p>
+            </div>
+            <div className="pt-2 border-t border-slate-800">
+              <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 {t('Sentimiento Congruente')}</h4>
+              <div className={`text-xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? t('Estable') : t('En Riesgo')}</div>
+              <p className="text-[9px] text-slate-400">Score IA: {Math.round(sentimientoScore)}/100</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-hidden w-full">
+          <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-4">📈 {t('Curva de Tendencia (Síntomas)')}</h4>
+          {totalSessions < 2 ? (
+            <p className="text-[10px] text-slate-500 italic text-center py-6">{t('Requiere 2+ sesiones para curva.')}</p>
+          ) : (
+            <div className="relative w-full h-40">
+              <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
+                <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
+                <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
+                <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bai / 63) * 40}`).join(' ')} />
+                <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bdi / 63) * 40}`).join(' ')} />
+                {chartData.map((d, i) => {
+                  const cx = (i / (totalSessions - 1)) * 100;
+                  return (
+                    <g key={i}>
+                      <circle cx={cx} cy={40 - (d.bai / 63) * 40} r="1.5" fill="#f59e0b" />
+                      <circle cx={cx} cy={40 - (d.bdi / 63) * 40} r="1.5" fill="#3b82f6" />
+                      <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const [adminPassword, setAdminPassword] = useState(() => localStorage.getItem('adminPassword') || 'psicologia1402');
@@ -307,7 +470,7 @@ export default function App() {
     return null;
   });
 
-  const getProfPrefix = (profType?: string) => profType === 'PSIQUIATRA' ? 'Dr.(a)' : 'Lic.(a)';
+  const getProfPrefix = (profType?: string) => profType === 'PSIQUIATRA' ? t('Médico Psiquiatra') : t('Psicólogo(a) Clínico');
 
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     const savedUser = localStorage.getItem('current_logged_psychologist');
@@ -496,7 +659,7 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem('last_notes_result', notesResult); }, [notesResult]);
 
-  const [scientificQuery, setScientificQuery] = useState<ScientificQuery>({ queryText: 'Tratamiento de primera línea para TAG en adultos según la APA.', responseText: '', loading: false });
+  const [scientificQuery, setScientificQuery] = useState<ScientificQuery>({ queryText: '', responseText: '', loading: false });
   const [selectedDsmTemplate, setSelectedDsmTemplate] = useState<Dsm5EvaluationTemplate | null>(null);
   const [dsmAnswers, setDsmAnswers] = useState<Record<string, string>>({});
   const [showDsmModal, setShowDsmModal] = useState(false);
@@ -514,12 +677,6 @@ export default function App() {
       if (user.passwordHash !== loginPassword) { setLoginError('Contraseña incorrecta.'); return; }
       setCurrentUser(user); setLoginError(''); setActiveCase(null); setNotesResult(''); setActiveCaseTab('HISTORIAL'); setClinicalTab('BUSCAR');
     } else { setLoginError('Credenciales incorrectas.'); }
-  };
-
-  const getDaysRemaining = (expiryDateStr: string): number => {
-    if (!expiryDateStr) return 0;
-    const diffTime = new Date(expiryDateStr).getTime() - new Date().setHours(0, 0, 0, 0);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   const handleRegisterLicense = async (e: React.FormEvent) => {
@@ -660,7 +817,7 @@ export default function App() {
     setCertificateType(type);
     const todayStr = new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' });
     const profTitle = getProfPrefix(currentUser.professionType);
-    setCertificateText(`A QUIEN INTERESE:\n\nPor medio de la presente se hace constar que el/la paciente ${activeCase.patientName}, expediente ${activeCase.id}, ha asistido a su proceso clínico.\n\nGuatemala, ${todayStr}.\n\nAtentamente,\n${profTitle} ${currentUser.fullName}\nColegiado: ${currentUser.colegiado}`);
+    setCertificateText(`${t('A QUIEN INTERESE:')}\n\n${t('Por medio de la presente se hace constar que el/la paciente')} ${activeCase.patientName}, ${t('expediente')} ${activeCase.id}, ${t('ha asistido a su proceso clínico.')}\n\n${t('Guatemala,')} ${todayStr}.\n\n${t('Atentamente,')}\n${profTitle} ${currentUser.fullName}\n${t('Colegiado')}: ${currentUser.colegiado}`);
     setShowCertificateModal(true);
   };
 
@@ -707,16 +864,16 @@ export default function App() {
     const profTitle = getProfPrefix(currentUser.professionType);
     
     let autoScoreStr = 'Evaluado';
-    if (selectedDsmTemplate.id === 'PHQ9' || selectedDsmTemplate.id === 'GAD7') {
+    if (['PHQ9', 'GAD7', 'HAM_A', 'HAM_D', 'YBOCS', 'ISI', 'SPIN'].includes(selectedDsmTemplate.id)) {
        let numScore = 0;
        Object.values(dsmAnswers).forEach(ans => {
          const match = ans.match(/\((\d+)\)/);
          if (match) numScore += parseInt(match[1]);
        });
-       autoScoreStr = `${selectedDsmTemplate.id.includes('GAD') ? 'Ansiedad' : 'Depresión'} (Score: ${numScore})`;
+       autoScoreStr = `${selectedDsmTemplate.name.split(' ')[0]} (Score: ${numScore})`;
     }
 
-    const formattedResult = `EVALUACIÓN PSICOMÉTRICA INTERNACIONAL\nInstrumento: ${selectedDsmTemplate.name}\nEvaluador: ${profTitle} ${currentUser.fullName}\n\nRESULTADOS Y PUNTUAJES:\n${Object.entries(dsmAnswers).map(([q, ans]) => `• ${q}: ${ans}`).join('\n')}\n\n-> PUNTUACIÓN AUTOMÁTICA: ${autoScoreStr}`;
+    const formattedResult = `${t('EVALUACIÓN PSICOMÉTRICA INTERNACIONAL')}\n${t('Instrumento:')} ${selectedDsmTemplate.name}\n${t('Evaluador:')} ${profTitle} ${currentUser.fullName}\n\n${t('RESULTADOS Y PUNTUAJES:')}\n${Object.entries(dsmAnswers).map(([q, ans]) => `• ${q}: ${ans}`).join('\n')}\n\n-> ${t('PUNTUACIÓN AUTOMÁTICA:')} ${autoScoreStr}`;
     
     const updatedSessions = [...activeCase.sessions];
     if (updatedSessions.length > 0) {
@@ -725,8 +882,8 @@ export default function App() {
         ...updatedSessions[lastIdx], 
         dsm5EvaluationName: selectedDsmTemplate.name, 
         dsm5EvaluationResult: formattedResult, 
-        baiScore: selectedDsmTemplate.id === 'GAD7' || selectedDsmTemplate.id === 'BAI' ? autoScoreStr : updatedSessions[lastIdx].baiScore, 
-        bdiScore: selectedDsmTemplate.id === 'PHQ9' || selectedDsmTemplate.id === 'BDI' ? autoScoreStr : updatedSessions[lastIdx].bdiScore 
+        baiScore: selectedDsmTemplate.id.includes('GAD') || selectedDsmTemplate.id.includes('BAI') || selectedDsmTemplate.id.includes('HAM_A') ? autoScoreStr : updatedSessions[lastIdx].baiScore, 
+        bdiScore: selectedDsmTemplate.id.includes('PHQ') || selectedDsmTemplate.id.includes('BDI') || selectedDsmTemplate.id.includes('HAM_D') ? autoScoreStr : updatedSessions[lastIdx].bdiScore 
       };
     }
     const updatedCase = { ...activeCase, sessions: updatedSessions };
@@ -735,58 +892,165 @@ export default function App() {
     alert(`Evaluación psicométrica guardada en el expediente.`);
   };
 
-  const generateClinicalHistoryHTML = (c: ClinicalCase): string => {
+  // ============================================================================
+  // GENERADOR HTML PARA PDF CON LOS NUEVOS KPIs INTEGRADOS
+  // ============================================================================
+  const generateClinicalHistoryHTML = (c: ClinicalCase, targetLang: string, translatedDictamen: string): string => {
     const gd = c.generalData || {};
     let evaluacionesRealizadasHTML = '';
-    c.sessions.forEach(s => { if (s.dsm5EvaluationName && s.dsm5EvaluationResult) { evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Prueba: ${s.dsm5EvaluationName} (${s.date})</p><div style="font-size: 9pt; white-space: pre-wrap;">${s.dsm5EvaluationResult}</div></div>`; } });
+    c.sessions.forEach(s => { 
+      if (s.dsm5EvaluationName && s.dsm5EvaluationResult) { 
+        evaluacionesRealizadasHTML += `<div style="page-break-inside: avoid; margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">${t('Prueba:', targetLang)} ${s.dsm5EvaluationName} (${s.date})</p><div style="font-size: 9pt; white-space: pre-wrap;">${s.dsm5EvaluationResult}</div></div>`; 
+      } 
+    });
     
     const totalSessions = c.sessions.length;
     const firstBai = extractNumericScore(c.sessions[0]?.baiScore);
     const firstBdi = extractNumericScore(c.sessions[0]?.bdiScore);
     const lastBai = extractNumericScore(c.sessions[totalSessions - 1]?.baiScore);
     const lastBdi = extractNumericScore(c.sessions[totalSessions - 1]?.bdiScore);
-    const avanceBase = Math.min(100, Math.round((totalSessions / 12) * 100));
     const lastAreas = (c.sessions[totalSessions - 1] as any)?.functionalAreas || { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 };
+    
+    // CÁLCULOS EXACTOS REPLICADOS PARA EL PDF
+    const avanceBase = Math.min(100, Math.round((totalSessions / 12) * 100));
+    const promedioFuncional = (lastAreas.sleep + lastAreas.appetite + lastAreas.energy + lastAreas.social + lastAreas.concentration) / 5;
+    const gafScore = Math.min(100, Math.round(promedioFuncional * 10));
+    const neurovegetativoScore = Math.round(((lastAreas.sleep + lastAreas.appetite + lastAreas.energy) / 30) * 100);
+    const adaptativaScore = Math.round(((lastAreas.social + lastAreas.concentration) / 20) * 100);
+    
+    const severidadInicial = firstBai + firstBdi;
+    const severidadActual = lastBai + lastBdi;
+    let reduccionSintomatica = 0;
+    if (severidadInicial > 0) reduccionSintomatica = Math.max(0, Math.round(((severidadInicial - severidadActual) / severidadInicial) * 100));
+
+    const legalNorm = t(getLegalNorm(currentUser?.countryCode || 'GT'), targetLang);
+    const profTitle = getProfPrefix(currentUser?.professionType);
 
     const kpiHTML = `
-      <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-        <tr>
-          <td style="width: 50%; padding: 10px; border: 1px solid #ccc; vertical-align: top;">
-            <div style="font-weight: bold; font-size: 10pt; margin-bottom: 5px;">Termómetro de Adherencia (Avance)</div>
-            <div style="font-size: 18pt; font-weight: bold; color: #333;">${avanceBase}%</div>
-            <div style="font-size: 8pt; color: #666;">Hacia el protocolo base de alta clínica (12 sesiones).</div>
-          </td>
-          <td style="width: 50%; padding: 10px; border: 1px solid #ccc; vertical-align: top;">
-            <div style="font-weight: bold; font-size: 10pt; margin-bottom: 5px;">Eficacia (Sesión 1 vs Actual)</div>
-            <div style="font-size: 10pt; color: #333;">Ansiedad (S1): <b>${firstBai}</b> → Actual: <b>${lastBai}</b></div>
-            <div style="font-size: 10pt; color: #333;">Depresión (S1): <b>${firstBdi}</b> → Actual: <b>${lastBdi}</b></div>
-          </td>
-        </tr>
-      </table>
-      <div style="text-align: center; margin: 20px 0;">
-        <div style="font-weight: bold; font-size: 10pt; margin-bottom: 10px;">Rueda Multiaxial de Vida (Última Evaluación)</div>
-        <div style="width: 250px; margin: 0 auto;">
-          ${generateSpiderChartSVG(lastAreas)}
+      <div style="page-break-inside: avoid; margin-top: 20px;">
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">${t('5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', targetLang)}</h2>
+        
+        <!-- NUEVA TABLA DE KPIs AVANZADOS EN EL PDF -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 9pt;">
+          <tr>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ccc; text-align: center;">
+              <div style="font-weight: bold; color: #555;">${t('GAF / EEAG', targetLang)}</div>
+              <div style="font-size: 14pt; font-weight: bold; color: #3b82f6;">${gafScore}/100</div>
+            </td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ccc; text-align: center;">
+              <div style="font-weight: bold; color: #555;">${t('Estabilidad Neurovegetativa', targetLang)}</div>
+              <div style="font-size: 14pt; font-weight: bold; color: #10b981;">${neurovegetativoScore}%</div>
+            </td>
+            <td style="width: 25%; padding: 8px; border: 1px solid #ccc; text-align: center;">
+              <div style="font-weight: bold; color: #555;">${t('Respuesta Terapéutica (% Reducción)', targetLang)}</div>
+              <div style="font-size: 14pt; font-weight: bold; color: #f59e0b;">${reduccionSintomatica}%</div>
+            </td>
+             <td style="width: 25%; padding: 8px; border: 1px solid #ccc; text-align: center;">
+              <div style="font-weight: bold; color: #555;">${t('Funcionalidad Adaptativa', targetLang)}</div>
+              <div style="font-size: 14pt; font-weight: bold; color: #3b82f6;">${adaptativaScore}%</div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- TABLA ORIGINAL DE AVANCE Y EFICACIA -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid;">
+          <tr>
+            <td style="width: 50%; padding: 10px; border: 1px solid #ccc; vertical-align: top;">
+              <div style="font-weight: bold; font-size: 10pt; margin-bottom: 5px;">${t('Termómetro de Adherencia (Avance)', targetLang)}</div>
+              <div style="font-size: 18pt; font-weight: bold; color: #333;">${avanceBase}%</div>
+              <div style="font-size: 8pt; color: #666;">${t('Hacia el protocolo base de alta clínica (12 sesiones).', targetLang)}</div>
+            </td>
+            <td style="width: 50%; padding: 10px; border: 1px solid #ccc; vertical-align: top;">
+              <div style="font-weight: bold; font-size: 10pt; margin-bottom: 5px;">${t('Eficacia (Sesión 1 vs Actual)', targetLang)}</div>
+              <div style="font-size: 10pt; color: #333;">${t('Ansiedad', targetLang)} (S1): <b>${firstBai}</b> → ${t('Actual:', targetLang)} <b>${lastBai}</b></div>
+              <div style="font-size: 10pt; color: #333;">${t('Depresión', targetLang)} (S1): <b>${firstBdi}</b> → ${t('Actual:', targetLang)} <b>${lastBdi}</b></div>
+            </td>
+          </tr>
+        </table>
+
+        <div style="text-align: center; margin: 20px 0; page-break-inside: avoid;">
+          <div style="font-weight: bold; font-size: 10pt; margin-bottom: 10px;">${t('Rueda Multiaxial de Vida (Última Evaluación)', targetLang)}</div>
+          <div style="margin: 0 auto; text-align: center;">
+            ${generateSpiderChartSVG(lastAreas, t, targetLang)}
+          </div>
         </div>
       </div>
     `;
 
-    const profTitle = getProfPrefix(currentUser?.professionType);
-
-    return `<div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #000; background-color: #fff; padding: 0px;"><div style="border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 15px; text-align: center;"><h1 style="font-size: 15pt; font-weight: bold; margin: 0; text-transform: uppercase;">EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO</h1><p style="font-size: 9pt; margin: 3px 0 0 0; color: #333;">Sistema de Gestión de Salud - Protocolo Oficial</p></div>${gd.fotoUrl ? `<div style="text-align: center; margin-bottom: 15px;"><img src="${gd.fotoUrl}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #000;" /></div>` : ''}<h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">1. FICHA DE IDENTIFICACIÓN</h2><table style="width: 100%; font-size: 10pt; border-collapse: collapse; margin-bottom: 10px;"><tr><td style="padding: 3px 0; width: 50%;"><strong>Nombre:</strong> ${c.patientName}</td><td style="padding: 3px 0; width: 50%;"><strong>Expediente ID:</strong> ${c.id}</td></tr><tr><td style="padding: 3px 0;"><strong>Teléfono:</strong> ${gd.telefono || 'N/R'}</td><td style="padding: 3px 0;"><strong>Sexo:</strong> ${gd.sexo || 'N/R'} | <strong>Edad:</strong> ${gd.edad || 'N/R'}</td></tr><tr><td style="padding: 3px 0;"><strong>Ocupación:</strong> ${gd.ocupacion || 'N/R'}</td><td style="padding: 3px 0;"><strong>Estado Civil:</strong> ${gd.estadoCivil || 'N/R'}</td></tr><tr><td style="padding: 3px 0;" colspan="2"><strong>Origen / Procedencia:</strong> ${gd.origenProcedencia || 'N/R'} | <strong>Religión:</strong> ${gd.religion || 'N/R'}</td></tr><tr><td style="padding: 3px 0;" colspan="2"><strong>Datos de Progenitores:</strong> ${gd.datosProgenitores || 'N/R'}</td></tr></table><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">2. MOTIVO DE CONSULTA Y ANAMNESIS</h2><p style="font-size: 10pt; text-align: justify; margin: 0 0 8px 0;"><strong>Motivo Textual:</strong> "${gd.motivoConsultaTextual || 'N/R'}"</p><p style="font-size: 10pt; text-align: justify; margin: 0 0 8px 0;"><strong>Antecedentes Clínicos:</strong> ${gd.antecedentes || 'Sin antecedentes.'}</p><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS</h2>${evaluacionesRealizadasHTML || '<p style="font-size: 10pt; font-style: italic;">No se han aplicado baterías psicométricas formales aún.</p>'}<h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)</h2><div style="font-size: 10pt; text-align: justify; margin: 0 0 10px 0;">${c.structuredOutput ? c.structuredOutput.replace(/\n/g, '<br/>') : 'En proceso de evaluación clínica acumulada.'}</div>${kpiHTML}<div style="margin-top: 40px; text-align: center;"><div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 5px auto;"></div><p style="font-size: 10pt; margin: 0; font-weight: bold;">${profTitle} ${currentUser?.fullName || 'Profesional'}</p><p style="font-size: 9pt; margin: 2px 0;">Especialidad: ${currentUser?.specialty || 'Salud Mental'}</p><p style="font-size: 9pt; margin: 2px 0;">Colegiado Activo: ${currentUser?.colegiado || 'N/A'}</p>${currentUser?.professionalReview ? `<p style="font-size: 8pt; color: #555; max-width: 400px; margin: 10px auto 0 auto; font-style: italic;">"${currentUser.professionalReview}"</p>` : ''}</div></div>`;
+    return `<div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #000; background-color: #fff; width: 750px; max-width: 100%; margin: 0 auto;">
+      <div style="border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 15px; text-align: center; page-break-inside: avoid;">
+        <h1 style="font-size: 15pt; font-weight: bold; margin: 0; text-transform: uppercase;">${t('EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', targetLang)}</h1>
+        <p style="font-size: 9pt; margin: 3px 0 0 0; color: #333;">${t('Protocolo de Gestión de Salud', targetLang)} | ${legalNorm}</p>
+      </div>
+      ${gd.fotoUrl ? `<div style="text-align: center; margin-bottom: 15px; page-break-inside: avoid;"><img src="${gd.fotoUrl}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #000;" /></div>` : ''}
+      <div style="page-break-inside: avoid;">
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">${t('1. FICHA DE IDENTIFICACIÓN', targetLang)}</h2>
+        <table style="width: 100%; font-size: 10pt; border-collapse: collapse; margin-bottom: 10px;">
+          <tr><td style="padding: 3px 0; width: 50%;"><strong>${t('Nombre:', targetLang)}</strong> ${c.patientName}</td><td style="padding: 3px 0; width: 50%;"><strong>${t('Expediente ID:', targetLang)}</strong> ${c.id}</td></tr>
+          <tr><td style="padding: 3px 0;"><strong>${t('Teléfono:', targetLang)}</strong> ${gd.telefono || t('N/R', targetLang)}</td><td style="padding: 3px 0;"><strong>${t('Sexo:', targetLang)}</strong> ${gd.sexo ? t(gd.sexo, targetLang) : t('N/R', targetLang)} | <strong>${t('Edad:', targetLang)}</strong> ${gd.edad || t('N/R', targetLang)}</td></tr>
+          <tr><td style="padding: 3px 0;"><strong>${t('Ocupación:', targetLang)}</strong> ${gd.ocupacion || t('N/R', targetLang)}</td><td style="padding: 3px 0;"><strong>${t('Estado Civil:', targetLang)}</strong> ${gd.estadoCivil ? t(gd.estadoCivil, targetLang) : t('N/R', targetLang)}</td></tr>
+          <tr><td style="padding: 3px 0;" colspan="2"><strong>${t('Origen / Procedencia:', targetLang)}</strong> ${gd.origenProcedencia || t('N/R', targetLang)} | <strong>${t('Religión:', targetLang)}</strong> ${gd.religion || t('N/R', targetLang)}</td></tr>
+          <tr><td style="padding: 3px 0;" colspan="2"><strong>${t('Datos de Progenitores:', targetLang)}</strong> ${gd.datosProgenitores || t('N/R', targetLang)}</td></tr>
+        </table>
+      </div>
+      <div>
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000; page-break-inside: avoid;">${t('3. Anamnesis y Motivo de Consulta', targetLang)}</h2>
+        <p style="font-size: 10pt; text-align: justify; margin: 0 0 8px 0;"><strong>${t('Motivo Textual:', targetLang)}</strong> "${gd.motivoConsultaTextual || t('N/R', targetLang)}"</p>
+        <p style="font-size: 10pt; text-align: justify; margin: 0 0 8px 0;"><strong>${t('Antecedentes Clínicos:', targetLang)}</strong> ${gd.antecedentes || t('Sin antecedentes.', targetLang)}</p>
+      </div>
+      <div>
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000; page-break-inside: avoid;">${t('3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', targetLang)}</h2>
+        ${evaluacionesRealizadasHTML || `<p style="font-size: 10pt; font-style: italic;">${t('No se han aplicado baterías psicométricas formales aún.', targetLang)}</p>`}
+      </div>
+      <div>
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000; page-break-inside: avoid;">${t('4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', targetLang)}</h2>
+        <div style="font-size: 10pt; text-align: justify; margin: 0 0 10px 0;">${translatedDictamen ? translatedDictamen.replace(/\n/g, '<br/>') : t('En proceso de evaluación clínica acumulada.', targetLang)}</div>
+      </div>
+      ${kpiHTML}
+      <div style="margin-top: 40px; text-align: center; page-break-inside: avoid;">
+        <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 5px auto;"></div>
+        <p style="font-size: 10pt; margin: 0; font-weight: bold;">${profTitle} ${currentUser?.fullName || 'Profesional'}</p>
+        <p style="font-size: 9pt; margin: 2px 0;">${t('Especialidad:', targetLang)} ${currentUser?.specialty || t('N/A', targetLang)}</p>
+        <p style="font-size: 9pt; margin: 2px 0;">${t('Colegiado Activo:', targetLang)} ${currentUser?.colegiado || t('N/A', targetLang)}</p>
+      </div>
+    </div>`;
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!activeCase) return;
-    const printContainer = document.createElement('div');
-    printContainer.innerHTML = generateClinicalHistoryHTML(activeCase);
-    if (typeof (window as any).html2pdf !== 'undefined') {
-      const opt = { margin: [0.75, 0.75, 0.75, 0.75], filename: `Expediente_Oficial_${activeCase.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#ffffff' }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
-      (window as any).html2pdf().set(opt).from(printContainer).save();
-    } else {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) { printWindow.document.write(`<html><head><title>PDF</title></head><body>${printContainer.innerHTML}</body></html>`); printWindow.document.close(); printWindow.print(); }
+    setIsGeneratingPdf(true);
+    
+    try {
+      let reportText = activeCase.structuredOutput || '';
+      let translatedReport = reportText;
+
+      if (pdfLang !== 'ES' && reportText) {
+         const langNames = { EN: 'Inglés (English)', PT: 'Portugués (Português)', IT: 'Italiano (Italian)', FR: 'Francés (Français)' };
+         const prompt = `Actúa como un traductor médico profesional. Traduce el siguiente dictamen clínico al ${langNames[pdfLang as keyof typeof langNames]}. Mantén el formato, viñetas y tono clínico profesional exactamente igual. Solo devuelve la traducción:\n\n${reportText}`;
+         translatedReport = await queryScientificDatabase(prompt);
+      }
+
+      const printContainer = document.createElement('div');
+      printContainer.innerHTML = generateClinicalHistoryHTML(activeCase, pdfLang, translatedReport);
+      
+      if (typeof (window as any).html2pdf !== 'undefined') {
+        const opt = { 
+          margin: 0.5,
+          filename: `Expediente_Oficial_${activeCase.id}.pdf`, 
+          image: { type: 'jpeg', quality: 0.98 }, 
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', letterRendering: true }, 
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] }
+        };
+        (window as any).html2pdf().set(opt).from(printContainer).save();
+      } else {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) { printWindow.document.write(`<html><head><title>PDF</title></head><body>${printContainer.innerHTML}</body></html>`); printWindow.document.close(); printWindow.print(); }
+      }
+    } catch (error) {
+      alert("Error al generar o traducir el PDF.");
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -813,11 +1077,17 @@ export default function App() {
             </div>
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-2 ${th.card} p-1 rounded-xl border ${th.border} w-full sm:w-auto`}>
-            {/* NUEVO BOTÓN IDIOMA GLOBAL */}
-            <button onClick={() => setLang(lang === 'ES' ? 'EN' : 'ES')} className="px-3 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow hover:bg-indigo-500">
-              {lang === 'ES' ? '🌐 EN' : '🌐 ES'}
-            </button>
-            {/* BOTÓN TEMA CLARO/OSCURO */}
+            <select 
+              value={lang} 
+              onChange={(e) => setLang(e.target.value as any)} 
+              className="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg outline-none cursor-pointer shadow hover:bg-indigo-500"
+            >
+              <option value="ES">🌐 ES (Español)</option>
+              <option value="EN">🌐 EN (English)</option>
+              <option value="PT">🌐 PT (Português)</option>
+              <option value="IT">🌐 IT (Italiano)</option>
+              <option value="FR">🌐 FR (Français)</option>
+            </select>
             <button onClick={toggleTheme} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${th.border} ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'}`}>
               {isDarkMode ? '☀️' : '🌙'}
             </button>
@@ -857,12 +1127,32 @@ export default function App() {
                         <div>
                           <label className={`text-[9px] font-bold ${th.textMuted} uppercase`}>{t('País / Región')}</label>
                           <select value={regCountry} onChange={(e) => setRegCountry(e.target.value)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
+                            <option value="US">Estados Unidos (USD)</option>
+                            <option value="ES">España (EUR)</option>
+                            <option value="GB">Reino Unido (GBP)</option>
+                            <option value="FR">Francia (EUR)</option>
+                            <option value="DE">Alemania (EUR)</option>
+                            <option value="IT">Italia (EUR)</option>
                             <option value="GT">Guatemala (GTQ)</option>
                             <option value="MX">México (USD)</option>
                             <option value="CO">Colombia (USD)</option>
                             <option value="CL">Chile (USD)</option>
                             <option value="PE">Perú (USD)</option>
                             <option value="SV">El Salvador (USD)</option>
+                            <option value="AR">Argentina (USD)</option>
+                            <option value="BR">Brasil (USD)</option>
+                            <option value="CR">Costa Rica (USD)</option>
+                            <option value="HN">Honduras (USD)</option>
+                            <option value="NI">Nicaragua (USD)</option>
+                            <option value="PA">Panamá (USD)</option>
+                            <option value="DO">República Dominicana (USD)</option>
+                            <option value="EC">Ecuador (USD)</option>
+                            <option value="UY">Uruguay (USD)</option>
+                            <option value="BO">Bolivia (USD)</option>
+                            <option value="PY">Paraguay (USD)</option>
+                            <option value="VE">Venezuela (USD)</option>
+                            <option value="PR">Puerto Rico (USD)</option>
+                            <option value="CU">Cuba (USD)</option>
                           </select>
                         </div>
                         <div>
@@ -952,8 +1242,8 @@ export default function App() {
             ) : (
               <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 shadow-xl space-y-6`}>
                 <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center border-b ${th.border} pb-4 gap-4`}>
-                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 Agenda Médica</h2></div>
-                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ Agendar Cita</button>
+                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 {t('Agenda Médica')}</h2></div>
+                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ {t('Agendar Cita')}</button>
                 </div>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {myAppointments.map(app => (
@@ -987,18 +1277,18 @@ export default function App() {
                 <div className={`bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4`}>
                   <div className="min-w-0">
                     <h2 className={`text-lg font-semibold ${th.text} truncate`}>🥼 {getProfPrefix(currentUser.professionType)} {currentUser.fullName}</h2>
-                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>Colegiado: {currentUser.colegiado} | Plan: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
+                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>{t('Colegiado')}: {currentUser.colegiado} | {t('Plan')}: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
                   </div>
                   <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 Respaldo JSON</button>
-                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); setNotesResult(''); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">Cerrar Sesión</button>
+                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 {t('Respaldo JSON')}</button>
+                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); setNotesResult(''); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">{t('Cerrar Sesión')}</button>
                   </div>
                 </div>
 
                 <div className={`flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 border-b ${th.border} pb-4`}>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 Búsqueda</button>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('ALERTAS'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 whitespace-nowrap ${!activeCase && clinicalTab === 'ALERTAS' ? 'bg-amber-600 text-white' : `${th.card} ${th.textMuted}`}`}>🚨 Alertas {hasPremiumAccess && emergencyAlerts.length > 0 && <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{emergencyAlerts.length}</span>}</button>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ Mi Perfil</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 {t('Búsqueda')}</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('ALERTAS'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 whitespace-nowrap ${!activeCase && clinicalTab === 'ALERTAS' ? 'bg-amber-600 text-white' : `${th.card} ${th.textMuted}`}`}>🚨 {t('Alertas')} {hasPremiumAccess && emergencyAlerts.length > 0 && <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{emergencyAlerts.length}</span>}</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ {t('Mi Perfil')}</button>
                 </div>
 
                 {!activeCase && clinicalTab === 'PERFIL' && (
@@ -1007,37 +1297,37 @@ export default function App() {
                       <div className="space-y-6">
                         <form onSubmit={handleUpdateProfile} className="space-y-6">
                           <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
-                            <h4 className="text-xs font-bold text-indigo-500 uppercase">✏️ Datos Profesionales</h4>
+                            <h4 className="text-xs font-bold text-indigo-500 uppercase">✏️ {t('Datos Profesionales')}</h4>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Título</label>
+                                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Título')}</label>
                                 <select value={editProfessionType} onChange={(e) => setEditProfessionType(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`}>
-                                  <option value="PSICOLOGO">Psicólogo(a) Clínico</option>
-                                  <option value="PSIQUIATRA">Médico Psiquiatra</option>
+                                  <option value="PSICOLOGO">{t('Psicólogo(a) Clínico')}</option>
+                                  <option value="PSIQUIATRA">{t('Médico Psiquiatra')}</option>
                                 </select>
                               </div>
                               <div>
-                                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Nombre Completo</label>
+                                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Nombre Completo')}</label>
                                 <input type="text" required value={editProfileName} onChange={(e) => setEditProfileName(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
                               </div>
                             </div>
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Especialidad Clínica</label>
-                              <input type="text" value={editSpecialty} onChange={(e) => setEditSpecialty(e.target.value)} placeholder="Ej: Adicciones, TLP, TCC..." className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Especialidad Clínica')}</label>
+                              <input type="text" value={editSpecialty} onChange={(e) => setEditSpecialty(e.target.value)} placeholder={t('Ej: Adicciones, TLP, TCC...')} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
                             </div>
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Firma para PDF</label>
-                              <textarea rows={2} value={editReview} onChange={(e) => setEditReview(e.target.value)} placeholder="Enfoque terapéutico..." className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Firma para PDF')}</label>
+                              <textarea rows={2} value={editReview} onChange={(e) => setEditReview(e.target.value)} placeholder={t('Enfoque terapéutico...')} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
                             </div>
                           </div>
-                          <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">Guardar Perfil</button>
+                          <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                         </form>
                       </div>
                       <div className="space-y-6">
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
-                          <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Licencia</h4>
-                          <div><label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Usuario</label><input type="text" disabled value={currentUser.username} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.textMuted} cursor-not-allowed font-mono opacity-60`} /></div>
-                          <button onClick={() => setShowPasswordModal(true)} className={`px-5 py-2 bg-slate-300 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold w-full mt-4`}>Cambiar Contraseña</button>
+                          <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 {t('Licencia')}</h4>
+                          <div><label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Usuario')}</label><input type="text" disabled value={currentUser.username} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.textMuted} cursor-not-allowed font-mono opacity-60`} /></div>
+                          <button onClick={() => setShowPasswordModal(true)} className={`px-5 py-2 bg-slate-300 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold w-full mt-4`}>{t('Cambiar Contraseña')}</button>
                         </div>
                       </div>
                     </div>
@@ -1048,7 +1338,7 @@ export default function App() {
                   <div className="w-full">
                     {emergencyAlerts.length === 0 ? (
                       <div className={`text-center py-10 ${th.card} rounded-2xl border ${th.border}`}>
-                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>Bandeja Limpia</p>
+                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>{t('Bandeja Limpia')}</p>
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
@@ -1056,16 +1346,16 @@ export default function App() {
                           <div key={alert.id} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex flex-col md:flex-row justify-between border relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-red-500 animate-pulse"></div>
                             <div className="pl-3">
-                              <h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia Registrada</h3>
-                              <p className="text-xs text-red-800 dark:text-red-200">Paciente: {alert.patientName}</p>
+                              <h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 {t('Llamada de Emergencia Registrada')}</h3>
+                              <p className="text-xs text-red-800 dark:text-red-200">{t('Paciente:')} {alert.patientName}</p>
                               {alert.audioUrl && (
                                 <div className="mt-2 flex flex-col gap-1">
-                                  <span className="text-[10px] text-slate-600 dark:text-slate-300">Audio de la llamada de crisis:</span>
+                                  <span className="text-[10px] text-slate-600 dark:text-slate-300">{t('Audio de la llamada de crisis:')}</span>
                                   <audio controls src={alert.audioUrl} className="h-8 w-64"></audio>
                                 </div>
                               )}
                             </div>
-                            <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-2 md:mt-0 px-5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl h-10 self-center">Analizar Expediente</button>
+                            <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-2 md:mt-0 px-5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl h-10 self-center">{t('Analizar Expediente')}</button>
                           </div>
                         ))}
                       </div>
@@ -1076,59 +1366,62 @@ export default function App() {
                 {!activeCase && clinicalTab === 'BUSCAR' && (
                   <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full`}>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                      <h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 Búsqueda de Expedientes</h3>
+                      <h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 {t('BÚSQUEDA DE EXPEDIENTES')}</h3>
                       <button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30 w-full sm:w-auto text-center">
-                        {showRegisterForm ? 'Ocultar Formulario' : '➕ Nuevo Expediente'}
+                        {showRegisterForm ? t('Ocultar Formulario') : `➕ ${t('Nuevo Expediente')}`}
                       </button>
                     </div>
 
                     {showRegisterForm && (
                       <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5 shadow-inner`}>
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>1. Datos Personales Básicos</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <input type="text" required placeholder="ID Expediente (Ej. PAC-001)" value={newPatientData.id} onChange={(e) => setNewPatientForm(prev => ({ ...prev, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" required placeholder="Nombre Completo" value={newPatientData.patientName} onChange={(e) => setNewPatientForm(prev => ({ ...prev, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Teléfono" value={newPatientData.telefono} onChange={(e) => setNewPatientForm(prev => ({ ...prev, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(prev => ({ ...prev, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder={t('ID Expediente (Ej. PAC-001)')} value={newPatientData.id} onChange={(e) => setNewPatientForm(prev => ({ ...prev, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder={t('Nombre Completo')} value={newPatientData.patientName} onChange={(e) => setNewPatientForm(prev => ({ ...prev, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Teléfono')} value={newPatientData.telefono} onChange={(e) => setNewPatientForm(prev => ({ ...prev, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Edad')} value={newPatientData.edad} onChange={(e) => setNewPatientForm(prev => ({ ...prev, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            
+                            <input type="url" placeholder="URL de Foto del Paciente (Opcional)" value={newPatientData.fotoUrl} onChange={(e) => setNewPatientForm(prev => ({ ...prev, fotoUrl: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
+                            
                             <select value={newPatientData.sexo} onChange={(e) => setNewPatientForm(prev => ({ ...prev, sexo: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Femenino">Femenino</option>
-                              <option value="Masculino">Masculino</option>
-                              <option value="Otro">Otro</option>
+                              <option value="Femenino">{t('Femenino')}</option>
+                              <option value="Masculino">{t('Masculino')}</option>
+                              <option value="Otro">{t('Otro')}</option>
                             </select>
                             <select value={newPatientData.estadoCivil} onChange={(e) => setNewPatientForm(prev => ({ ...prev, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Soltero(a)">Soltero(a)</option>
-                              <option value="Casado(a)">Casado(a)</option>
-                              <option value="Divorciado(a)">Divorciado(a)</option>
-                              <option value="Viudo(a)">Viudo(a)</option>
-                              <option value="Unión Libre">Unión Libre</option>
+                              <option value="Soltero(a)">{t('Soltero(a)')}</option>
+                              <option value="Casado(a)">{t('Casado(a)')}</option>
+                              <option value="Divorciado(a)">{t('Divorciado(a)')}</option>
+                              <option value="Viudo(a)">{t('Viudo(a)')}</option>
+                              <option value="Unión Libre">{t('Unión Libre')}</option>
                             </select>
-                            <input type="text" placeholder="Religión" value={newPatientData.religion} onChange={(e) => setNewPatientForm(prev => ({ ...prev, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Religión')} value={newPatientData.religion} onChange={(e) => setNewPatientForm(prev => ({ ...prev, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>2. Contexto Sociodemográfico</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <input type="text" placeholder="Ocupación" value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(prev => ({ ...prev, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Grado de Estudios" value={newPatientData.estudios} onChange={(e) => setNewPatientForm(prev => ({ ...prev, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Lugar de Origen / Procedencia" value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(prev => ({ ...prev, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Datos de Progenitores (Nombres, edades, estado...)" value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(prev => ({ ...prev, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Ocupación')} value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(prev => ({ ...prev, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Grado de Estudios')} value={newPatientData.estudios} onChange={(e) => setNewPatientForm(prev => ({ ...prev, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(prev => ({ ...prev, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(prev => ({ ...prev, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>3. Anamnesis y Motivo de Consulta</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta')}</h4>
                           <div className="space-y-3">
-                            <textarea rows={2} placeholder="Antecedentes Médicos / Psicológicos Previos..." value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(prev => ({ ...prev, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <textarea required rows={3} placeholder="Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)..." value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(prev => ({ ...prev, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(prev => ({ ...prev, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(prev => ({ ...prev, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
-                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 Guardar Expediente Clínico Completo</button>
+                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 {t('Guardar Expediente Clínico Completo')}</button>
                       </form>
                     )}
 
                     <form onSubmit={handleClinicalSearch} className="flex flex-col sm:flex-row gap-2 w-full">
-                      <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder="Busque por nombre o ID..." className={`flex-1 w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text} focus:outline-none`} />
-                      <button type="submit" className="w-full sm:w-auto py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs text-center">Buscar</button>
+                      <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder={t('Busque por nombre o ID...')} className={`flex-1 w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text} focus:outline-none`} />
+                      <button type="submit" className="w-full sm:w-auto py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs text-center">{t('Buscar')}</button>
                     </form>
                     {searchFeedback && <div className={`p-3 ${th.input} rounded-xl text-xs border ${th.border} text-indigo-500 font-mono`}>{searchFeedback}</div>}
                   </div>
@@ -1139,19 +1432,19 @@ export default function App() {
                     
                     <div className="xl:col-span-5 space-y-6 w-full">
                       <div className="flex justify-between items-center bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-xl flex-wrap gap-2">
-                        <button onClick={() => setActiveCase(null)} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-bold px-3 py-1">← Búsqueda</button>
+                        <button onClick={() => setActiveCase(null)} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-bold px-3 py-1">← {t('Búsqueda')}</button>
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={() => handleOpenCertificateModal('ATTENDANCE')} className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">📄 Constancia</button>
-                          <button onClick={() => handleOpenCertificateModal('REFERRAL')} className="text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">🔁 Referencia</button>
+                          <button onClick={() => handleOpenCertificateModal('ATTENDANCE')} className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">📄 {t('Constancia')}</button>
+                          <button onClick={() => handleOpenCertificateModal('REFERRAL')} className="text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">🔁 {t('Referencia')}</button>
                           {currentUser?.professionType === 'PSIQUIATRA' && (
-                            <button onClick={() => setShowRecipeModal(true)} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">💊 Extender Receta</button>
+                            <button onClick={() => setShowRecipeModal(true)} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">💊 {t('Extender Receta')}</button>
                           )}
                         </div>
                       </div>
 
                       <div className={`flex flex-col sm:flex-row gap-2 ${th.card} p-2 rounded-2xl border ${th.border} w-full`}>
-                        <button onClick={() => setActiveCaseTab('HISTORIAL')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all w-full text-center ${activeCaseTab === 'HISTORIAL' ? 'bg-indigo-600 text-white' : `${th.textMuted} hover:${th.input}`}`}>📝 Historial</button>
-                        <button onClick={() => setActiveCaseTab('ESTADISTICAS')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all w-full text-center ${activeCaseTab === 'ESTADISTICAS' ? 'bg-indigo-600 text-white' : `${th.textMuted} hover:${th.input}`}`}>📈 KPIs Empresariales</button>
+                        <button onClick={() => setActiveCaseTab('HISTORIAL')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all w-full text-center ${activeCaseTab === 'HISTORIAL' ? 'bg-indigo-600 text-white' : `${th.textMuted} hover:${th.input}`}`}>📝 {t('Historial')}</button>
+                        <button onClick={() => setActiveCaseTab('ESTADISTICAS')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all w-full text-center ${activeCaseTab === 'ESTADISTICAS' ? 'bg-indigo-600 text-white' : `${th.textMuted} hover:${th.input}`}`}>📈 {t('KPIs Empresariales')}</button>
                       </div>
 
                       {activeCaseTab === 'HISTORIAL' && (
@@ -1161,41 +1454,41 @@ export default function App() {
                           </div>
 
                           <div className={`border-b ${th.border} pb-2 flex justify-between items-center`}>
-                            <span className={`text-xs font-bold ${th.textMuted}`}>Sesiones</span>
-                            <button onClick={() => setShowNewSessionForm(!showNewSessionForm)} className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-xl">➕ Nueva</button>
+                            <span className={`text-xs font-bold ${th.textMuted}`}>{t('Sesiones')}</span>
+                            <button onClick={() => setShowNewSessionForm(!showNewSessionForm)} className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-xl">➕ {t('Nueva')}</button>
                           </div>
 
                           {showNewSessionForm && (
                             <form onSubmit={handleAddNewSession} className={`${th.input} p-4 rounded-xl border ${th.border} space-y-4 text-xs`}>
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData(prev => ({ ...prev, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
-                              <input type="url" placeholder="Pegue enlace de grabación (Zoom, Meet, Drive)..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData(prev => ({ ...prev, videoUrl: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded text-indigo-500 placeholder-slate-400`} />
+                              <input type="url" placeholder={t('Pegue enlace de grabación (Zoom, Meet, Drive)...')} value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData(prev => ({ ...prev, videoUrl: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded text-indigo-500 placeholder-slate-400`} />
                               
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
-                                <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ Evaluación Multiaxial (1 al 10)</label>
+                                <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
                                 <div className="space-y-2">
                                   <div className="flex items-center gap-2">
-                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>Sueño</span>
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Sueño')}</span>
                                     <input type="range" min="1" max="10" value={sessionAreas.sleep} onChange={e=>setSessionAreas(prev=>({...prev, sleep: parseInt(e.target.value)}))} className="flex-1 accent-indigo-500" />
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.sleep}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>Apetito</span>
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Apetito')}</span>
                                     <input type="range" min="1" max="10" value={sessionAreas.appetite} onChange={e=>setSessionAreas(prev=>({...prev, appetite: parseInt(e.target.value)}))} className="flex-1" />
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.appetite}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>Energía</span>
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Energía')}</span>
                                     <input type="range" min="1" max="10" value={sessionAreas.energy} onChange={e=>setSessionAreas(prev=>({...prev, energy: parseInt(e.target.value)}))} className="flex-1" />
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.energy}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>Social</span>
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Social')}</span>
                                     <input type="range" min="1" max="10" value={sessionAreas.social} onChange={e=>setSessionAreas(prev=>({...prev, social: parseInt(e.target.value)}))} className="flex-1" />
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.social}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>Atención</span>
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Atención')}</span>
                                     <input type="range" min="1" max="10" value={sessionAreas.concentration} onChange={e=>setSessionAreas(prev=>({...prev, concentration: parseInt(e.target.value)}))} className="flex-1" />
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.concentration}</span>
                                   </div>
@@ -1204,23 +1497,23 @@ export default function App() {
 
                               {currentUser?.hasVoiceModule ? (
                                 <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios Adjuntos</label>
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ {t('Grabadora, Dictado IA y Audios Adjuntos')}</label>
                                   <div className="flex gap-2">
                                     <button type="button"
                                         onClick={toggleRecording}
                                         className={`flex-1 py-2.5 rounded-lg font-bold text-white transition-colors text-xs ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-slate-700 hover:bg-slate-600'}`}
                                     >
-                                        {isRecordingLive ? '🔴 Grabando (Clic para Detener y Guardar)' : '🎤 Clic para Empezar a Grabar'}
+                                        {isRecordingLive ? t('🔴 Grabando (Clic para Detener y Guardar)') : t('🎤 Clic para Empezar a Grabar')}
                                     </button>
                                   </div>
-                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all">✓ Audio vinculado: {newSessionData.audioPath}</p>}
+                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all">✓ {t('Audio vinculado:')} {newSessionData.audioPath}</p>}
                                   <div className="flex gap-2">
-                                    <input type="text" placeholder="Dictado rápido para limpiar con IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                    <input type="text" placeholder={t('Dictado rápido para limpiar con IA...')} value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                     <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] transition disabled:opacity-50">
-                                      {isDictatingVoice ? '⏳' : '✨ Usar IA'}
+                                      {isDictatingVoice ? '⏳' : t('✨ Usar IA')}
                                     </button>
                                   </div>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio Externo (MP3/WAV)</label>
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 {t('Subir Audio Externo (MP3/WAV)')}</label>
                                   <input type="file" accept="audio/*" onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if(file) {
@@ -1231,13 +1524,13 @@ export default function App() {
                                 </div>
                               ) : (
                                 <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}>
-                                  <p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Módulo de Voz Inactivo</p>
-                                  <p className={`text-[9px] ${th.textMuted} mt-1`}>Contacte a soporte para adquirir el Add-on de IA de Voz y Grabación.</p>
+                                  <p className="text-[10px] text-red-500 font-bold uppercase">🎙️ {t('Módulo de Voz Inactivo')}</p>
+                                  <p className={`text-[9px] ${th.textMuted} mt-1`}>{t('Contacte a soporte para adquirir el Add-on de IA de Voz y Grabación.')}</p>
                                 </div>
                               )}
 
-                              <textarea required rows={4} value={newSessionData.rawNotes} onChange={(e) => setNewSessionData(prev => ({ ...prev, rawNotes: e.target.value }))} placeholder="Notas de evolución formales (puede escribir manual o usar la IA arriba)..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} font-mono`} />
-                              <button type="submit" className="w-full py-2 bg-indigo-600 text-white font-bold rounded">Guardar Sesión en Expediente</button>
+                              <textarea required rows={4} value={newSessionData.rawNotes} onChange={(e) => setNewSessionData(prev => ({ ...prev, rawNotes: e.target.value }))} placeholder={t('Notas de evolución formales (puede escribir manual o usar la IA arriba)...')} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} font-mono`} />
+                              <button type="submit" className="w-full py-2 bg-indigo-600 text-white font-bold rounded">{t('Guardar Sesión en Expediente')}</button>
                             </form>
                           )}
 
@@ -1248,30 +1541,30 @@ export default function App() {
                                 <p className={`${th.text} italic mt-1 opacity-80`}>"{s.rawNotes}"</p>
                                 {s.audioPath && (
                                   <div className="mt-2 flex flex-col gap-1">
-                                    <span className={`text-[10px] ${th.textMuted}`}>Audio de Sesión:</span>
+                                    <span className={`text-[10px] ${th.textMuted}`}>{t('Audio de Sesión:')}</span>
                                     <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px]"></audio>
                                   </div>
                                 )}
-                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
+                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 {t('Enlace:')} <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
                                 {s.dsm5EvaluationName && <div className="text-[10px] text-emerald-500 font-semibold truncate mt-1">✓ {s.dsm5EvaluationName}</div>}
                               </div>
                             ))}
                           </div>
 
                           <div className={`${th.input} p-4 rounded-xl border ${th.border}`}>
-                            <span className={`font-bold ${th.text} block mb-2`}>Baterías Clínicas Internacionales (APA / OMS)</span>
+                            <span className={`font-bold ${th.text} block mb-2`}>{t('Baterías Clínicas Internacionales (APA / OMS)')}</span>
                             <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                               {CLINICAL_EVALUATIONS.map((template) => (
                                 <div key={template.id} className={`flex justify-between items-center ${th.card} p-2.5 rounded border ${th.border} hover:border-indigo-500/50 transition`}>
                                   <span className={`text-[11px] ${th.text} font-semibold`}>{template.name}</span>
-                                  <button onClick={() => { setSelectedDsmTemplate(template); setShowDsmModal(true); }} className="text-[9px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold">Aplicar</button>
+                                  <button onClick={() => { setSelectedDsmTemplate(template); setShowDsmModal(true); }} className="text-[9px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold">{t('Aplicar')}</button>
                                 </div>
                               ))}
                             </div>
                           </div>
 
                           <button onClick={handleProcessNotes} disabled={isProcessingNotes} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition shadow-lg">
-                            {isProcessingNotes ? "⏳ Procesando con IA..." : "Generar Dictamen IA"}
+                            {isProcessingNotes ? t('⏳ Procesando con IA...') : t('Generar Dictamen IA')}
                           </button>
                         </div>
                       )}
@@ -1279,29 +1572,42 @@ export default function App() {
                       {activeCaseTab === 'ESTADISTICAS' && <PatientDashboard activeCase={activeCase} />}
 
                       <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-3 w-full`}>
-                        <span className={`text-xs font-bold ${th.text} uppercase block tracking-wider truncate`}>🔬 Consulta Académica / Científica</span>
-                        <textarea value={scientificQuery.queryText} onChange={(e) => setScientificQuery(prev => ({ ...prev, queryText: e.target.value }))} rows={2} placeholder="Consulte dudas teóricas, criterios del DSM-5, medicamentos..." className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                        <span className={`text-xs font-bold ${th.text} uppercase block tracking-wider truncate`}>🔬 {t('Consulta Académica / Científica')}</span>
+                        <textarea value={scientificQuery.queryText} onChange={(e) => setScientificQuery(prev => ({ ...prev, queryText: e.target.value }))} rows={2} placeholder={t('Consulte dudas teóricas, criterios del DSM-5, medicamentos...')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                         <button onClick={handleScientificQuery} disabled={scientificQuery.loading} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-semibold text-center transition-colors">
-                          {scientificQuery.loading ? "Consultando Base de Datos..." : "Realizar Consulta"}
+                          {scientificQuery.loading ? t('Consultando Base de Datos...') : t('Realizar Consulta')}
                         </button>
                       </div>
                     </div>
 
                     <div className="xl:col-span-7 space-y-6 w-full">
                       <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col min-h-[450px]`}>
-                        <div className={`${th.input} px-4 py-4 border-b ${th.border} flex justify-between items-center`}>
-                          <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-widest`}>Dictamen Clínico Profesional</span>
-                          <button onClick={handleDownloadPDF} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg font-bold shadow-md transition">📄 Generar PDF</button>
+                        <div className={`${th.input} px-4 py-4 border-b ${th.border} flex flex-wrap gap-2 justify-between items-center`}>
+                          <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-widest`}>{t('Dictamen Clínico Profesional')}</span>
+                          
+                          <div className="flex flex-wrap items-center gap-2">
+                             <select value={pdfLang} onChange={e => setPdfLang(e.target.value as any)} className={`text-[10px] font-bold p-1.5 rounded border ${th.border} ${th.card} ${th.text} outline-none cursor-pointer`}>
+                               <option value="ES">PDF: Español</option>
+                               <option value="EN">PDF: English</option>
+                               <option value="PT">PDF: Português</option>
+                               <option value="IT">PDF: Italiano</option>
+                               <option value="FR">PDF: Français</option>
+                             </select>
+                             <button onClick={handleDownloadPDF} disabled={isGeneratingPdf} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg font-bold shadow-md transition disabled:opacity-50">
+                               {isGeneratingPdf ? '⏳...' : `📄 ${t('Generar PDF')}`}
+                             </button>
+                          </div>
+
                         </div>
                         <div className={`p-5 flex-1 text-[13px] ${th.text} font-mono whitespace-pre-wrap overflow-y-auto leading-relaxed max-h-[800px]`}>
-                          {notesResult || "Presione 'Generar Dictamen IA' para procesar el expediente actual."}
+                          {notesResult || t('Presione \'Generar Dictamen IA\' para procesar el expediente actual.')}
                         </div>
                       </div>
 
                       {scientificQuery.responseText && (
                         <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col w-full overflow-hidden`}>
                           <div className={`${th.input} px-4 sm:px-6 py-4 border-b ${th.border} flex justify-between items-center`}>
-                            <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-wide truncate`}>Resultados de Consulta Científica</span>
+                            <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-wide truncate`}>{t('Resultados de Consulta Científica')}</span>
                             <button onClick={() => setScientificQuery(prev => ({ ...prev, responseText: '' }))} className={`${th.textMuted} hover:${th.text}`}>✕</button>
                           </div>
                           <div className={`p-4 sm:p-6 flex-1 text-xs ${th.text} font-mono whitespace-pre-wrap break-words leading-relaxed overflow-y-auto max-h-64 w-full`}>
@@ -1323,30 +1629,30 @@ export default function App() {
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-lg w-full p-6 text-xs space-y-4 shadow-2xl`}>
             <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-              <h3 className="text-sm font-bold text-emerald-500">💊 Extender Receta Médica</h3>
+              <h3 className="text-sm font-bold text-emerald-500">💊 {t('Extender Receta Médica')}</h3>
               <button onClick={() => setShowRecipeModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Paciente')}</label>
                 <input type="text" disabled value={`${activeCase.patientName} (Exp: ${activeCase.id})`} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.textMuted} font-mono text-xs`} />
               </div>
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Diagnóstico (CIE-11)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Diagnóstico (CIE-11)')}</label>
                 <input type="text" value={recipeData.diagnostico} onChange={e => setRecipeData(prev => ({...prev, diagnostico: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text}`} />
               </div>
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Rp/ (Medicamentos)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Rp/ (Medicamentos)')}</label>
                 <textarea rows={4} value={recipeData.medicamentos} onChange={e => setRecipeData(prev => ({...prev, medicamentos: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} font-mono`} />
               </div>
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Instrucciones</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Instrucciones')}</label>
                 <textarea rows={2} value={recipeData.indicaciones} onChange={e => setRecipeData(prev => ({...prev, indicaciones: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text}`} />
               </div>
             </div>
             <div className={`flex flex-col sm:flex-row justify-end gap-2 pt-3 border-t ${th.border}`}>
-              <button onClick={() => setShowRecipeModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
-              <a href={`mailto:?subject=Receta Médica - Dr.(a) ${currentUser.fullName}&body=${encodeURIComponent(`RECETA MÉDICA OFICIAL\n\nPaciente: ${activeCase.patientName}\nFecha: ${new Date().toLocaleDateString()}\nDiagnóstico: ${recipeData.diagnostico}\n\nRp/\n${recipeData.medicamentos}\n\nInstrucciones:\n${recipeData.indicaciones}\n\nAtentamente,\nDr.(a) ${currentUser.fullName}\nColegiado: ${currentUser.colegiado}`)}`} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-center">📧 Correo</a>
+              <button onClick={() => setShowRecipeModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>{t('Cancelar')}</button>
+              <a href={`mailto:?subject=Receta Médica - Dr.(a) ${currentUser.fullName}&body=${encodeURIComponent(`RECETA MÉDICA OFICIAL\n\nPaciente: ${activeCase.patientName}\nFecha: ${new Date().toLocaleDateString()}\nDiagnóstico: ${recipeData.diagnostico}\n\nRp/\n${recipeData.medicamentos}\n\nInstrucciones:\n${recipeData.indicaciones}\n\nAtentamente,\nDr.(a) ${currentUser.fullName}\nColegiado: ${currentUser.colegiado}`)}`} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-center">📧 {t('Correo')}</a>
               <a href={`https://wa.me/${activeCase.generalData?.telefono?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(`*RECETA MÉDICA OFICIAL*\n*Dr.(a)* ${currentUser.fullName}\n*Colegiado:* ${currentUser.colegiado}\n\n*Paciente:* ${activeCase.patientName}\n*Fecha:* ${new Date().toLocaleDateString()}\n\n*Diagnóstico:* ${recipeData.diagnostico}\n\n*Rp/*\n${recipeData.medicamentos}\n\n*Instrucciones:* \n${recipeData.indicaciones}`)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl text-center">💬 WhatsApp</a>
             </div>
           </div>
@@ -1375,14 +1681,14 @@ export default function App() {
                 </div>
               ))}
               <div className={`${th.input} p-4 rounded-xl border ${th.border} mt-4`}>
-                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>Firma Digital para Guardar</label>
-                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder="Su clave de psicólogo/psiquiatra..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
+                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>{t('Firma Digital para Guardar')}</label>
+                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder={t('Su clave de psicólogo/psiquiatra...')} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
                 {verificationError && <p className="text-red-500 text-[10px] mt-1">{verificationError}</p>}
               </div>
             </div>
             <div className={`p-3 border-t ${th.border} ${th.input} flex justify-end gap-2`}>
-              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>Cancelar</button>
-              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">Firmar y Guardar en Expediente</button>
+              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>{t('Cancelar')}</button>
+              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">{t('Firmar y Guardar en Expediente')}</button>
             </div>
           </div>
         </div>
@@ -1392,19 +1698,19 @@ export default function App() {
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-2xl w-full p-6 text-xs space-y-4 shadow-2xl`}>
             <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-              <h3 className={`text-sm font-bold ${th.text}`}>{certificateType === 'ATTENDANCE' ? '📄 Constancia de Asistencia' : '📄 Orden de Referencia'}</h3>
+              <h3 className={`text-sm font-bold ${th.text}`}>{certificateType === 'ATTENDANCE' ? t('Constancia de Asistencia') : t('Orden de Referencia')}</h3>
               <button onClick={() => setShowCertificateModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
             </div>
             <textarea rows={10} value={certificateText} onChange={(e) => setCertificateText(e.target.value)} className={`w-full p-3 ${th.input} border ${th.border} rounded-xl ${th.text}`} />
             <div className="flex justify-end gap-2 pt-2">
-              <button onClick={() => setShowCertificateModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
+              <button onClick={() => setShowCertificateModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>{t('Cancelar')}</button>
               <button onClick={() => {
                 const printWin = window.open('', '_blank');
                 if (printWin) {
                   printWin.document.write(`<html><body><pre style="font-family:Arial,sans-serif;font-size:12pt;white-space:pre-wrap;">${certificateText}</pre></body></html>`);
                   printWin.document.close(); printWin.print();
                 }
-              }} className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl">🖨️ Imprimir</button>
+              }} className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl">🖨️ {t('Imprimir')}</button>
             </div>
           </div>
         </div>
@@ -1414,14 +1720,14 @@ export default function App() {
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
             <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-              <h3 className={`text-sm font-bold ${th.text}`}>➕ Agendar Nueva Cita</h3>
+              <h3 className={`text-sm font-bold ${th.text}`}>➕ {t('Agendar Nueva Cita')}</h3>
               <button onClick={() => setShowCalendarModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
             </div>
             <form onSubmit={handleCreateAppointment} className="space-y-4">
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente (Expediente Activo)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Paciente (Expediente Activo)')}</label>
                 <select required value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`}>
-                  <option value="" disabled>Seleccione un paciente...</option>
+                  <option value="" disabled>{t('Seleccione un paciente...')}</option>
                   {myPatients.map(p => (
                     <option key={p.id} value={p.id}>{p.patientName} (Exp: {p.id})</option>
                   ))}
@@ -1429,27 +1735,27 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Fecha</label>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Fecha')}</label>
                   <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
                 </div>
                 <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Hora</label>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Hora')}</label>
                   <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
                 </div>
               </div>
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Duración (Minutos)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Duración (Minutos)')}</label>
                 <input type="number" required min="15" step="15" value={durationMinutes} onChange={(e) => setDurationMinutes(parseInt(e.target.value))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
               </div>
-              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 Guardar Cita</button>
+              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 {t('Guardar Cita')}</button>
             </form>
           </div>
         </div>
       )}
 
-      {/* AQUÍ ESTÁ TU FIRMA COMO DESARROLLADOR */}
+      {/* FIRMA DE DESARROLLADOR */}
       <footer className={`border-t ${th.border} ${th.bg} py-4 text-center text-xs ${th.textMuted} mt-auto w-full transition-colors duration-300`}>
-        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. Desarrollado por Harold.</p>
+        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. {t('Desarrollado por Harold.')}</p>
       </footer>
     </div>
   );
