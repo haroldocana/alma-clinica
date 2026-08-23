@@ -19,6 +19,7 @@ const getDaysRemaining = (expiryDateStr: string | undefined): number => {
   if (!expiryDateStr) return -1;
   const today = new Date();
   const expiry = new Date(expiryDateStr);
+  if (isNaN(expiry.getTime())) return -1;
   today.setHours(0, 0, 0, 0);
   expiry.setHours(0, 0, 0, 0);
   const diffTime = expiry.getTime() - today.getTime();
@@ -29,18 +30,17 @@ const getDaysSince = (pastDateStr: string): number => {
   if (!pastDateStr) return 0;
   const today = new Date();
   const past = new Date(pastDateStr);
+  if (isNaN(past.getTime())) return 0;
   today.setHours(0, 0, 0, 0);
   past.setHours(0, 0, 0, 0);
   const diffTime = today.getTime() - past.getTime();
   return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const exportToWord = (elementId: string, filename: string) => {
-  const element = document.getElementById(elementId);
-  if (!element) return;
-  const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Dictamen</title></head><body>";
+const exportHTMLToWord = (htmlContent: string, filename: string) => {
+  const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Documento</title></head><body>";
   const postHtml = "</body></html>";
-  const html = preHtml + element.innerHTML + postHtml;
+  const html = preHtml + htmlContent + postHtml;
   const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -50,6 +50,55 @@ const exportToWord = (elementId: string, filename: string) => {
   link.click();
   document.body.removeChild(link);
 };
+
+// MACHOTES CLÍNICOS PROFESIONALES (MEMBRETES)
+const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: string, colegiado: string, specialty: string) => `
+  <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
+    <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
+      <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
+      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty || 'Especialista en Salud Mental'} | Colegiado Activo: ${colegiado}</p>
+      <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
+    </div>
+    <h2 style="text-align: center; font-size: 16px; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-decoration: underline;">${title}</h2>
+    <div style="font-size: 13px; line-height: 1.8; text-align: justify; margin-bottom: 50px; white-space: pre-wrap;">${bodyHtml}</div>
+    <div style="text-align: center; margin-top: 80px;">
+      <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px auto;"></div>
+      <p style="font-size: 14px; font-weight: bold; margin: 0;">${doctorName}</p>
+      <p style="font-size: 12px; margin: 2px 0;">Firma y Sello Profesional</p>
+    </div>
+  </div>
+`;
+
+const getPrescriptionLetterhead = (patientName: string, date: string, diagnostico: string, rx: string, indications: string, doctorName: string, colegiado: string, specialty: string) => `
+  <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #000; border: 1px solid #ccc; border-radius: 8px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 20px; color: #059669; margin: 0;">${doctorName}</h1>
+        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty || 'Médico Psiquiatra'} | Col: ${colegiado}</p>
+      </div>
+      <div style="text-align: right;">
+        <h2 style="font-size: 32px; color: #059669; margin: 0; font-family: serif;">Rx</h2>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border: 1px solid #e5e7eb; margin-bottom: 20px; font-size: 12px;">
+      <p style="margin: 0 0 5px 0;"><strong>Paciente:</strong> ${patientName}</p>
+      <p style="margin: 0 0 5px 0;"><strong>Fecha de emisión:</strong> ${date}</p>
+      <p style="margin: 0;"><strong>Diagnóstico CIE-11:</strong> ${diagnostico || 'Evaluación Clínica'}</p>
+    </div>
+    <div style="margin-bottom: 30px;">
+      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Medicamentos:</h3>
+      <p style="font-size: 15px; white-space: pre-wrap; font-family: monospace; color: #111827; margin-top: 10px;">${rx}</p>
+    </div>
+    <div style="margin-bottom: 40px;">
+      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Instrucciones:</h3>
+      <p style="font-size: 13px; white-space: pre-wrap; color: #1f2937; margin-top: 10px;">${indications}</p>
+    </div>
+    <div style="text-align: right; margin-top: 70px;">
+      <div style="border-top: 1px solid #000; width: 220px; margin-left: auto; margin-bottom: 5px;"></div>
+      <p style="font-size: 12px; margin: 0; padding-right: 60px;">Firma del Médico</p>
+    </div>
+  </div>
+`;
 
 // ============================================================================
 // BATERÍA COMPLETA INTERNACIONAL (PSICOLOGÍA Y PSIQUIATRÍA DE GRADO MÉDICO)
@@ -64,6 +113,14 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'YBOCS', name: 'Y-BOCS (Trastorno Obsesivo-Compulsivo - TOC)', questions: ['Tiempo ocupado por pensamientos obsesivos', 'Interferencia funcional de pensamientos obsesivos', 'Malestar/Angustia causada por obsesiones', 'Resistencia contra las obsesiones', 'Control percibido sobre los pensamientos obsesivos', 'Tiempo dedicado a conductas compulsivas', 'Interferencia funcional de las compulsiones', 'Malestar al no realizar la compulsión', 'Resistencia contra las compulsiones', 'Control percibido sobre las compulsiones'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Extremo (4)'] },
   { id: 'CSSRS', name: 'C-SSRS (Escala Columbia - Riesgo Suicida)', questions: ['¿Ha deseado estar muerto o dormirse y no despertar?', '¿Ha tenido pensamientos de matarse sin método específico?', '¿Ha tenido pensamientos de matarse con algún método sin plan activo?', '¿Ha tenido intenciones e ideación suicida con algún plan en desarrollo?', '¿Ha realizado alguna conducta preparatoria o ensayo de intento suicida?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'MSIBPD', name: 'MSI-BPD (Trastorno Límite de Personalidad - TLP)', questions: ['¿Relaciones interpersonales muy intensas pero inestables?', '¿Actos impulsivos de riesgo (gastos, sexo, sustancias)?', '¿Conductas o amenazas suicidas / autolesiones deliberadas?', '¿Cambios de humor repentinos y extremos?', '¿Sensación persistente de vacío interior?', '¿Miedo intenso e irrazonable al rechazo o abandono?', '¿Episodios de ira intensa fuera de control?', '¿Cambio dramático sobre opinión propia o valores?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'MDQ', name: 'MDQ (Detección de Trastorno Bipolar)', questions: ['¿Se sintió tan feliz o lleno de energía que otros notaron cambios?', '¿Se sintió tan irritable que le gritaba a la gente o peleaba?', '¿Se sentía mucho más seguro de sí mismo que de costumbre?', '¿Dormía mucho menos de lo habitual y no extrañaba el sueño?', '¿Hablaba mucho más o más rápido de lo habitual?', '¿Los pensamientos iban a toda velocidad por su cabeza?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'MMSE', name: 'MMSE (Mini-Mental State - Evaluación Cognitiva)', questions: ['Orientación Temporal (Año, estación, fecha, día, mes)', 'Orientación Espacial (Lugar, hospital, ciudad, país)', 'Fijación y Registro (Repetición de 3 palabras clave)', 'Atención y Cálculo (Sustracción de 7 en 7 o deletreo inverso)', 'Memoria de Evocación (Recordar las 3 palabras fijadas)'], options: ['Incorrecto (0)', 'Correcto (1)'] },
+  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfacción con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'SPIN', name: 'SPIN (Inventario de Fobia Social)', questions: ['Tengo miedo a las personas con autoridad', 'Me molesta ruborizarme delante de la gente', 'Las fiestas y eventos me dan temor', 'Evito hablar con gente que no conozco', 'El temor a la crítica me paraliza'], options: ['Nada (0)', 'Un poco (1)', 'Moderado (2)', 'Mucho (3)', 'Extremadamente (4)'] },
+  { id: 'EAT26', name: 'EAT-26 (Trastornos Conducta Alimentaria)', questions: ['Me aterroriza tener sobrepeso.', 'Evito comer cuando tengo hambre.', 'Me preocupo mucho por la comida.', 'Siento que los demás preferirían que yo comiese más.', 'Vomito después de haber comido.', 'Siento que la comida controla mi vida.'], options: ['Nunca (0)', 'A veces (1)', 'Siempre (2)'] },
+  { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su maneira de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'AUDIT', name: 'AUDIT (Trastornos por Alcohol - OMS)', questions: ['¿Frecuencia con que consume bebidas alcohólicas?', '¿Consumiciones habituales en un día ordinario de consumo?', '¿Frecuencia de toma de 5 o más bebidas en un solo día?', '¿Incapaz de parar de beber una vez que había empezado?', '¿Incapacidad para recordar lo sucedido debido al alcohol?', '¿Usted u otra persona resultó herida debido a su consumo?'], options: ['Nunca (0)', 'Raramente (1)', 'Mensualmente (2)', 'Semanalmente (3)', 'Diariamente (4)'] },
+  { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en detalles?', '¿Dificultad para mantener atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
   { id: 'PCL5', name: 'PCL-5 (Trauma y TEPT)', questions: ['Recuerdos repetitivos e inquietantes de la experiencia estresante', 'Pesadillas de la experiencia', 'Evitar situaciones o lugares que le recuerden el evento', 'Creencias negativas fuertes sobre sí mismo', 'Estar muy alerta o vigilante'], options: ['Nada (0)', 'Un poco (1)', 'Moderadamente (2)', 'Bastante (3)', 'Extremadamente (4)'] }
 ];
 
@@ -125,8 +182,133 @@ export default function App() {
     const activeLang = overrideLang || lang;
     const dict: Record<string, { ES: string, EN: string, PT: string, IT: string, FR: string }> = {
       'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant', PT: 'Assistente Clínico SaaS', IT: 'Assistente Clinico SaaS', FR: 'Assistant Clinique SaaS' },
+      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)', PT: 'Sistema Clínico e Prontuários', IT: 'Sistema Clinico e Cartelle', FR: 'Système Clinique et Dossiers' },
+      'Clínico': { ES: 'Clínico', EN: 'Clinical', PT: 'Clínico', IT: 'Clinico', FR: 'Clinique' },
+      'Agenda': { ES: 'Agenda', EN: 'Schedule', PT: 'Agenda', IT: 'Agenda', FR: 'Agenda' },
+      'Admin': { ES: 'Admin', EN: 'Admin', PT: 'Admin', IT: 'Admin', FR: 'Admin' },
+      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access', PT: 'Acesso Profissional Clínico', IT: 'Accesso Professionale Clinico', FR: 'Accès Professionnel Clinique' },
+      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login', PT: 'Entrar', IT: 'Accedi', FR: 'Connexion' },
+      'Usuario': { ES: 'Usuario', EN: 'Username', PT: 'Usuário', IT: 'Utente', FR: 'Utilisateur' },
+      'Contraseña': { ES: 'Contraseña', EN: 'Password', PT: 'Senha', IT: 'Password', FR: 'Mot de passe' },
+      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console', PT: 'Console Mestre de Licenças', IT: 'Console Master Licenze', FR: 'Console Principale des Licences' },
+      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License', PT: 'Ativar Nova Licença', IT: 'Attiva Nuova Licenza', FR: 'Activer Nouvelle Licence' },
+      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support', PT: 'Auditoria e Suporte', IT: 'Audit e Supporto', FR: 'Audit et Support' },
+      'Búsqueda': { ES: 'Búsqueda', EN: 'Search', PT: 'Busca', IT: 'Ricerca', FR: 'Recherche' },
+      'Alertas': { ES: 'Alertas', EN: 'Alerts', PT: 'Alertas', IT: 'Avvisi', FR: 'Alertes' },
+      'Mi Perfil': { ES: 'Mi Perfil', EN: 'My Profile', PT: 'Meu Perfil', IT: 'Mio Profilo', FR: 'Mon Profil' },
+      'Respaldo JSON': { ES: 'Respaldo JSON', EN: 'JSON Backup', PT: 'Backup JSON', IT: 'Backup JSON', FR: 'Sauvegarde JSON' },
+      'Cerrar Sesión': { ES: 'Cerrar Sesión', EN: 'Logout', PT: 'Sair', IT: 'Esci', FR: 'Déconnexion' },
+      'BÚSQUEDA DE EXPEDIENTES': { ES: 'BÚSQUEDA DE EXPEDIENTES', EN: 'RECORD SEARCH', PT: 'BUSCA DE PRONTUÁRIOS', IT: 'RICERCA CARTELLE', FR: 'RECHERCHE DE DOSSIERS' },
+      'Nuevo Expediente': { ES: 'Nuevo Expediente', EN: 'New Record', PT: 'Novo Prontuário', IT: 'Nuova Cartella', FR: 'Nouveau Dossier' },
+      'Ocultar Formulario': { ES: 'Ocultar Formulario', EN: 'Hide Form', PT: 'Ocultar Formulário', IT: 'Nascondi Modulo', FR: 'Masquer le Formulaire' },
+      'Edad': { ES: 'Edad', EN: 'Age', PT: 'Idade', IT: 'Età', FR: 'Âge' },
+      'Teléfono': { ES: 'Teléfono', EN: 'Phone', PT: 'Telefone', IT: 'Telefono', FR: 'Téléphone' },
+      'Religión': { ES: 'Religión', EN: 'Religion', PT: 'Religião', IT: 'Religione', FR: 'Religion' },
+      'Femenino': { ES: 'Femenino', EN: 'Female', PT: 'Feminino', IT: 'Femmina', FR: 'Féminin' },
+      'Masculino': { ES: 'Masculino', EN: 'Male', PT: 'Masculino', IT: 'Maschio', FR: 'Masculin' },
+      'Otro': { ES: 'Otro', EN: 'Other', PT: 'Outro', IT: 'Altro', FR: 'Autre' },
+      'Soltero(a)': { ES: 'Soltero(a)', EN: 'Single', PT: 'Solteiro(a)', IT: 'Celibe/Nubile', FR: 'Célibataire' },
+      'Casado(a)': { ES: 'Casado(a)', EN: 'Married', PT: 'Casado(a)', IT: 'Sposato(a)', FR: 'Marié(e)' },
+      'Divorciado(a)': { ES: 'Divorciado(a)', EN: 'Divorced', PT: 'Divorciado(a)', IT: 'Divorziato(a)', FR: 'Divorcé(e)' },
+      'Viudo(a)': { ES: 'Viudo(a)', EN: 'Widowed', PT: 'Viúvo(a)', IT: 'Vedovo(a)', FR: 'Veuf(ve)' },
+      'Unión Libre': { ES: 'Unión Libre', EN: 'Domestic Partnership', PT: 'União Estável', IT: 'Convivenza', FR: 'Union Libre' },
+      'Psicólogo(a) Clínico': { ES: 'Psicólogo(a) Clínico', EN: 'Clinical Psychologist', PT: 'Psicólogo(a) Clínico', IT: 'Psicologo(a) Clinico', FR: 'Psychologue Clinicien' },
+      'Médico Psiquiatra': { ES: 'Médico Psiquiatra', EN: 'Psychiatrist', PT: 'Médico Psiquiatra', IT: 'Medico Psichiatra', FR: 'Médecin Psychiatre' },
+      '1. Datos Personales Básicos': { ES: '1. Datos Personales Básicos', EN: '1. Basic Personal Data', PT: '1. Dados Pessoais Básicos', IT: '1. Dati Personali di Base', FR: '1. Données Personnelles de Base' },
+      'ID Expediente (Ej. PAC-001)': { ES: 'ID Expediente (Ej. PAC-001)', EN: 'Record ID (E.g. PAC-001)', PT: 'ID do Prontuário', IT: 'ID Cartella', FR: 'ID Dossier' },
+      '2. Contexto Sociodemográfico': { ES: '2. Contexto Sociodemográfico', EN: '2. Sociodemographic Context', PT: '2. Contexto Sociodemográfico', IT: '2. Contesto Sociodemografico', FR: '2. Contexte Sociodémographique' },
+      'Ocupación': { ES: 'Ocupación', EN: 'Occupation', PT: 'Ocupação', IT: 'Occupazione', FR: 'Profession' },
+      'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level', PT: 'Grau de Escolaridade', IT: 'Livello di Istruzione', FR: 'Niveau d\'Éducation' },
+      'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin', PT: 'Local de Origem', IT: 'Luogo di Origine', FR: 'Lieu d\'Origine' },
+      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)', PT: 'Dados dos Pais', IT: 'Dati dei Genitori', FR: 'Données Parentales' },
+      '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint', PT: '3. Anamnese e Queixa Principal', IT: '3. Anamnesi e Motivo del Consulto', FR: '3. Anamnèse et Motif de Consultation' },
+      'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...', PT: 'Antecedentes Médicos / Psicológicos...', IT: 'Precedenti Medici / Psicologici...', FR: 'Antécédents Médicaux / Psychologiques...' },
+      'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...', PT: 'Motivo da Consulta...', IT: 'Motivo del Consulto...', FR: 'Motif de Consultation...' },
+      'Guardar Expediente Clínico Completo': { ES: 'Guardar Expediente Clínico Completo', EN: 'Save Complete Clinical Record', PT: 'Salvar Prontuário Clínico Completo', IT: 'Salva Cartella Clinica Completa', FR: 'Enregistrer le Dossier Clinique Complet' },
+      'Busque por nombre o ID...': { ES: 'Busque por nombre o ID...', EN: 'Search by name or ID...', PT: 'Busque por nome ou ID...', IT: 'Cerca per nome o ID...', FR: 'Recherche par nom ou ID...' },
+      'Buscar': { ES: 'Buscar', EN: 'Search', PT: 'Buscar', IT: 'Cerca', FR: 'Chercher' },
+      'Constancia': { ES: 'Constancia', EN: 'Certificate', PT: 'Declaração', IT: 'Certificato', FR: 'Attestation' },
+      'Referencia': { ES: 'Referencia', EN: 'Referral', PT: 'Encaminhamento', IT: 'Impegnativa', FR: 'Référence' },
+      'Extender Receta': { ES: 'Extender Receta', EN: 'Prescription', PT: 'Receituário', IT: 'Ricetta', FR: 'Ordonnance' },
+      'Historial': { ES: 'Historial', EN: 'History', PT: 'Histórico', IT: 'Cronologia', FR: 'Historique' },
+      'KPIs Empresariales': { ES: 'KPIs Empresariales', EN: 'Business KPIs', PT: 'KPIs Empresariais', IT: 'KPI Aziendali', FR: 'KPIs d\'Entreprise' },
+      'Sesiones': { ES: 'Sesiones', EN: 'Sessions', PT: 'Sessões', IT: 'Sessioni', FR: 'Sessions' },
+      'Nueva': { ES: 'Nueva', EN: 'New', PT: 'Nova', IT: 'Nuova', FR: 'Nouvelle' },
+      'Generar Dictamen IA': { ES: 'Generar Dictamen IA', EN: 'Generate AI Report', PT: 'Gerar Parecer IA', IT: 'Genera Referto IA', FR: 'Générer Rapport IA' },
+      '⏳ Procesando con IA...': { ES: '⏳ Procesando con IA...', EN: '⏳ Processing with AI...', PT: '⏳ Processando com IA...', IT: '⏳ Elaborazione con IA...', FR: '⏳ Traitement avec IA...' },
+      'Consulta Académica / Científica': { ES: 'Consulta Académica / Científica', EN: 'Academic / Scientific Query', PT: 'Consulta Acadêmica / Científica', IT: 'Consultazione Accademica / Scientifica', FR: 'Consultation Académique / Scientifique' },
+      'Consulte dudas teóricas, criterios del DSM-5, medicamentos...': { ES: 'Consulte dudas teóricas, criterios del DSM-5, medicamentos...', EN: 'Consult theoretical doubts, DSM-5 criteria, medications...', PT: 'Consulte dúvidas teóricas...', IT: 'Consulta dubbi teorici, criteri DSM-5...', FR: 'Consultez des doutes théoriques, critères du DSM-5...' },
+      'Consultando Base de Datos...': { ES: 'Consultando Base de Datos...', EN: 'Querying Database...', PT: 'Consultando Banco de Dados...', IT: 'Consultazione Database...', FR: 'Interrogation de la Base de Données...' },
+      'Realizar Consulta': { ES: 'Realizar Consulta', EN: 'Run Query', PT: 'Realizar Consulta', IT: 'Esegui Query', FR: 'Exécuter la Requête' },
       'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report', PT: 'Parecer Clínico Profissional', IT: 'Referto Clinico Professionale', FR: 'Rapport Clinique Professionnel' },
-      // ... Se mantiene toda la base de traducciones
+      'Generar PDF': { ES: 'Generar PDF', EN: 'Generate PDF', PT: 'Gerar PDF', IT: 'Genera PDF', FR: 'Générer PDF' },
+      'Nivel de Actividad Psicosocial (GAF / EEAG)': { ES: 'Nivel de Actividad Psicosocial (GAF / EEAG)', EN: 'Global Assessment of Functioning (GAF)', PT: 'Avaliação Global do Funcionamento (GAF)', IT: 'Valutazione Globale del Funzionamento (GAF)', FR: 'Évaluation Globale du Fonctionnement (GAF)' },
+      'GAF / EEAG': { ES: 'GAF / EEAG', EN: 'GAF Score', PT: 'Escore GAF', IT: 'Punteggio GAF', FR: 'Score GAF' },
+      'Estabilidad Neurovegetativa': { ES: 'Estabilidad Neurovegetativa', EN: 'Neurovegetative Stability', PT: 'Estabilidade Neurovegetativa', IT: 'Stabilità Neurovegetativa', FR: 'Stabilité Neurovégétative' },
+      'Respuesta Terapéutica (% Reducción)': { ES: 'Respuesta Terapéutica (% Reducción)', EN: 'Therapeutic Response (% Reduction)', PT: 'Resposta Terapêutica (% Redução)', IT: 'Risposta Terapeutica (% Riduzione)', FR: 'Réponse Thérapeutique (% Réduction)' },
+      'Riesgo Clínico Integrado': { ES: 'Riesgo Clínico Integrado', EN: 'Integrated Clinical Risk', PT: 'Risco Clínico Integrado', IT: 'Rischio Clinico Integrato', FR: 'Risque Clinique Intégré' },
+      'Funcionalidad Adaptativa': { ES: 'Funcionalidad Adaptativa', EN: 'Adaptive Functioning', PT: 'Funcionalidade Adaptativa', IT: 'Funzionalità Adattiva', FR: 'Fonctionnalité Adaptative' },
+      'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO': { ES: 'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', EN: 'PSYCHOLOGICAL AND MEDICAL CLINICAL RECORD', PT: 'PRONTUÁRIO CLÍNICO PSICOLÓGICO E MÉDICO', IT: 'CARTELLA CLINICA PSICOLOGICA E MEDICA', FR: 'DOSSIER CLINIQUE PSYCHOLOGIQUE ET MÉDICAL' },
+      'Protocolo de Gestión de Salud': { ES: 'Protocolo de Gestión de Salud', EN: 'Health Management Protocol', PT: 'Protocolo de Gestão de Saúde', IT: 'Protocollo di Gestione Sanitaria', FR: 'Protocole de Gestion de la Santé' },
+      '1. FICHA DE IDENTIFICACIÓN': { ES: '1. FICHA DE IDENTIFICACIÓN', EN: '1. IDENTIFICATION DATA', PT: '1. FICHA DE IDENTIFICAÇÃO', IT: '1. DATI DI IDENTIFICAZIONE', FR: '1. FICHE D\'IDENTIFICATION' },
+      'Nombre:': { ES: 'Nombre:', EN: 'Name:', PT: 'Nome:', IT: 'Nome:', FR: 'Nom:' },
+      'Expediente ID:': { ES: 'Expediente ID:', EN: 'Record ID:', PT: 'ID do Prontuário:', IT: 'ID Cartella:', FR: 'ID Dossier:' },
+      'Teléfono:': { ES: 'Teléfono:', EN: 'Phone:', PT: 'Telefone:', IT: 'Telefono:', FR: 'Téléphone:' },
+      'Sexo:': { ES: 'Sexo:', EN: 'Sex:', PT: 'Sexo:', IT: 'Sesso:', FR: 'Sexe:' },
+      'Edad:': { ES: 'Edad:', EN: 'Age:', PT: 'Idade:', IT: 'Età:', FR: 'Âge:' },
+      'Ocupación:': { ES: 'Ocupación:', EN: 'Occupation:', PT: 'Ocupação:', IT: 'Occupazione:', FR: 'Profession:' },
+      'Estado Civil:': { ES: 'Estado Civil:', EN: 'Marital Status:', PT: 'Estado Civil:', IT: 'Stato Civile:', FR: 'État Civil:' },
+      'Origen / Procedencia:': { ES: 'Origen / Procedencia:', EN: 'Origin:', PT: 'Origem:', IT: 'Origine:', FR: 'Origine:' },
+      'Religión:': { ES: 'Religión:', EN: 'Religion:', PT: 'Religião:', IT: 'Religione:', FR: 'Religion:' },
+      'Datos de Progenitores:': { ES: 'Datos de Progenitores:', EN: 'Parental Data:', PT: 'Dados dos Genitores:', IT: 'Dati dei Genitori:', FR: 'Données Parentales:' },
+      'Motivo Textual:': { ES: 'Motivo Textual:', EN: 'Textual Reason:', PT: 'Motivo Textual:', IT: 'Motivo Testuale:', FR: 'Raison Textuelle:' },
+      'Antecedentes Clínicos:': { ES: 'Antecedentes Clínicos:', EN: 'Clinical History:', PT: 'Antecedentes Clínicos:', IT: 'Precedenti Clinici:', FR: 'Antécédents Cliniques:' },
+      'Sin antecedentes.': { ES: 'Sin antecedentes.', EN: 'No previous history.', PT: 'Sem antecedentes.', IT: 'Nessun precedente.', FR: 'Aucun antécédent.' },
+      '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS': { ES: '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', EN: '3. PSYCHOMETRIC EVALUATIONS PERFORMED', PT: '3. AVALIAÇÕES PSICOMÉTRICAS REALIZADAS', IT: '3. VALUTAZIONI PSICOMETRICHE ESEGUITE', FR: '3. ÉVALUATIONS PSYCHOMÉTRIQUES RÉALISÉES' },
+      'No se han aplicado baterías psicométricas formales aún.': { ES: 'No se han aplicado baterías psicométricas formales aún.', EN: 'No formal psychometric batteries applied yet.', PT: 'Nenhuma bateria psicométrica formal aplicada ainda.', IT: 'Nessuna batteria psicometrica formale applicata ancora.', FR: 'Aucune batterie psychométrique formelle appliquée pour le moment.' },
+      '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)': { ES: '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', EN: '4. DIAGNOSTIC IMPRESSION AND REPORT (AI)', PT: '4. PARECER E IMPRESSÃO DIAGNÓSTICA (IA)', IT: '4. REFERTO E IMPRESSIONE DIAGNOSTICA (IA)', FR: '4. RAPPORT ET IMPRESSION DIAGNOSTIQUE (IA)' },
+      'En proceso de evaluación clínica acumulada.': { ES: 'En proceso de evaluación clínica acumulada.', EN: 'In the process of cumulative clinical evaluation.', PT: 'Em processo de avaliação clínica acumulada.', IT: 'In corso di valutazione clinica accumulata.', FR: 'En cours d\'évaluation clinique cumulée.' },
+      '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)': { ES: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', EN: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', PT: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', IT: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', FR: '5. BUSINESS INTELLIGENCE CLINIQUE (KPIs)' },
+      'Termómetro de Adherencia (Avance)': { ES: 'Termómetro de Adherencia (Avance)', EN: 'Adherence Thermometer (Progress)', PT: 'Termômetro de Adesão (Avanço)', IT: 'Termometro di Aderenza (Progresso)', FR: 'Thermomètre d\'Adhérence (Progrès)' },
+      'Hacia el protocolo base de alta clínica (12 sesiones).': { ES: 'Hacia el protocolo base de alta clínica (12 sesiones).', EN: 'Towards the clinical discharge base protocol (12 sessions).', PT: 'Rumo ao protocolo base de alta clínica (12 sessões).', IT: 'Verso il protocollo base di dimissione clinica (12 sessioni).', FR: 'Vers le protocole de base de sortie clinique (12 sessions).' },
+      'Eficacia (Sesión 1 vs Actual)': { ES: 'Eficacia (Sesión 1 vs Actual)', EN: 'Efficacy (Session 1 vs Current)', PT: 'Eficácia (Sessão 1 vs Atual)', IT: 'Efficacia (Sessione 1 vs Attuale)', FR: 'Efficacité (Session 1 vs Actuelle)' },
+      'Ansiedad': { ES: 'Ansiedad', EN: 'Anxiety', PT: 'Ansiedade', IT: 'Ansia', FR: 'Anxiété' },
+      'Depresión': { ES: 'Depresión', EN: 'Depression', PT: 'Depressão', IT: 'Depressione', FR: 'Dépression' },
+      'Rueda Multiaxial de Vida (Última Evaluación)': { ES: 'Rueda Multiaxial de Vida (Última Evaluación)', EN: 'Multiaxial Wheel of Life (Last Evaluation)', PT: 'Roda Multiaxial de Vida (Última Avaliação)', IT: 'Ruota Multiassiale della Vita (Ultima Valutazione)', FR: 'Roue Multiaxiale de Vie (Dernière Évaluation)' },
+      'Sentimiento Congruente': { ES: 'Sentimiento Congruente', EN: 'Congruent Sentiment', PT: 'Sentimento Congruente', IT: 'Sentimento Congruente', FR: 'Sentiment Congruent' },
+      'Estable': { ES: 'Estable', EN: 'Stable', PT: 'Estável', IT: 'Stabile', FR: 'Stable' },
+      'En Riesgo': { ES: 'En Riesgo', EN: 'At Risk', PT: 'Em Risco', IT: 'A Rischio', FR: 'À Risque' },
+      'Especialidad:': { ES: 'Especialidad:', EN: 'Specialty:', PT: 'Especialidade:', IT: 'Specialità:', FR: 'Spécialité:' },
+      'Colegiado Activo:': { ES: 'Colegiado Activo:', EN: 'Active License:', PT: 'Registro Ativo:', IT: 'Licenza Attiva:', FR: 'Licence Active:' },
+      'Prueba:': { ES: 'Prueba:', EN: 'Test:', PT: 'Teste:', IT: 'Test:', FR: 'Test:' },
+      'Actual:': { ES: 'Actual:', EN: 'Current:', PT: 'Atual:', IT: 'Attuale:', FR: 'Actuel:' },
+      'N/A': { ES: 'N/A', EN: 'N/A', PT: 'N/A', IT: 'N/A', FR: 'N/A' },
+      'N/R': { ES: 'N/R', EN: 'N/R', PT: 'N/R', IT: 'N/R', FR: 'N/R' },
+      'Sueño': { ES: 'Sueño', EN: 'Sleep', PT: 'Sono', IT: 'Sonno', FR: 'Sommeil' },
+      'Apetito': { ES: 'Apetito', EN: 'Appetite', PT: 'Apetite', IT: 'Appetito', FR: 'Appétit' },
+      'Energía': { ES: 'Energía', EN: 'Energy', PT: 'Energia', IT: 'Energia', FR: 'Énergie' },
+      'Social': { ES: 'Social', EN: 'Social', PT: 'Social', IT: 'Sociale', FR: 'Social' },
+      'Atención': { ES: 'Atención', EN: 'Attention', PT: 'Atenção', IT: 'Attenzione', FR: 'Attention' },
+      'HIPAA Compliance & Privacy Rule': { ES: 'HIPAA Compliance & Privacy Rule', EN: 'HIPAA Compliance & Privacy Rule', PT: 'Conformidade HIPAA e Regra de Privacidade', IT: 'Conformità HIPAA e Regola sulla Privacy', FR: 'Conformité HIPAA et Règle de Confidentialité' },
+      'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente': { ES: 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente', EN: 'GDPR Compliance (Europe) / Patient Autonomy Law', PT: 'Conformidade RGPD (Europa) / Lei de Autonomia do Paciente', IT: 'Conformità GDPR (Europa) / Legge sull\'Autonomia del Paziente', FR: 'Conformité RGPD (Europe) / Loi sur l\'Autonomie du Patient' },
+      'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)': { ES: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)', EN: 'NOM-004-SSA3-2012 (Official Mexican Standard for Clinical Records)', PT: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana do Prontuário Clínico)', IT: 'NOM-004-SSA3-2012 (Standard Ufficiale Messicano per Cartelle Cliniche)', FR: 'NOM-004-SSA3-2012 (Norme Officielle Mexicaine pour les Dossiers Cliniques)' },
+      'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)': { ES: 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)', EN: 'Resolution 1995 of 1999 and 839 of 2017 (Clinical History)', PT: 'Resolução 1995 de 1999 e 839 de 2017 (História Clínica)', IT: 'Risoluzione 1995 del 1999 e 839 del 2017 (Storia Clinica)', FR: 'Résolution 1995 de 1999 et 839 de 2017 (Dossier Médical)' },
+      'Ley N° 20.584 (Derechos y Deberes del Paciente)': { ES: 'Ley N° 20.584 (Derechos y Deberes del Paciente)', EN: 'Law N° 20.584 (Patient Rights and Duties)', PT: 'Lei N° 20.584 (Direitos e Deveres do Paciente)', IT: 'Legge N° 20.584 (Diritti e Doveri del Paziente)', FR: 'Loi N° 20.584 (Droits et Devoirs du Patient)' },
+      'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)': { ES: 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)', EN: 'NTS N° 139-MINSA/2018/DGAIN (Clinical History Management)', PT: 'NTS N° 139-MINSA/2018/DGAIN (Gestão da História Clínica)', IT: 'NTS N° 139-MINSA/2018/DGAIN (Gestione della Storia Clinica)', FR: 'NTS N° 139-MINSA/2018/DGAIN (Gestion du Dossier Médical)' },
+      'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)': { ES: 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)', EN: 'Law 26.529 (Patient Rights, Clinical History & Informed Consent)', PT: 'Lei 26.529 (Direitos do Paciente, História Clínica e Consentimento Informado)', IT: 'Legge 26.529 (Diritti del Paziente, Storia Clinica e Consenso Informato)', FR: 'Loi 26.529 (Droits du Patient, Dossier Médical et Consentement Éclairé)' },
+      'Código de Salud (Decreto 90-97) / Normativa MSPAS': { ES: 'Código de Salud (Decreto 90-97) / Normativa MSPAS', EN: 'Health Code (Decree 90-97) / MSPAS Regulations', PT: 'Código de Saúde (Decreto 90-97) / Normativas MSPAS', IT: 'Codice della Salute (Decreto 90-97) / Normative MSPAS', FR: 'Code de la Santé (Décret 90-97) / Réglementations MSPAS' },
+      'Cumplimiento de Confidencialidad y Ética Profesional Internacional': { ES: 'Cumplimiento de Confidencialidad y Ética Profesional Internacional', EN: 'Compliance with Confidentiality and International Professional Ethics', PT: 'Cumprimento de Confidencialidade e Ética Profissional Internacional', IT: 'Conformità alla Riservatezza ed Etica Professionale Internazionale', FR: 'Conformité à la Confidentialité et à l\'Éthique Professionnelle Internationale' },
+      'A QUIEN INTERESE:': { ES: 'A QUIEN INTERESE:', EN: 'TO WHOM IT MAY CONCERN:', PT: 'A QUEM POSSA INTERESSAR:', IT: 'A CHI DI COMPETENZA:', FR: 'À QUI DE DROIT:' },
+      'Por medio de la presente se hace constar que el/la paciente': { ES: 'Por medio de la presente se hace constar que el/la paciente', EN: 'This is to certify that the patient', PT: 'Por meio desta certifica-se que o/a paciente', IT: 'Si certifica con la presente che il/la paziente', FR: 'Par la présente, il est certifié que le/la patient(e)' },
+      'expediente': { ES: 'expediente', EN: 'record', PT: 'prontuário', IT: 'cartella', FR: 'dossier' },
+      'ha asistido a su proceso clínico.': { ES: 'ha asistido a su proceso clínico.', EN: 'has attended their clinical process.', PT: 'compareceu ao seu processo clínico.', IT: 'ha partecipato al suo processo clinico.', FR: 'a assisté à son processus clinique.' },
+      'Atentamente,': { ES: 'Atentamente,', EN: 'Sincerely,', PT: 'Atenciosamente,', IT: 'Cordiali saluti,', FR: 'Cordialement,' },
+      'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL': { ES: 'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL', EN: 'INTERNATIONAL PSYCHOMETRIC EVALUATION', PT: 'AVALIAÇÃO PSICOMÉTRICA INTERNACIONAL', IT: 'VALUTAZIONE PSICOMETRICA INTERNAZIONALE', FR: 'ÉVALUATION PSYCHOMÉTRIQUE INTERNATIONALE' },
+      'Instrumento:': { ES: 'Instrumento:', EN: 'Instrument:', PT: 'Instrumento:', IT: 'Strumento:', FR: 'Instrument:' },
+      'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:', PT: 'Avaliador:', IT: 'Valutatore:', FR: 'Évaluateur:' },
+      'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:', PT: 'RESULTADOS E PONTUAÇÕES:', IT: 'RISULTATI E PUNTEGGI:', FR: 'RÉSULTATS ET SCORES:' },
+      'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:', PT: 'PONTUAÇÃO AUTOMÁTICA:', IT: 'PUNTEGGIO AUTOMATICO:', FR: 'SCORE AUTOMATIQUE:' },
+      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.', PT: 'Desenvolvido por Harold.', IT: 'Sviluppato da Harold.', FR: 'Développé par Harold.' }
     };
     return dict[key]?.[activeLang] || key;
   };
@@ -177,7 +359,11 @@ export default function App() {
 
     const handleCopySVG = () => {
       const svg = generateSpiderChartSVG(lastSessionAreas, t);
-      navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML."));
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML."));
+      } else {
+        alert("La copia al portapapeles no está disponible en este entorno (asegúrese de usar HTTPS).");
+      }
     };
 
     return (
@@ -196,7 +382,6 @@ export default function App() {
             {isFullscreen && (
                <>
                  <button onClick={() => {
-                   // Mock image download for Dashboard
                    alert("El Dashboard se ha descargado como imagen en su dispositivo.");
                  }} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow">
                    📸 Descargar PNG
@@ -355,7 +540,6 @@ export default function App() {
     return null;
   });
 
-  // Mantener al currentUser sincronizado con la BD de psicólogos (por si el Admin cambia su acceso a Voz o Días)
   useEffect(() => {
     if (currentUser && psychologists[currentUser.username]) {
       const updatedUser = psychologists[currentUser.username];
@@ -417,9 +601,6 @@ export default function App() {
     try { await savePsychologistsRemote(updatedDb); alert('¡Perfil y configuraciones actualizados con éxito!'); } catch (error) {}
   };
 
-  // ============================================================================
-  // CÁLCULO DE ALERTAS DE ABANDONO + EMERGENCIA
-  // ============================================================================
   const [emergencyAlerts, setEmergencyAlerts] = useState<any[]>([]);
   const [abandonmentAlerts, setAbandonmentAlerts] = useState<any[]>([]);
   const [clinicalTab, setClinicalTab] = useState<'BUSCAR' | 'ALERTAS' | 'PERFIL'>('BUSCAR');
@@ -441,8 +622,8 @@ export default function App() {
   useEffect(() => {
     if (!currentUser) return;
     const thresh = currentUser.abandonmentThreshold || 30;
-    const abandons = Object.values(clinicalDatabase).filter(c => c.doctorUsername === currentUser.username).map(c => {
-      if (c.sessions && c.sessions.length > 0) {
+    const abandons = Object.values(clinicalDatabase).filter(c => c && c.doctorUsername === currentUser.username).map(c => {
+      if (c && c.sessions && c.sessions.length > 0) {
         const lastSessionDate = c.sessions[c.sessions.length - 1].date;
         const days = getDaysSince(lastSessionDate);
         if (days >= thresh) {
@@ -454,7 +635,7 @@ export default function App() {
     setAbandonmentAlerts(abandons as any[]);
   }, [clinicalDatabase, currentUser]);
 
-  const totalAlerts = emergencyAlerts.length + abandonmentAlerts.length;
+  const totalAlerts = (emergencyAlerts?.length || 0) + (abandonmentAlerts?.length || 0);
 
   const handleViewEmergency = async (patientId: string) => {
     let foundCase = clinicalDatabase[patientId];
@@ -486,6 +667,7 @@ export default function App() {
 
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [recipeData, setRecipeData] = useState({ diagnostico: '', medicamentos: '', indicaciones: '' });
+  
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [certificateType, setCertificateType] = useState<'ATTENDANCE' | 'REFERRAL'>('ATTENDANCE');
   const [certificateText, setCertificateText] = useState('');
@@ -638,6 +820,52 @@ export default function App() {
     setShowDsmModal(false); setSelectedDsmTemplate(null); setDsmAnswers({}); setVerificationPassword(''); alert(`Evaluación guardada.`);
   };
 
+  const handleOpenCertificateModal = (type: 'ATTENDANCE' | 'REFERRAL') => {
+    if (!activeCase || !currentUser) return;
+    setCertificateType(type);
+    
+    if (type === 'ATTENDANCE') {
+      setCertificateText(`A QUIEN CORRESPONDA:\n\nPor medio de la presente, el infrascrito profesional de la salud mental, hace constar que el/la paciente ${activeCase.patientName}, con número de expediente ${activeCase.id}, asiste regularmente a tratamiento en esta clínica.\n\nLa presente evaluación y seguimiento se realiza en estricto apego y cumplimiento a los estándares clínicos vigentes.\n\nSe extiende la presente constancia para los usos legales o administrativos que al paciente convengan.`);
+    } else {
+      setCertificateText(`Estimado(a) Colega / Especialista:\n\nPor medio de la presente remito a evaluación y/o seguimiento a el/la paciente ${activeCase.patientName}, con expediente clínico ${activeCase.id}, edad: ${activeCase.generalData?.edad || 'N/R'}.\n\nMotivo de Referencia:\n[Describa aquí el motivo exacto de la referencia clínica, ej. Evaluación Neurológica, Apoyo Psiquiátrico, etc.]\n\nQuedo a su entera disposición para cualquier consulta adicional referente a este caso.\n\nAgradeciendo de antemano su valiosa intervención.`);
+    }
+    setShowCertificateModal(true);
+  };
+
+  const printOrExportCertificate = (format: 'PRINT' | 'WORD') => {
+    const profTitle = getProfPrefix(currentUser?.professionType);
+    const title = certificateType === 'ATTENDANCE' ? 'CONSTANCIA DE ASISTENCIA CLÍNICA' : 'ORDEN DE REFERENCIA CLÍNICA';
+    const htmlString = getProfessionalLetterhead(title, certificateText, `${profTitle} ${currentUser?.fullName}`, currentUser?.colegiado || '', currentUser?.specialty || '');
+    
+    if (format === 'WORD') {
+      exportHTMLToWord(htmlString, `${title.replace(/ /g, '_')}_${activeCase?.id}`);
+    } else {
+      const printWin = window.open('', '_blank');
+      if (printWin) { printWin.document.write(htmlString); printWin.document.close(); printWin.print(); }
+    }
+  };
+
+  const printOrExportRecipe = (format: 'PRINT' | 'WORD') => {
+    const profTitle = getProfPrefix(currentUser?.professionType);
+    const htmlString = getPrescriptionLetterhead(
+      activeCase?.patientName || '', 
+      new Date().toLocaleDateString('es-GT'), 
+      recipeData.diagnostico, 
+      recipeData.medicamentos, 
+      recipeData.indicaciones, 
+      `${profTitle} ${currentUser?.fullName}`, 
+      currentUser?.colegiado || '', 
+      currentUser?.specialty || ''
+    );
+    
+    if (format === 'WORD') {
+      exportHTMLToWord(htmlString, `Receta_Medica_${activeCase?.id}`);
+    } else {
+      const printWin = window.open('', '_blank');
+      if (printWin) { printWin.document.write(htmlString); printWin.document.close(); printWin.print(); }
+    }
+  };
+
   // PDF HTML GENERATOR
   const generateClinicalHistoryHTML = (c: ClinicalCase, targetLang: string, translatedDictamen: string): string => {
     const gd = c.generalData || {};
@@ -697,8 +925,8 @@ export default function App() {
       printContainer.innerHTML = generateClinicalHistoryHTML(activeCase, pdfLang, translatedReport);
 
       if (format === 'DOC') {
-        document.body.appendChild(printContainer); // Attach temp for fetching by ID
-        exportToWord('word-content', `Expediente_${activeCase.id}`);
+        document.body.appendChild(printContainer);
+        exportHTMLToWord(printContainer.innerHTML, `Expediente_${activeCase.id}`);
         document.body.removeChild(printContainer);
       } else {
         if (typeof (window as any).html2pdf !== 'undefined') {
@@ -711,7 +939,8 @@ export default function App() {
     } catch (error) { alert("Error al exportar."); } finally { setIsGeneratingPdf(false); }
   };
 
-  const myPatients = currentUser ? Object.values(clinicalDatabase).filter(c => c.doctorUsername === currentUser.username) : [];
+  const myPatients = currentUser ? Object.values(clinicalDatabase).filter(c => c && c.doctorUsername === currentUser.username) : [];
+  const myAppointments = currentUser ? appointments.filter(a => a && a.doctorUsername === currentUser.username && a.status !== 'CANCELLED') : [];
 
   return (
     <div className={`min-h-screen flex flex-col ${th.bg} ${th.text} overflow-x-hidden transition-colors duration-300`}>
@@ -783,7 +1012,7 @@ export default function App() {
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-6 lg:col-span-7`}>
                     <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Auditoría y Soporte')}</h3>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                      {Object.values(psychologists).map((p) => {
+                      {Object.values(psychologists).filter(p => p && p.username).map((p) => {
                         const rem = getDaysRemaining(p.licenseExpiry);
                         return (
                           <div key={p.username} className={`p-3 ${th.input} rounded-xl border ${th.border} text-xs flex justify-between`}>
@@ -797,6 +1026,28 @@ export default function App() {
                       })}
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {mode === AppMode.CALENDAR && (
+          <div className="space-y-6 flex-1 flex flex-col w-full">
+            {!currentUser ? (
+              <p className={`text-center text-xs ${th.textMuted} py-8`}>Inicie sesión para acceder a su agenda.</p>
+            ) : (
+              <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 shadow-xl space-y-6`}>
+                <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center border-b ${th.border} pb-4 gap-4`}>
+                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 {t('Agenda Médica')}</h2></div>
+                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ {t('Agendar Cita')}</button>
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {myAppointments.map(app => (
+                    <div key={app.id} className={`p-3 ${th.input} rounded-lg border ${th.border} text-xs flex justify-between items-center`}>
+                      <div><span className="font-bold text-indigo-500">{app.patientName}</span><p className={`text-[11px] ${th.textMuted}`}>{app.start.replace('T', ' - ')}</p></div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -867,14 +1118,14 @@ export default function App() {
                     ) : (
                       <div className="space-y-4 w-full">
                         {emergencyAlerts.map((alert: any) => (
-                          <div key={alert.id} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex justify-between border">
-                            <div><h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia Registrada</h3><p className="text-xs text-red-800 dark:text-red-200">Paciente: {alert.patientName}</p></div>
+                          <div key={alert?.id || Math.random()} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex justify-between border">
+                            <div><h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia Registrada</h3><p className="text-xs text-red-800 dark:text-red-200">Paciente: {alert?.patientName}</p></div>
                             <button onClick={() => handleViewEmergency(alert.patientId)} className="px-5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl h-10">Analizar</button>
                           </div>
                         ))}
                         {abandonmentAlerts.map((alert: any) => (
-                          <div key={alert.id} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex justify-between border">
-                            <div><h3 className="text-sm font-bold text-amber-600 dark:text-amber-400">⚠️ Riesgo de Abandono de Tratamiento</h3><p className="text-xs text-amber-800 dark:text-amber-200">Paciente: {alert.patientName} | {alert.days} días sin asistir.</p></div>
+                          <div key={alert?.id || Math.random()} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex justify-between border">
+                            <div><h3 className="text-sm font-bold text-amber-600 dark:text-amber-400">⚠️ Riesgo de Abandono de Tratamiento</h3><p className="text-xs text-amber-800 dark:text-amber-200">Paciente: {alert?.patientName} | {alert?.days} días sin asistir.</p></div>
                             <button onClick={() => handleViewEmergency(alert.patientId)} className="px-5 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl h-10">Ver Expediente</button>
                           </div>
                         ))}
@@ -893,7 +1144,6 @@ export default function App() {
                           <input type="text" required placeholder="Nombre Completo" value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2`} />
                           <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
                           
-                          {/* SUBIR FOTO DEL DISPOSITIVO O URL */}
                           <div className="sm:col-span-2 space-y-1">
                              <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
                              <div className="flex gap-2">
@@ -906,10 +1156,10 @@ export default function App() {
                         <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold">💾 Guardar Expediente</button>
                       </form>
                     )}
-                    <form onSubmit={(e) => { e.preventDefault(); /* Logic existing in handleClinicalSearch */ }} className="flex gap-2 w-full">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full">
                       <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder="Busque por nombre o ID..." className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text}`} />
-                      <button type="button" onClick={handleClinicalSearch as any} className="py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs font-bold">Buscar</button>
-                    </form>
+                      <button type="button" onClick={(e) => { e.preventDefault(); handleClinicalSearch(e as any); }} className="py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs font-bold">Buscar</button>
+                    </div>
                     {searchFeedback && <p className="text-xs text-indigo-500 mt-2">{searchFeedback}</p>}
                   </div>
                 )}
@@ -919,6 +1169,13 @@ export default function App() {
                     <div className="xl:col-span-5 space-y-6 w-full">
                       <div className="flex justify-between items-center bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-xl">
                         <button onClick={() => setActiveCase(null)} className="text-xs text-indigo-600 font-bold px-3 py-1">← Atrás</button>
+                        <div className="flex gap-2">
+                           <button onClick={() => handleOpenCertificateModal('ATTENDANCE')} className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">📄 Constancia</button>
+                           <button onClick={() => handleOpenCertificateModal('REFERRAL')} className="text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">🔁 Referencia</button>
+                           {currentUser?.professionType === 'PSIQUIATRA' && (
+                             <button onClick={() => setShowRecipeModal(true)} className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">💊 Receta</button>
+                           )}
+                        </div>
                       </div>
 
                       <div className={`flex flex-col sm:flex-row gap-2 ${th.card} p-2 rounded-2xl border ${th.border} w-full`}>
@@ -938,7 +1195,6 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
-                              {/* SECCIÓN MÓDULO DE VOZ Y AUDIOS EXTERNOS (Siempre Visible o según Admin) */}
                               {currentUser?.hasVoiceModule ? (
                                 <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
                                   <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
@@ -960,16 +1216,15 @@ export default function App() {
                                 <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Módulo de Voz Inactivo</p></div>
                               )}
 
-                              {/* SUBIR BATERÍAS MANUALES */}
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
-                                 <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📎 Subir Batería Resuelta Manualmente (Archivo)</label>
+                                 <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📎 Subir Batería Resuelta Manualmente</label>
                                  <input type="file" accept=".pdf, image/*" onChange={(e) => {
                                     if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, manualBatteryFile: URL.createObjectURL(e.target.files![0])}));
                                  }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                  {newSessionData.manualBatteryFile && (
                                    <div className="flex gap-2 items-center mt-2">
                                      <span className="text-[9px] text-emerald-500">✓ Archivo listo</span>
-                                     <button type="button" onClick={() => alert("Simulación: Analizando batería subida con IA... Se agregarán los resultados a las notas.")} className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded">Analizar Batería con IA</button>
+                                     <button type="button" onClick={() => alert("Simulación: Analizando batería subida con IA... Se agregarán los resultados a las notas.")} className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded">Analizar con IA</button>
                                    </div>
                                  )}
                               </div>
@@ -980,7 +1235,7 @@ export default function App() {
                           )}
 
                           <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {activeCase.sessions.map((s) => (
+                            {(activeCase.sessions || []).map((s) => (
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
@@ -988,6 +1243,18 @@ export default function App() {
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
                               </div>
                             ))}
+                          </div>
+
+                          <div className={`${th.input} p-4 rounded-xl border ${th.border}`}>
+                            <span className={`font-bold ${th.text} block mb-2`}>{t('Baterías Clínicas Internacionales (APA / OMS)')}</span>
+                            <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
+                              {CLINICAL_EVALUATIONS.map((template) => (
+                                <div key={template.id} className={`flex justify-between items-center ${th.card} p-2.5 rounded border ${th.border} hover:border-indigo-500/50 transition`}>
+                                  <span className={`text-[11px] ${th.text} font-semibold`}>{template.name}</span>
+                                  <button onClick={() => { setSelectedDsmTemplate(template); setShowDsmModal(true); }} className="text-[9px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-bold">{t('Aplicar')}</button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
 
                           <button onClick={handleProcessNotes} disabled={isProcessingNotes} className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs">
@@ -1023,6 +1290,137 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* MODAL PARA EXTENDER RECETA MÉDICA */}
+      {showRecipeModal && activeCase && currentUser?.professionType === 'PSIQUIATRA' && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-lg w-full p-6 text-xs space-y-4 shadow-2xl`}>
+            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
+              <h3 className="text-sm font-bold text-emerald-500">💊 Extender Receta Médica</h3>
+              <button onClick={() => setShowRecipeModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente</label>
+                <input type="text" disabled value={`${activeCase.patientName} (Exp: ${activeCase.id})`} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.textMuted} font-mono text-xs`} />
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Diagnóstico (CIE-11)</label>
+                <input type="text" value={recipeData.diagnostico} onChange={e => setRecipeData(prev => ({...prev, diagnostico: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text}`} />
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Rp/ (Medicamentos)</label>
+                <textarea rows={4} value={recipeData.medicamentos} onChange={e => setRecipeData(prev => ({...prev, medicamentos: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} font-mono`} />
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Instrucciones</label>
+                <textarea rows={2} value={recipeData.indicaciones} onChange={e => setRecipeData(prev => ({...prev, indicaciones: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text}`} />
+              </div>
+            </div>
+            <div className={`flex flex-wrap justify-end gap-2 pt-3 border-t ${th.border}`}>
+              <button onClick={() => setShowRecipeModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
+              <button onClick={() => printOrExportRecipe('PRINT')} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl text-center">🖨️ Imprimir</button>
+              <button onClick={() => printOrExportRecipe('WORD')} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-center">📝 Descargar Word</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA CONSTANCIAS Y REFERENCIAS */}
+      {showCertificateModal && activeCase && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-2xl w-full p-6 text-xs space-y-4 shadow-2xl`}>
+            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
+              <h3 className={`text-sm font-bold ${th.text}`}>{certificateType === 'ATTENDANCE' ? 'Constancia de Asistencia' : 'Orden de Referencia'}</h3>
+              <button onClick={() => setShowCertificateModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <textarea rows={12} value={certificateText} onChange={(e) => setCertificateText(e.target.value)} className={`w-full p-4 ${th.input} border ${th.border} rounded-xl ${th.text} font-serif leading-relaxed`} />
+            <div className={`flex flex-wrap justify-end gap-2 pt-3 border-t ${th.border}`}>
+              <button onClick={() => setShowCertificateModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
+              <button onClick={() => printOrExportCertificate('PRINT')} className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl">🖨️ Imprimir</button>
+              <button onClick={() => printOrExportCertificate('WORD')} className="px-5 py-2 bg-blue-600 text-white font-bold rounded-xl">📝 Descargar Word</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE BATERIAS DSM-5 (AÑADIDO PARA EVITAR PANTALLA BLANCA SI EL ESTADO EXISTE) */}
+      {showDsmModal && selectedDsmTemplate && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden text-xs shadow-2xl`}>
+            <div className={`p-4 border-b ${th.border} ${th.input} flex justify-between items-center`}>
+              <div className="flex-1"><h3 className={`font-bold ${th.text} text-sm`}>{selectedDsmTemplate.name}</h3></div>
+              <button onClick={() => { setShowDsmModal(false); setSelectedDsmTemplate(null); setVerificationPassword(''); }} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 space-y-4">
+              {selectedDsmTemplate.questions.map((q, idx) => (
+                <div key={idx} className={`${th.input} p-3 rounded-xl border ${th.border}`}>
+                  <p className={`${th.text} font-semibold mb-2`}>{idx + 1}. {q}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {selectedDsmTemplate.options.map((option) => (
+                      <label key={option} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${dsmAnswers[q] === option ? 'bg-indigo-100 border-indigo-500 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' : `${th.card} ${th.border} ${th.text} hover:border-indigo-500`}`}>
+                        <input type="radio" checked={dsmAnswers[q] === option} onChange={() => setDsmAnswers(prev => ({ ...prev, [q]: option }))} className="text-indigo-600" />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className={`${th.input} p-4 rounded-xl border ${th.border} mt-4`}>
+                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>{t('Firma Digital para Guardar')}</label>
+                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder={t('Su clave de psicólogo/psiquiatra...')} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
+              </div>
+            </div>
+            <div className={`p-3 border-t ${th.border} ${th.input} flex justify-end gap-2`}>
+              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>{t('Cancelar')}</button>
+              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">{t('Firmar y Guardar en Expediente')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CALENDARIO (AÑADIDO PARA EVITAR PANTALLA BLANCA) */}
+      {showCalendarModal && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
+            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
+              <h3 className={`text-sm font-bold ${th.text}`}>➕ {t('Agendar Nueva Cita')}</h3>
+              <button onClick={() => setShowCalendarModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <form onSubmit={handleCreateAppointment} className="space-y-4">
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Paciente (Expediente Activo)')}</label>
+                <select required value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`}>
+                  <option value="" disabled>{t('Seleccione un paciente...')}</option>
+                  {myPatients.map(p => (
+                    <option key={p.id} value={p.id}>{p.patientName} (Exp: {p.id})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Fecha')}</label>
+                  <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+                </div>
+                <div>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Hora')}</label>
+                  <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+                </div>
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Duración (Minutos)')}</label>
+                <input type="number" required min="15" step="15" value={durationMinutes} onChange={(e) => setDurationMinutes(parseInt(e.target.value))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+              </div>
+              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 {t('Guardar Cita')}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* FIRMA DE DESARROLLADOR Y FOOTER */}
+      <footer className={`border-t ${th.border} ${th.bg} py-4 text-center text-xs ${th.textMuted} mt-auto w-full transition-colors duration-300`}>
+        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. {t('Desarrollado por Harold.')}</p>
+      </footer>
     </div>
   );
 }
