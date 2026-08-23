@@ -405,7 +405,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* AJUSTE PARA EL MINI-DASHBOARD: Apila en 2 columnas en lugar de 4 si no está en pantalla completa */}
         <div className={`grid gap-4 ${isFullscreen ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
           <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
              <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
@@ -429,7 +428,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* AJUSTE PARA LAS GRÁFICAS: Si está en pantalla completa son 3 columnas, si no, se apilan verticalmente */}
         <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
           <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
             <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
@@ -729,8 +727,6 @@ export default function App() {
   const [regFullName, setRegFullName] = useState('');
   const [regColegiado, setRegColegiado] = useState('');
   const [regLicenseType, setRegLicenseType] = useState<'ESTANDAR' | 'PREMIUM' | 'DEMO'>('ESTANDAR');
-  const [regCountry, setRegCountry] = useState('GT'); 
-  const [regVoice, setRegVoice] = useState(false); 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -771,7 +767,7 @@ export default function App() {
     const expiry = new Date();
     if (regLicenseType === 'DEMO') expiry.setDate(expiry.getDate() + 15); else expiry.setDate(expiry.getDate() + 365);
     const newPsychologist: any = { 
-      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: 'PSICOLOGO', specialty: '', professionalReview: '', countryCode: regCountry, abandonmentThreshold: 30 
+      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: 'PSICOLOGO', specialty: '', professionalReview: '', abandonmentThreshold: 30 
     };
     const updatedDb = { ...psychologists, [newPsychologist.username]: newPsychologist };
     setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
@@ -1173,6 +1169,7 @@ export default function App() {
                   {myAppointments.map(app => (
                     <div key={app.id} className={`p-3 ${th.input} rounded-lg border ${th.border} text-xs flex justify-between items-center`}>
                       <div><span className="font-bold text-indigo-500">{app.patientName}</span><p className={`text-[11px] ${th.textMuted}`}>{app.start?.replace('T', ' - ')}</p></div>
+                      <button onClick={() => handleSyncToGoogleCalendar(app)} className="bg-emerald-600 px-3 py-1 text-white rounded text-[10px] shadow font-bold">🗓️ Google Calendar</button>
                     </div>
                   ))}
                 </div>
@@ -1219,7 +1216,19 @@ export default function App() {
                       <form onSubmit={handleUpdateProfile} className="space-y-6">
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className="text-xs font-bold text-indigo-500 uppercase">✏️ Datos Profesionales & Alertas</h4>
-                          <input type="text" required value={editProfileName} onChange={(e) => setEditProfileName(e.target.value)} placeholder="Nombre" className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Título')}</label>
+                              <select value={editProfessionType} onChange={(e) => setEditProfessionType(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`}>
+                                <option value="PSICOLOGO">{t('Psicólogo(a) Clínico')}</option>
+                                <option value="PSIQUIATRA">{t('Médico Psiquiatra')}</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Nombre Completo')}</label>
+                              <input type="text" required value={editProfileName} onChange={(e) => setEditProfileName(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
+                            </div>
+                          </div>
                           <div>
                             <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Días para Alerta de Abandono de Tratamiento</label>
                             <select value={editAbandonmentThreshold} onChange={(e) => setEditAbandonmentThreshold(parseInt(e.target.value))} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`}>
@@ -1391,6 +1400,12 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
+                              {/* ENLACE DE SESIÓN EXTERNA (ZOOM, MEET, DRIVE) */}
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
+                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
+                                <input type="url" placeholder="Pegue la URL del video de la sesión aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                              </div>
+
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
                                 <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
                                 <div className="space-y-2">
@@ -1474,7 +1489,7 @@ export default function App() {
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
-                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
+                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace de Sesión: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
                                 {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1 font-bold">📎 Batería Manual Adjunta</p>}
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
                               </div>
