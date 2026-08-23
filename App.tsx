@@ -733,7 +733,6 @@ export default function App() {
   const [regColegiado, setRegColegiado] = useState('');
   const [regProfessionType, setRegProfessionType] = useState<'PSICOLOGO' | 'PSIQUIATRA'>('PSICOLOGO');
   const [regLicenseType, setRegLicenseType] = useState<'ESTANDAR' | 'PREMIUM' | 'DEMO'>('ESTANDAR');
-  const [regCountry, setRegCountry] = useState('GT'); 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -1463,12 +1462,6 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
-                              {/* ENLACE DE SESIÓN EXTERNA (ZOOM, MEET, DRIVE) AHORA ES INDEPENDIENTE */}
-                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
-                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
-                                <input type="url" placeholder="Pegue la URL de la videollamada aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                              </div>
-
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
                                 <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
                                 <div className="space-y-2">
@@ -1500,19 +1493,17 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* GRABADORA Y DICTADO SIEMPRE ACTIVOS */}
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
+                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
+                                <input type="url" placeholder="Pegue la URL de la videollamada aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                              </div>
+
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
                                 <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
                                 
-                                {!isMicConnected ? (
-                                  <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
-                                    🔌 Conectar Micrófono del Dispositivo
-                                  </button>
-                                ) : (
-                                  <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                                    {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
-                                  </button>
-                                )}
+                                <button type="button" onClick={isRecordingLive ? toggleRecording : connectMicrophone} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                                  {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Conectar Micrófono / Iniciar Grabación'}
+                                </button>
 
                                 {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
                                 
@@ -1553,7 +1544,7 @@ export default function App() {
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
-                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace de Sesión: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
+                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace de Sesión: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline font-bold">{s.videoUrl}</a></p>}
                                 {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1 font-bold">📎 Batería Manual Adjunta</p>}
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
                               </div>
@@ -1580,7 +1571,7 @@ export default function App() {
 
                       {activeCaseTab === 'ESTADISTICAS' && <PatientDashboard activeCase={activeCase} />}
 
-                      {/* SIEMPRE VISIBLE: CONSULTA ACADÉMICA / CIENTÍFICA (Globalmente en la columna izquierda) */}
+                      {/* SIEMPRE VISIBLE: CONSULTA ACADÉMICA / CIENTÍFICA */}
                       <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-3 w-full mt-6`}>
                         <span className={`text-xs font-bold ${th.text} uppercase block tracking-wider truncate`}>🔬 {t('Consulta Académica / Científica')}</span>
                         <textarea value={scientificQuery.queryText} onChange={(e) => setScientificQuery(prev => ({ ...prev, queryText: e.target.value }))} rows={2} placeholder={t('Consulte dudas teóricas, criterios del DSM-5, medicamentos...')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
