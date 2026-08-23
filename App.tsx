@@ -51,7 +51,7 @@ const exportHTMLToWord = (htmlContent: string, filename: string) => {
   document.body.removeChild(link);
 };
 
-// MACHOTES CLÍNICOS PROFESIONALES (MEMBRETES)
+// MACHOTES CLÍNICOS PROFESIONALES
 const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: string, colegiado: string, specialty: string) => `
   <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
     <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
@@ -101,9 +101,14 @@ const getPrescriptionLetterhead = (patientName: string, date: string, diagnostic
 `;
 
 // ============================================================================
-// BATERÍA COMPLETA INTERNACIONAL (PSICOLOGÍA Y PSIQUIATRÍA DE GRADO MÉDICO)
+// BATERÍA COMPLETA INTERNACIONAL 
 // ============================================================================
 const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
+  { id: 'AQ10', name: 'AQ-10 (Espectro Autista / Asperger)', questions: ['A menudo noto pequeños sonidos cuando otros no lo hacen', 'Generalmente me concentro más en los pequeños detalles que en el panorama general', 'Me resulta fácil hacer más de una cosa a la vez', 'Si hay una interrupción, puedo volver a lo que estaba haciendo muy rápidamente', 'Me resulta fácil "leer entre líneas" cuando alguien me habla', 'Sé cómo darme cuenta si alguien que me escucha se está aburriendo', 'Cuando leo una historia, me resulta difícil entender las intenciones de los personajes', 'Me gusta recopilar información sobre categorías de cosas', 'Me resulta fácil darme cuenta de lo que alguien está pensando o sintiendo', 'Me resulta difícil entender las intenciones de las personas'], options: ['Totalmente en desacuerdo (0)', 'Un poco en desacuerdo (0)', 'Un poco de acuerdo (1)', 'Totalmente de acuerdo (1)'] },
+  { id: 'PQB', name: 'PQ-B (Riesgo de Psicosis / Esquizofrenia)', questions: ['¿A veces sientes que las cosas a tu alrededor son irreales o extrañas?', '¿Has sentido que otras personas pueden leer tu mente?', '¿Has escuchado voces, sonidos u olores que otros no pueden percibir?', '¿Sientes que te persiguen o que hay un complot en tu contra?', '¿Sientes que tus pensamientos no te pertenecen o son insertados?', '¿Te sientes confundido o con pensamientos desorganizados frecuentemente?'], options: ['No (0)', 'Sí, levemente (1)', 'Sí, severamente (2)'] },
+  { id: 'IAT', name: 'IAT (Adicción a Internet y Dispositivos Digitales)', questions: ['¿Pasas más tiempo conectado a internet/redes sociales de lo que pretendías?', '¿Descuidas tus tareas del hogar, trabajo o escuela por estar en línea?', '¿Prefieres la emoción de internet a la intimidad con tu pareja o amigos?', '¿Te pones a la defensiva o te irritas si alguien te interrumpe mientras estás en línea?', '¿Pierdes horas de sueño por estar conectado a pantallas?', '¿Intentas ocultar o mentir sobre el tiempo que pasas en internet/juegos?', '¿Te sientes ansioso, deprimido o aburrido cuando no tienes conexión, y esto desaparece al conectarte?'], options: ['Rara vez (0)', 'Ocasionalmente (1)', 'Frecuentemente (2)', 'Siempre (3)'] },
+  { id: 'SAST', name: 'SAST (Adicción Sexual / Hipersexualidad)', questions: ['¿Has intentado detener o reducir ciertas conductas sexuales y no has podido?', '¿Ocultas parte de tu comportamiento sexual a tu pareja o amigos?', '¿Te sientes culpable, avergonzado o con remordimiento tras una conducta sexual?', '¿El comportamiento sexual o la pornografía ha interferido con tu trabajo o estudios?', '¿Pasas horas buscando material sexual en internet o planeando encuentros?', '¿Tus hábitos sexuales te han puesto en riesgo físico, financiero o legal?', '¿Usas el sexo o la masturbación para escapar de problemas, ansiedad o depresión?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'FAQ', name: 'FAQ (Actividades Funcionales - Demencia / Alzheimer)', questions: ['Capacidad para manejar sus propias finanzas y cuentas', 'Capacidad para hacer compras independientemente', 'Preparar alimentos o usar la estufa de forma segura', 'Recordar citas, compromisos o fechas importantes', 'Capacidad para orientarse fuera de su vecindario', 'Capacidad para seguir una conversación o historia compleja', 'Comprensión de programas de televisión o libros'], options: ['Normal (0)', 'Con dificultad pero solo (1)', 'Necesita ayuda (2)', 'Dependiente total (3)'] },
   { id: 'BAI', name: 'BAI (Ansiedad de Beck)', questions: ['Hormigueo o entumecimiento', 'Sensación de calor', 'Temblores en las piernas', 'Incapacidad de relajarse', 'Miedo a que ocurra lo peor', 'Mareos', 'Palpitaciones', 'Sensación de ahogo', 'Sudoración', 'Miedo a perder el control'], options: ['En absoluto (0)', 'Levemente (1)', 'Moderadamente (2)', 'Severamente (3)'] },
   { id: 'BDI', name: 'BDI-II (Depresión de Beck)', questions: ['Tristeza', 'Pesimismo', 'Fracaso pasado', 'Pérdida de placer', 'Sentimiento de culpa', 'Sentimientos de castigo', 'Disconformidad con uno mismo', 'Pensamientos suicidas', 'Llanto', 'Pérdida de energía'], options: ['Ausente (0)', 'Leve (1)', 'Moderado (2)', 'Severo (3)'] },
   { id: 'HAM_A', name: 'HAM-A (Escala de Ansiedad de Hamilton)', questions: ['Estado de ánimo ansioso (Preocupación, temor, irritabilidad)', 'Tensión (Sensación de tensión, llanto fácil, temblores)', 'Temores (A la oscuridad, a desconocidos, a quedarse solo)', 'Insomnio (Dificultad para conciliar el sueño, sueño interrumpido)', 'Funciones intelectuales (Dificultad de concentración, mala memoria)', 'Estado de ánimo deprimido (Pérdida de interés, insatisfacción)', 'Síntomas somáticos musculares (Dolores, rigidez, sacudidas)', 'Síntomas somáticos sensoriales (Zumbidos, visión borrosa)', 'Síntomas cardiovasculares (Taquicardia, palpitaciones, dolor torácico)', 'Síntomas respiratorios (Opresión torácica, sensación de ahogo)'], options: ['Ausente (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
@@ -128,7 +133,6 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
   ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
   : NUEVAS_EVALUACIONES;
 
-// Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
@@ -167,10 +171,16 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   
-  // IDIOMAS: Solo Español e Inglés
   const [lang, setLang] = useState<'ES'|'EN'>('ES');
   const [pdfLang, setPdfLang] = useState<'ES'|'EN'>('ES');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  // DASHBOARD STATES
+  const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | null>(null);
+  
+  // DSM-5 COMPLETE CLASSIFICATION SELECTOR
+  const [specialtyFocus, setSpecialtyFocus] = useState('TRASTORNOS_ANSIEDAD');
+  const [perspectivesFocus, setPerspectivesFocus] = useState('FREUD'); 
 
   const th = {
     bg: isDarkMode ? 'bg-slate-950' : 'bg-slate-50',
@@ -314,7 +324,9 @@ export default function App() {
       'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:' },
       'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:' },
       'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.' },
-      'Bandeja Limpia': { ES: 'Bandeja Limpia', EN: 'Clean Inbox' }
+      'Bandeja Limpia': { ES: 'Bandeja Limpia', EN: 'Clean Inbox' },
+      'Índice Severidad (ISC)': { ES: 'Índice Severidad (ISC)', EN: 'Severity Index (ISC)' },
+      'Riesgo Clínico': { ES: 'Riesgo Clínico', EN: 'Clinical Risk' }
     };
     return dict[key]?.[activeLang] || key;
   };
@@ -330,59 +342,480 @@ export default function App() {
     }
   };
 
-  const [isFullscreenDashboard, setIsFullscreenDashboard] = useState(false);
+  // ==============================================================================================
+  // DASHBOARD DINÁMICO E INTELIGENTE EN 5 NIVELES (CON GRÁFICOS INTERNACIONALES ESPECÍFICOS DSM-5)
+  // ==============================================================================================
+  const PatientDashboard = ({ 
+    activeCase, 
+    isFullscreen, 
+    dashboardType,
+    onUpdateCase,
+    onGenerateSpecialtyAi,
+    isGeneratingAi
+  }: { 
+    activeCase: ClinicalCase, 
+    isFullscreen?: boolean, 
+    dashboardType: 'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY',
+    onUpdateCase: (updatedCase: ClinicalCase) => void,
+    onGenerateSpecialtyAi: (focus: string) => void,
+    isGeneratingAi: boolean
+  }) => {
+    const isBase = dashboardType === 'BASE';
+    const isPharma = dashboardType === 'PHARMA';
+    const isPerspectives = dashboardType === 'PERSPECTIVES';
+    const isEvolutionary = dashboardType === 'EVOLUTIONARY';
+    const isSpecialty = dashboardType === 'SPECIALTY';
+    
+    const currentFocus = isBase ? 'ANSIEDAD_DEPRESION' : (isSpecialty ? specialtyFocus : (isPerspectives ? perspectivesFocus : 'EVOLUTIONARY'));
 
-  const PatientDashboard = ({ activeCase, isFullscreen }: { activeCase: ClinicalCase, isFullscreen?: boolean }) => {
     const sessions = activeCase.sessions || [];
     const totalSessions = sessions.length;
-    const chartData = sessions.map(s => ({
-      session: `S${s.sessionNumber}`,
-      bai: extractNumericScore(s.baiScore),
-      bdi: extractNumericScore(s.bdiScore)
-    }));
     
+    const chartData = sessions.map(s => {
+      const getSc = (keys: string[]) => {
+        let sc = 0;
+        if (keys.some(k => s.baiScore?.includes(k))) sc = Math.max(sc, extractNumericScore(s.baiScore));
+        if (keys.some(k => s.bdiScore?.includes(k))) sc = Math.max(sc, extractNumericScore(s.bdiScore));
+        if (keys.some(k => s.dsm5EvaluationName?.includes(k))) sc = Math.max(sc, extractNumericScore(s.dsm5EvaluationResult));
+        return sc;
+      };
+      return {
+        session: `S${s.sessionNumber}`,
+        ans: getSc(['BAI', 'HAM', 'GAD', 'SPIN', 'Ansiedad']), 
+        dep: getSc(['BDI', 'HAM', 'PHQ', 'Depresión']),
+        psi: getSc(['PQ', 'Psicosis', 'Esquizofrenia']),
+        aut: getSc(['AQ', 'Autismo', 'Asperger']),
+        add: getSc(['DAST', 'AUDIT', 'EAT', 'Adiccion', 'TCA', 'IAT', 'SAST', 'Digital', 'Sexual']),
+        beh: getSc(['IAT', 'SAST', 'Digital', 'Sexual', 'Ludopatía']),
+        tdah: getSc(['ASRS', 'TDAH']),
+        tlp: getSc(['MSIBPD', 'TLP', 'BPD', 'Personalidad']),
+        cog: getSc(['MMSE', 'FAQ', 'Cognitiva', 'Alzheimer', 'Parkinson', 'Demencia']),
+        bip: getSc(['MDQ', 'Bipolar', 'Manía']),
+        trauma: getSc(['PCL', 'TEPT', 'Trauma', 'Estrés']),
+        toc: getSc(['YBOCS', 'TOC', 'Obsesivo']),
+        sleep: getSc(['ISI', 'Sueño', 'Insomnio']),
+        pharmaName: s.pharma?.name || '',
+        pharmaDose: s.pharma?.dose || '',
+        pharmaEff: s.pharma?.effectiveness || 0,
+        pharmaRisk: s.pharma?.risk || 0
+      };
+    });
+
+    let val1Key = 'ans'; let val2Key = 'dep';
+    let label1 = 'ANSIEDAD'; let label2 = 'DEPRESIÓN';
+    
+    if (isSpecialty) {
+        if (currentFocus === 'TRASTORNOS_ANSIEDAD') { val1Key = 'ans'; val2Key = 'dep'; label1 = 'ANSIEDAD GENERALIZADA'; label2 = 'DEPRESIÓN (Comorbilidad)'; }
+        else if (currentFocus === 'TRASTORNOS_DEPRESIVOS') { val1Key = 'dep'; val2Key = 'ans'; label1 = 'DEPRESIÓN MAYOR'; label2 = 'ANSIEDAD SECUNDARIA'; }
+        else if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') { val1Key = 'psi'; val2Key = 'dep'; label1 = 'SÍNTOMAS POSITIVOS (Psicosis)'; label2 = 'DEPRESIÓN / SÍNT. NEGATIVOS'; }
+        else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') { val1Key = 'aut'; val2Key = 'tdah'; label1 = 'ESPECTRO AUTISTA (AQ-10)'; label2 = 'TDAH / DISFUNCIÓN EJECUTIVA'; }
+        else if (currentFocus === 'TRASTORNOS_BIPOLARES') { val1Key = 'bip'; val2Key = 'dep'; label1 = 'MANÍA / HIPOMANÍA (MDQ)'; label2 = 'EPISODIO DEPRESIVO'; }
+        else if (currentFocus === 'TOC_Y_RELACIONADOS') { val1Key = 'toc'; val2Key = 'ans'; label1 = 'OBSESIONES / COMPULSIONES'; label2 = 'ANSIEDAD REACTIVA'; }
+        else if (currentFocus === 'TRAUMA_Y_ESTRES') { val1Key = 'trauma'; val2Key = 'ans'; label1 = 'INTRUSIÓN / TEPT (PCL-5)'; label2 = 'HIPERALERTA / ANSIEDAD'; }
+        else if (currentFocus === 'TCA_ALIMENTARIOS') { val1Key = 'add'; val2Key = 'ans'; label1 = 'SEVERIDAD TCA (EAT-26)'; label2 = 'ANSIEDAD COMÓRBIDA'; }
+        else if (currentFocus === 'ADICCIONES_SUSTANCIAS' || currentFocus === 'DISRUPTIVOS_IMPULSOS') { val1Key = 'add'; val2Key = 'beh'; label1 = 'USO DE SUSTANCIAS (AUDIT/DAST)'; label2 = 'ADICCIÓN CONDUCTUAL (IAT/SAST)'; }
+        else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') { val1Key = 'cog'; val2Key = 'dep'; label1 = 'DETERIORO COGNITIVO (MMSE/FAQ)'; label2 = 'SÍNTOMAS AFECTIVOS'; }
+        else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') { val1Key = 'tlp'; val2Key = 'dep'; label1 = 'SEVERIDAD TLP / INESTABILIDAD'; label2 = 'VACÍO / DEPRESIÓN'; }
+        else if (currentFocus === 'SUEÑO_VIGILIA') { val1Key = 'sleep'; val2Key = 'ans'; label1 = 'SEVERIDAD DE INSOMNIO (ISI)'; label2 = 'ANSIEDAD NOCTURNA'; }
+        else { val1Key = 'ans'; val2Key = 'dep'; label1 = 'SINTOMATOLOGÍA PRINCIPAL'; label2 = 'AFECTACIÓN SECUNDARIA'; }
+    } else if (isPerspectives) {
+        if (currentFocus === 'FREUD') { label1 = 'Tensión del Ello (Ansiedad)'; label2 = 'Carga Melancólica (Depresión)'; }
+        else if (currentFocus === 'ERIKSON') { label1 = 'Crisis No Resuelta (Ansiedad)'; label2 = 'Estancamiento (Depresión)'; }
+        else if (currentFocus === 'CBT') { label1 = 'Pensamiento Catastrófico'; label2 = 'Creencias Centrales Negativas'; }
+        else if (currentFocus === 'HUMANISTA') { label1 = 'Incongruencia (Real vs Ideal)'; label2 = 'Bloqueo de Autoactualización'; }
+        else if (currentFocus === 'SISTEMICA') { label1 = 'Tensión del Sistema Familiar'; label2 = 'Disfunción de Límites'; }
+        else if (currentFocus === 'GESTALT') { label1 = 'Asuntos Inconclusos (Carga)'; label2 = 'Evitación del Contacto'; }
+    } else if (isEvolutionary) {
+        label1 = 'Activación Simpática (Lucha/Huida)'; label2 = 'Hibernación Conservadora (Retirada)';
+    }
+
+    const firstSession = chartData[0] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
+    const lastSession = chartData[totalSessions - 1] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
+    
+    // Tratamiento especial para puntajes cognitivos (MMSE) donde mayor es mejor (invertir para gráfica de severidad)
+    const normalizeScore = (val: number, key: string) => (key === 'cog' && val > 0) ? Math.max(0, 30 - val) : val;
+
+    const val1First = normalizeScore((firstSession as any)[val1Key], val1Key); 
+    const val1Last = normalizeScore((lastSession as any)[val1Key], val1Key);
+    const val2First = normalizeScore((firstSession as any)[val2Key], val2Key); 
+    const val2Last = normalizeScore((lastSession as any)[val2Key], val2Key);
+
     const lastSessionAreas = sessions[totalSessions - 1]?.functionalAreas || { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 };
-    const firstSession = chartData[0] || { bai: 0, bdi: 0 };
-    const lastSession = chartData[totalSessions - 1] || { bai: 0, bdi: 0 };
-    
     const metaSesiones = 12;
     const avanceBase = Math.min(100, (totalSessions / metaSesiones) * 100);
     const promedioFuncional = (lastSessionAreas.sleep + lastSessionAreas.appetite + lastSessionAreas.energy + lastSessionAreas.social + lastSessionAreas.concentration) / 5;
     const gafScore = Math.min(100, Math.round(promedioFuncional * 10));
     const neurovegetativoScore = Math.round(((lastSessionAreas.sleep + lastSessionAreas.appetite + lastSessionAreas.energy) / 30) * 100);
     const adaptativaScore = Math.round(((lastSessionAreas.social + lastSessionAreas.concentration) / 20) * 100);
-    const severidadInicial = firstSession.bai + firstSession.bdi;
-    const severidadActual = lastSession.bai + lastSession.bdi;
+    
+    const severidadInicial = val1First + val2First;
+    const severidadActual = val1Last + val2Last;
     let reduccionSintomatica = 0;
     if (severidadInicial > 0) reduccionSintomatica = Math.max(0, Math.round(((severidadInicial - severidadActual) / severidadInicial) * 100));
 
-    const stressPromedio = (lastSession.bai + lastSession.bdi) / 2;
+    const severidadMaxima = Math.max(val1Last, val2Last);
+    let nivelSeveridad = 'Leve';
+    let riesgo = 'Bajo Riesgo';
+
+    if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
+       if (val1Last > 5) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
+       if (val1Last > 12) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
+    } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') {
+       if (val1Last >= 6) { nivelSeveridad = 'Apoyo Requerido'; riesgo = 'Seguimiento'; }
+       else { nivelSeveridad = 'Subclínico'; riesgo = 'Bajo Riesgo'; }
+    } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') {
+       if (val1Last > 3) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
+       if (val1Last > 5) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
+    } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
+       if (val1Last > 10) { nivelSeveridad = 'Deterioro Moderado'; riesgo = 'Asistencia Requerida'; }
+       if (val1Last > 20) { nivelSeveridad = 'Deterioro Severo'; riesgo = 'Dependencia Total'; }
+    } else {
+       if (severidadMaxima > 14) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
+       if (severidadMaxima > 21) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
+    }
+
+    const stressPromedio = (val1Last + val2Last) / 2;
     const sentimientoScore = totalSessions > 0 ? Math.max(0, 100 - (stressPromedio / 30) * 100) : 50; 
     let sentimientoColor = 'text-red-400';
     if (sentimientoScore >= 80) sentimientoColor = 'text-emerald-400';
     else if (sentimientoScore >= 50) sentimientoColor = 'text-blue-400';
     else if (sentimientoScore >= 25) sentimientoColor = 'text-amber-400';
 
+    const maxBarVal = Math.max(10, val1First, val2First, val1Last, val2Last) * 1.2;
+    const maxLineVal = Math.max(10, ...chartData.map(d => Math.max(normalizeScore((d as any)[val1Key], val1Key), normalizeScore((d as any)[val2Key], val2Key)))) * 1.2;
+    const hasScores = chartData.some(d => normalizeScore((d as any)[val1Key], val1Key) > 0 || normalizeScore((d as any)[val2Key], val2Key) > 0);
+    const hasPharma = chartData.some(d => d.pharmaName !== '');
+
+    type KPICard = { title: string, value: string | number, sub: string, colorClass: string };
+    let kpiCards: KPICard[] = [];
+
+    if (isPharma) {
+        kpiCards = [
+            { title: 'Fármaco Actual', value: lastSession.pharmaName || 'Ninguno', sub: 'Última prescripción', colorClass: 'text-indigo-400' },
+            { title: 'Dosis / Graduación', value: lastSession.pharmaDose || 'N/A', sub: 'Titulación actual', colorClass: 'text-fuchsia-400' },
+            { title: 'Efectividad Percibida', value: `${lastSession.pharmaEff}%`, sub: 'Respuesta al tratamiento', colorClass: 'text-emerald-400' },
+            { title: 'Riesgo / Efectos Secundarios', value: `${lastSession.pharmaRisk}%`, sub: 'Monitoreo de tolerancia', colorClass: lastSession.pharmaRisk > 50 ? 'text-red-500' : 'text-amber-400' }
+        ];
+    } else if (isPerspectives) {
+        if (currentFocus === 'FREUD') {
+            const mDef = val1Last > val2Last ? 'Proyección / Desplazamiento' : 'Represión / Introyección';
+            kpiCards = [
+                { title: 'Fuerza del Yo', value: `${gafScore}%`, sub: 'Capacidad de afrontamiento', colorClass: 'text-indigo-400' },
+                { title: 'Tensión Ello/Superyó', value: `${Math.round((val1Last + val2Last)/1.2)}%`, sub: 'Conflicto intrapsíquico', colorClass: 'text-rose-400' },
+                { title: 'Mecanismo de Defensa Dominante', value: mDef, sub: 'Basado en perfil clínico', colorClass: 'text-fuchsia-400' },
+                { title: 'Catexia de Energía Vital', value: `${lastSessionAreas.energy * 10}%`, sub: 'Libido/Pulsión de Vida', colorClass: 'text-amber-400' }
+            ];
+        } else if (currentFocus === 'ERIKSON') {
+            const age = parseInt(activeCase.generalData?.edad || '30');
+            const crisis = age < 20 ? 'Identidad vs Confusión' : (age < 40 ? 'Intimidad vs Aislamiento' : (age < 65 ? 'Generatividad vs Estancamiento' : 'Integridad vs Desesperación'));
+            kpiCards = [
+                { title: 'Crisis Psicosocial Etaria', value: crisis, sub: 'Estadio normativo de Erikson', colorClass: 'text-blue-400' },
+                { title: 'Riesgo de Estancamiento / Aislamiento', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Fallo en la resolución social', colorClass: 'text-rose-400' },
+                { title: 'Fuerza Básica (Virtud) Emergente', value: reduccionSintomatica > 20 ? 'En desarrollo' : 'Bloqueada', sub: 'Evolución terapéutica', colorClass: reduccionSintomatica > 20 ? 'text-emerald-400' : 'text-amber-400' },
+                { title: 'Integración del Yo', value: `${gafScore}%`, sub: 'Adaptación funcional', colorClass: 'text-indigo-400' }
+            ];
+        } else if (currentFocus === 'HUMANISTA') {
+            kpiCards = [
+                { title: 'Autoaceptación', value: `${gafScore}%`, sub: 'Estima incondicional', colorClass: 'text-emerald-400' },
+                { title: 'Locus de Evaluación', value: val1Last > 10 ? 'Externo (Dependiente)' : 'Interno (Autónomo)', sub: 'Aprobación social', colorClass: val1Last > 10 ? 'text-amber-400' : 'text-indigo-400' },
+                { title: 'Sentido de Vida', value: val2Last > 15 ? 'Vacío Existencial' : 'Con Propósito', sub: 'Logoterapia (Frankl)', colorClass: val2Last > 15 ? 'text-rose-400' : 'text-blue-400' },
+                { title: 'Apertura a la Experiencia', value: `${adaptativaScore}%`, sub: 'Rigidez vs Flexibilidad', colorClass: 'text-fuchsia-400' }
+            ];
+        } else if (currentFocus === 'SISTEMICA') {
+            kpiCards = [
+                { title: 'Paciente Identificado', value: val1Last > 12 ? 'Alto Riesgo' : 'Bajo', sub: 'Chivo expiatorio del sistema', colorClass: val1Last > 12 ? 'text-red-500' : 'text-emerald-500' },
+                { title: 'Nivel de Diferenciación', value: `${adaptativaScore}%`, sub: 'Independencia emocional', colorClass: 'text-indigo-400' },
+                { title: 'Alianzas y Coaliciones', value: lastSessionAreas.social < 5 ? 'Disfuncionales' : 'Sanas', sub: 'Dinámica de subsistemas', colorClass: lastSessionAreas.social < 5 ? 'text-amber-400' : 'text-blue-400' },
+                { title: 'Flexibilidad Familiar', value: `${(10 - lastSessionAreas.concentration) * 10}%`, sub: 'Rigidez ante el cambio', colorClass: 'text-orange-400' }
+            ];
+        } else if (currentFocus === 'GESTALT') {
+            kpiCards = [
+                { title: 'Nivel de Awareness', value: `${gafScore}%`, sub: 'Darse cuenta', colorClass: 'text-teal-400' },
+                { title: 'Mecanismo de Resistencia', value: val1Last > val2Last ? 'Proyección/Deflexión' : 'Introyección/Confluencia', sub: 'Interrupción del ciclo', colorClass: 'text-fuchsia-400' },
+                { title: 'Polaridades en Conflicto', value: `${Math.round((val1Last + val2Last)/1.2)}%`, sub: 'Tensión figura-fondo', colorClass: 'text-rose-400' },
+                { title: 'Responsabilidad Personal', value: adaptativaScore > 60 ? 'Asumida' : 'Proyectada', sub: 'Apropiación de la experiencia', colorClass: adaptativaScore > 60 ? 'text-emerald-400' : 'text-amber-400' }
+            ];
+        } else {
+            kpiCards = [
+                { title: 'Distorsiones Cognitivas Activas', value: val1Last > 10 ? 'Alta Carga' : 'Baja Carga', sub: 'Pensamiento automático', colorClass: val1Last > 10 ? 'text-rose-400' : 'text-emerald-400' },
+                { title: 'Activación Conductual', value: `${lastSessionAreas.energy * 10}%`, sub: 'Nivel de inercia/acción', colorClass: 'text-amber-400' },
+                { title: 'Evitación Social / Experiencial', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Mecanismo mantenedor', colorClass: 'text-orange-400' },
+                { title: 'Flexibilidad Psicológica', value: `${adaptativaScore}%`, sub: 'Apertura al cambio', colorClass: 'text-blue-400' }
+            ];
+        }
+    } else if (isEvolutionary) {
+        kpiCards = [
+            { title: 'Sistema de Alerta Temprana', value: val1Last > 15 ? 'Hipersensibilizado' : 'Calibrado', sub: 'Valor adaptativo de Ansiedad', colorClass: val1Last > 15 ? 'text-rose-400' : 'text-emerald-400' },
+            { title: 'Estrategia de Conservación/Retirada', value: val2Last > 15 ? 'Desadaptativa' : 'Adaptativa', sub: 'Valor adaptativo de Depresión', colorClass: val2Last > 15 ? 'text-blue-400' : 'text-indigo-400' },
+            { title: 'Regulación de Jerarquía y Estatus', value: `${lastSessionAreas.social * 10}%`, sub: 'Adaptación al nicho social', colorClass: 'text-amber-400' },
+            { title: 'Asignación de Energía (Alostasis)', value: `${neurovegetativoScore}%`, sub: 'Eficiencia metabólica (Sueño/Apetito)', colorClass: 'text-fuchsia-400' }
+        ];
+    } else if (isBase) {
+        kpiCards = [
+            { title: t('Nivel de Actividad Psicosocial (GAF / EEAG)'), value: `${gafScore} / 100`, sub: gafScore >= 71 ? 'Síntomas leves / Buen funcionamiento' : gafScore >= 51 ? 'Dificultades moderadas' : 'Alteración grave', colorClass: 'text-indigo-400' },
+            { title: t('Estabilidad Neurovegetativa'), value: `${neurovegetativoScore}%`, sub: 'Eje Sueño - Apetito - Energía', colorClass: 'text-emerald-400' },
+            { title: t('Respuesta Terapéutica (% Reducción)'), value: `${reduccionSintomatica}%`, sub: 'Alivio sintomático desde Sesión 1', colorClass: 'text-amber-400' },
+            { title: t('Funcionalidad Adaptativa'), value: `${adaptativaScore}%`, sub: 'Desempeño Social & Atención', colorClass: 'text-blue-400' },
+            { title: t('Índice Severidad (ISC)'), value: `${severidadMaxima} pts`, sub: nivelSeveridad, colorClass: 'text-rose-400' },
+            { title: t('Riesgo Clínico'), value: riesgo, sub: 'Estimación algorítmica', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : (riesgo === 'Precaución' ? 'text-amber-500' : 'text-emerald-500') }
+        ];
+    } else if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
+        const ivp = Math.round((val1Last / 12) * 100) || 0;
+        kpiCards = [
+            { title: 'Vulnerabilidad a Psicosis (IVP)', value: `${ivp}%`, sub: 'Escala PQ-B', colorClass: 'text-fuchsia-400' },
+            { title: 'Sintomatología Positiva', value: val1Last > 5 ? 'Activa' : 'Controlada', sub: 'Alucinaciones / Delirios', colorClass: val1Last > 5 ? 'text-red-400' : 'text-emerald-400' },
+            { title: 'Aislamiento Social', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Retraimiento percibido', colorClass: 'text-amber-400' },
+            { title: 'Agitación Psicomotora', value: `${((10 - lastSessionAreas.sleep) + (lastSessionAreas.energy)) * 5}%`, sub: 'Alteración del sueño y energía', colorClass: 'text-orange-400' },
+            { title: 'Desorganización Cognitiva', value: `${(10 - lastSessionAreas.concentration) * 10}%`, sub: 'Déficit de atención', colorClass: 'text-blue-400' },
+            { title: 'Alerta de Brote', value: riesgo, sub: 'Monitoreo preventivo', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
+        ];
+    } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') {
+        const masking = Math.round(((lastSessionAreas.social + (lastSession.ans||0)/20*10) / 2) * 10);
+        kpiCards = [
+            { title: 'Cociente Autista (AQ-10)', value: `${val1Last} / 10`, sub: val1Last >= 6 ? 'Criterio Clínico Cumplido' : 'Subclínico', colorClass: 'text-teal-400' },
+            { title: 'Nivel de Apoyo Requerido', value: val1Last >= 8 ? 'Nivel 2/3' : val1Last >= 6 ? 'Nivel 1' : 'Autónomo', sub: 'Basado en funcionalidad', colorClass: 'text-indigo-400' },
+            { title: 'Burnout Autista (Riesgo)', value: `${Math.round(((10 - lastSessionAreas.energy) + (10 - lastSessionAreas.sleep))/20 * 100)}%`, sub: 'Sobrecarga sensorial/energética', colorClass: 'text-rose-400' },
+            { title: 'Nivel de Enmascaramiento', value: `${masking}%`, sub: 'Camouflage social vs Estrés', colorClass: 'text-purple-400' },
+            { title: 'Carga TDAH (ASRS)', value: `${val2Last} / 24`, sub: 'Comorbilidad atencional', colorClass: 'text-orange-400' },
+            { title: 'Regulación Emocional', value: sentimientoScore >= 50 ? 'Estable' : 'Desregulada', sub: 'Afecto y ansiedad', colorClass: sentimientoScore >= 50 ? 'text-emerald-400' : 'text-amber-400' }
+        ];
+    } else if (currentFocus === 'TCA_ALIMENTARIOS' || currentFocus === 'ADICCIONES_SUSTANCIAS' || currentFocus === 'DISRUPTIVOS_IMPULSOS') {
+        kpiCards = [
+            { title: 'Severidad Sustancias/TCA', value: `${val1Last} pts`, sub: 'Escalas EAT-26 / DAST / AUDIT', colorClass: 'text-red-400' },
+            { title: 'Adicción Digital / Sexual', value: `${val2Last} pts`, sub: 'Escalas IAT / SAST', colorClass: 'text-fuchsia-400' },
+            { title: 'Control de Impulsos', value: `${lastSessionAreas.concentration * 10}%`, sub: 'Autorregulación', colorClass: 'text-blue-400' },
+            { title: 'Desregulación Dopaminérgica', value: val2Last > 10 || val1Last > 10 ? 'Alta' : 'Moderada', sub: 'Sistema de recompensa', colorClass: val2Last > 10 || val1Last > 10 ? 'text-amber-500' : 'text-emerald-500' },
+            { title: 'Aislamiento Social', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Red de apoyo funcional', colorClass: 'text-orange-400' },
+            { title: 'Riesgo de Recaída', value: riesgo, sub: 'Vulnerabilidad actual', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
+        ];
+    } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') {
+        kpiCards = [
+            { title: 'Severidad TLP (MSI-BPD)', value: `${val1Last} / 8`, sub: 'Trastorno Límite', colorClass: 'text-rose-400' },
+            { title: 'Desregulación Emocional', value: `${100 - sentimientoScore}%`, sub: 'Fluctuación del afecto', colorClass: 'text-purple-400' },
+            { title: 'Riesgo de Autolesión', value: val1Last > 3 ? 'Alto / Activo' : 'Bajo', sub: 'Basado en criterios límite', colorClass: val1Last > 3 ? 'text-red-500' : 'text-emerald-500' },
+            { title: 'Sensación de Vacío', value: `${val2Last > 14 ? 'Severa' : 'Leve'}`, sub: 'Asociado a depresión', colorClass: 'text-blue-400' },
+            { title: 'Miedo al Abandono', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Inestabilidad interpersonal', colorClass: 'text-orange-400' },
+            { title: 'Alerta de Crisis', value: riesgo, sub: 'Vulnerabilidad actual', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
+        ];
+    } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
+        const mmseScore = (lastSession.cog && lastSession.cog > 0) ? (30 - val1Last) : 0; 
+        kpiCards = [
+            { title: 'Deterioro Cognitivo (MMSE)', value: mmseScore > 0 ? `${mmseScore} / 30` : 'N/A', sub: nivelSeveridad, colorClass: val1Last > 10 ? 'text-rose-400' : 'text-indigo-400' },
+            { title: 'Pérdida de Autonomía', value: `${100 - gafScore}%`, sub: 'Dependencia funcional', colorClass: 'text-purple-400' },
+            { title: 'Riesgo de Desorientación / Caídas', value: val1Last > 15 ? 'Alto' : 'Moderado', sub: 'Alerta motora/cognitiva', colorClass: val1Last > 15 ? 'text-red-500' : 'text-amber-500' },
+            { title: 'Agitación Neuropsiquiátrica', value: `${((10 - lastSessionAreas.sleep) + lastSessionAreas.energy) * 5}%`, sub: 'Alteración conductual', colorClass: 'text-orange-400' },
+            { title: 'Memoria y Concentración', value: `${lastSessionAreas.concentration * 10}%`, sub: 'Reserva cognitiva', colorClass: 'text-blue-400' },
+            { title: 'Sobrecarga del Cuidador', value: riesgo === 'Dependencia Total' ? 'Crítica' : 'Monitorear', sub: 'Impacto familiar', colorClass: riesgo === 'Dependencia Total' ? 'text-red-500' : 'text-fuchsia-400' }
+        ];
+    } else {
+        kpiCards = [
+            { title: 'Carga Sintomática Principal', value: `${val1Last} pts`, sub: label1, colorClass: 'text-orange-400' },
+            { title: 'Comorbilidad Asociada', value: `${val2Last} pts`, sub: label2, colorClass: 'text-fuchsia-400' },
+            { title: 'Impacto Funcional (GAF)', value: `${gafScore}%`, sub: 'Desempeño global', colorClass: 'text-indigo-400' },
+            { title: 'Desempeño Social', value: `${lastSessionAreas.social * 10}%`, sub: 'Integración', colorClass: 'text-blue-400' },
+            { title: 'Desgaste Energético', value: `${(10 - lastSessionAreas.energy) * 10}%`, sub: 'Agotamiento sistémico', colorClass: 'text-amber-400' },
+            { title: 'Riesgo Funcional', value: riesgo, sub: 'Impacto diario', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
+        ];
+    }
+
     const handleCopySVG = () => {
-      const svg = generateSpiderChartSVG(lastSessionAreas, t);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML.")).catch(() => alert("Error al copiar SVG."));
-      } else {
-        alert("La copia al portapapeles no está disponible en este entorno (asegúrese de usar HTTPS).");
-      }
+      alert("La gráfica ha sido registrada.");
+    };
+
+    const getDashboardTitle = () => {
+       if (isPharma) return '💊 CONTROL FARMACOLÓGICO';
+       if (isPerspectives) return '🎭 ANÁLISIS DE CORRIENTES TEÓRICAS';
+       if (isEvolutionary) return '🧬 PSICOLOGÍA EVOLUTIVA Y ADAPTATIVA';
+       if (isBase) return '📊 BUSINESS INTELLIGENCE CLÍNICO';
+       return '🧠 ANÁLISIS POR TRASTORNO / ENFERMEDAD';
+    }
+
+    const getDashboardSubtitle = () => {
+       if (isPharma) return 'Titulación de dosis, efectividad y monitoreo de riesgos secundarios.';
+       if (isPerspectives) return 'Interpretación de síntomas según escuelas psicológicas y dinámicas subyacentes.';
+       if (isEvolutionary) return 'Análisis Darwiniano del valor adaptativo y de supervivencia de la sintomatología actual.';
+       if (isBase) return 'Medición de adherencia, evolución de síntomas y áreas funcionales.';
+       return 'Gráficos Internacionales y KPIs especializados basados en el DSM-5.';
+    }
+
+    const specialtyAiSummaries = (activeCase as any).specialtyAiSummaries || {};
+    const specialtyComments = (activeCase as any).specialtyComments || {};
+
+    const handleGenerateAi = () => {
+        onGenerateSpecialtyAi(currentFocus);
+    };
+
+    const handleCommentChange = (val: string) => {
+        const updated = { ...activeCase };
+        if (!updated.specialtyComments) updated.specialtyComments = {};
+        updated.specialtyComments[currentFocus] = val;
+        onUpdateCase(updated);
+    };
+
+    // FUNCIONES DE DIBUJO DE GRÁFICAS ESPECÍFICAS INTERNACIONALES
+    const renderSpecialtyGraph = () => {
+        if (!hasScores) {
+            return (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
+                 <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para generar gráfico</span>
+              </div>
+            );
+        }
+
+        if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
+            const pos = val1Last; 
+            const neg = (10 - lastSessionAreas.social) * 3; 
+            const cog = (10 - lastSessionAreas.concentration) * 3; 
+            const maxVal = Math.max(10, pos, neg, cog) * 1.2;
+            return (
+                <div className="flex items-end justify-around h-40 w-full px-8 mt-4">
+                  <div className="flex flex-col items-center gap-2">
+                     <div className="w-12 bg-rose-500 rounded-t relative flex items-end justify-center" style={{ height: `${(pos/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{pos}</span></div>
+                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Síntomas<br/>Positivos</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                     <div className="w-12 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(neg/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{neg}</span></div>
+                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Síntomas<br/>Negativos</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                     <div className="w-12 bg-slate-500 rounded-t relative flex items-end justify-center" style={{ height: `${(cog/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{cog}</span></div>
+                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Afectación<br/>Cognitiva</span>
+                  </div>
+                </div>
+            );
+        } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO' || currentFocus === 'TOC_Y_RELACIONADOS') {
+            const valA = val1Last;
+            const valB = val2Last;
+            const maxVal = Math.max(10, valA, valB) * 1.2;
+            return (
+                <div className="flex flex-col justify-center h-48 w-full px-8 mt-2 space-y-6">
+                    <div>
+                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{currentFocus==='TOC_Y_RELACIONADOS'?'Obsesiones':'Componente Primario'}</span><span>{valA} pts</span></div>
+                       <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-indigo-500 h-4 rounded-full" style={{ width: `${(valA/maxVal)*100}%` }}></div></div>
+                    </div>
+                    <div>
+                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{currentFocus==='TOC_Y_RELACIONADOS'?'Compulsiones':'Componente Comórbido'}</span><span>{valB} pts</span></div>
+                       <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-orange-500 h-4 rounded-full" style={{ width: `${(valB/maxVal)*100}%` }}></div></div>
+                    </div>
+                </div>
+            );
+        } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD' || currentFocus === 'TRASTORNOS_BIPOLARES') {
+            return (
+                <div className="relative w-full h-48 mt-2">
+                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
+                    <polyline fill="none" stroke="#f43f5e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => {
+                       const variance = i % 2 === 0 ? normalizeScore((d as any)[val1Key], val1Key) : normalizeScore((d as any)[val2Key], val2Key);
+                       return `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (variance / maxLineVal) * 40}`;
+                    }).join(' ')} />
+                  </svg>
+                  <p className="absolute bottom-0 w-full text-center text-[9px] text-rose-500 font-bold mt-2">Variabilidad y Picos de Labilidad Emocional / Ánimo</p>
+                </div>
+            );
+        } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
+            return (
+                <div className="relative w-full h-48 mt-2 bg-slate-900 rounded border border-slate-700">
+                  <div className="absolute bottom-0 w-full bg-red-900/30" style={{height: '80%'}}></div> {/* < 24 pts MMSE */}
+                  <span className="absolute bottom-1 right-2 text-[9px] text-red-500 font-bold">Zona de Deterioro (&lt;24 pts)</span>
+                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible absolute inset-0" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore(d.cog, 'cog') / 30) * 40}`).join(' ')} />
+                    {chartData.map((d, i) => {
+                      const cx = (i / Math.max(1, totalSessions - 1)) * 100;
+                      const score = normalizeScore(d.cog, 'cog');
+                      const actualMmse = score > 0 ? 30 - score : 0;
+                      return (
+                        <g key={i}>
+                          <circle cx={cx} cy={40 - (score / 30) * 40} r="1.5" fill="#3b82f6" />
+                          <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                          {actualMmse > 0 && <text x={cx} y={40 - (score / 30) * 40 - 2} fontSize="2.5" fill="#fff" textAnchor="middle">{actualMmse}</text>}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+            );
+        } else {
+            // Curva estándar Dual (Ansiedad, Depresión, Trauma, etc)
+            return (
+                <div className="relative w-full h-48 mt-2">
+                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
+                    <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40}`).join(' ')} />
+                    <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40}`).join(' ')} />
+                    {chartData.map((d, i) => {
+                      const cx = (i / Math.max(1, totalSessions - 1)) * 100;
+                      return (
+                        <g key={i}>
+                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40} r="1.5" fill="#f59e0b" />
+                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40} r="1.5" fill="#3b82f6" />
+                          <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                  <div className="flex justify-center gap-6 mt-6 text-[10px] text-slate-300 uppercase font-bold">
+                    <span className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-full"></div> {label1}</span>
+                    <span className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div> {label2}</span>
+                  </div>
+                </div>
+            );
+        }
     };
 
     return (
-      <div id="kpi-dashboard-container" className={`bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full ${isFullscreen ? 'min-h-screen overflow-y-auto' : 'overflow-hidden'}`}>
-        <div className="border-b border-slate-800 pb-3 flex justify-between items-center flex-wrap gap-2">
+      <div id={`kpi-dashboard-${dashboardType}`} className={`bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full ${isFullscreen ? 'min-h-screen overflow-y-auto' : 'overflow-hidden'}`}>
+        <div className="border-b border-slate-800 pb-3 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h3 className="text-lg font-bold text-white uppercase tracking-wider break-words">📊 {t('Business Intelligence Clínico')}</h3>
-            <p className="text-xs text-slate-400">{t('Medición de adherencia, evolución de síntomas y áreas funcionales.')}</p>
+            <h3 className="text-lg font-bold text-white uppercase tracking-wider break-words">{getDashboardTitle()}</h3>
+            <p className="text-xs text-slate-400">{getDashboardSubtitle()}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            
+            {dashboardType === 'SPECIALTY' && (
+              <div className="flex items-center gap-2 mr-2">
+                 <span className="text-[10px] font-bold text-indigo-400 uppercase hidden sm:inline">Clasificación DSM-5:</span>
+                 <select value={specialtyFocus} onChange={(e) => setSpecialtyFocus(e.target.value)} className="bg-slate-800 text-xs text-white font-bold p-1.5 rounded-lg border border-indigo-500/50 outline-none cursor-pointer hover:bg-slate-700 transition">
+                    <option value="TRASTORNOS_NEURODESARROLLO">Neurodesarrollo (Autismo / TDAH)</option>
+                    <option value="ESPECTRO_ESQUIZOFRENIA_PSICOSIS">Espectro de la Esquizofrenia (Psicosis)</option>
+                    <option value="TRASTORNOS_BIPOLARES">Trastornos Bipolares y Relacionados</option>
+                    <option value="TRASTORNOS_DEPRESIVOS">Trastornos Depresivos</option>
+                    <option value="TRASTORNOS_ANSIEDAD">Trastornos de Ansiedad</option>
+                    <option value="TOC_Y_RELACIONADOS">Trastorno Obsesivo-Compulsivo (TOC)</option>
+                    <option value="TRAUMA_Y_ESTRES">Trauma y Factores de Estrés (TEPT)</option>
+                    <option value="TRASTORNOS_DISOCIATIVOS">Trastornos Disociativos</option>
+                    <option value="SINTOMAS_SOMATICOS">Síntomas Somáticos</option>
+                    <option value="TCA_ALIMENTARIOS">Trastornos Conducta Alimentaria (TCA)</option>
+                    <option value="SUEÑO_VIGILIA">Trastornos del Sueño-Vigilia</option>
+                    <option value="DISFUNCIONES_SEXUALES">Disfunciones Sexuales y Parafilias</option>
+                    <option value="DISRUPTIVOS_IMPULSOS">Disruptivos y Control de Impulsos</option>
+                    <option value="ADICCIONES_SUSTANCIAS">Adicciones (Sustancias, Digitales, Sexuales)</option>
+                    <option value="TRASTORNOS_NEUROCOGNITIVOS">Neurocognitivos (Alzheimer, Parkinson)</option>
+                    <option value="TRASTORNOS_PERSONALIDAD">Trastornos de la Personalidad (TLP)</option>
+                 </select>
+              </div>
+            )}
+
+            {dashboardType === 'PERSPECTIVES' && (
+              <div className="flex items-center gap-2 mr-2">
+                 <span className="text-[10px] font-bold text-fuchsia-400 uppercase hidden sm:inline">Corriente:</span>
+                 <select value={perspectivesFocus} onChange={(e) => setPerspectivesFocus(e.target.value)} className="bg-slate-800 text-xs text-white font-bold p-1.5 rounded-lg border border-fuchsia-500/50 outline-none cursor-pointer hover:bg-slate-700 transition">
+                    <option value="FREUD">Psicoanálisis (Freud / Jung)</option>
+                    <option value="ERIKSON">Desarrollo Psicosocial (Erikson)</option>
+                    <option value="CBT">Cognitivo-Conductual (CBT)</option>
+                    <option value="HUMANISTA">Humanista-Existencial</option>
+                    <option value="SISTEMICA">Sistémica / Familiar</option>
+                    <option value="GESTALT">Gestalt</option>
+                 </select>
+              </div>
+            )}
+
             {!isFullscreen && (
-               <button onClick={() => setIsFullscreenDashboard(true)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow">
-                 ⛶ {t('Pantalla Completa')}
+               <button onClick={() => setIsFullscreenDashboard(dashboardType)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow">
+                 ⛶ Pantalla Completa
                </button>
             )}
             {isFullscreen && (
@@ -392,116 +825,171 @@ export default function App() {
                  }} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow">
                    📸 Descargar PNG
                  </button>
-                 <button onClick={() => setIsFullscreenDashboard(false)} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold shadow">
+                 <button onClick={() => setIsFullscreenDashboard(null)} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold shadow">
                    ✕ Cerrar
                  </button>
                </>
             )}
-            <div className="px-3 py-1 bg-indigo-950 border border-indigo-500/40 rounded-xl text-xs font-bold text-indigo-300 font-mono flex items-center">
-                GAF / EEAG: {gafScore}/100
-            </div>
+            {!isPharma && (
+              <div className="px-3 py-1.5 bg-indigo-950 border border-indigo-500/40 rounded-xl text-xs font-bold text-indigo-300 font-mono flex items-center shadow">
+                  GAF / EEAG: {gafScore}/100
+              </div>
+            )}
           </div>
         </div>
 
-        {/* AJUSTE DE GRID PARA MINI DASHBOARD ALINEADO */}
-        <div className={`grid gap-4 ${isFullscreen ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
-             <div className="text-2xl font-bold text-indigo-400 mt-1">{gafScore} / 100</div>
-             <p className="text-[10px] text-slate-500 mt-1">{gafScore >= 71 ? 'Síntomas leves / Buen funcionamiento' : gafScore >= 51 ? 'Dificultades moderadas' : 'Alteración grave'}</p>
-          </div>
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Estabilidad Neurovegetativa')}</span>
-             <div className="text-2xl font-bold text-emerald-400 mt-1">{neurovegetativoScore}%</div>
-             <p className="text-[10px] text-slate-500 mt-1">Eje Sueño - Apetito - Energía</p>
-          </div>
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Respuesta Terapéutica (% Reducción)')}</span>
-             <div className="text-2xl font-bold text-amber-400 mt-1">{reduccionSintomatica}%</div>
-             <p className="text-[10px] text-slate-500 mt-1">Alivio sintomático desde Sesión 1</p>
-          </div>
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Funcionalidad Adaptativa')}</span>
-             <div className="text-2xl font-bold text-blue-400 mt-1">{adaptativaScore}%</div>
-             <p className="text-[10px] text-slate-500 mt-1">Desempeño Social & Atención</p>
-          </div>
+        {/* TARJETAS DE KPIs */}
+        <div className={`grid gap-4 ${isFullscreen ? (isPharma || isPerspectives || isEvolutionary ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6') : (isPharma || isPerspectives || isEvolutionary ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-3')}`}>
+          {kpiCards.map((kpi, idx) => (
+             <div key={idx} className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+               <span className="text-[10px] font-bold text-slate-400 uppercase block leading-tight">{kpi.title}</span>
+               <div className={`text-2xl font-bold mt-1 ${kpi.colorClass}`}>{kpi.value}</div>
+               <p className="text-[10px] text-slate-500 mt-1">{kpi.sub}</p>
+             </div>
+          ))}
         </div>
 
-        <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
-            <div className="w-full h-48 flex justify-center" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
-            <button onClick={handleCopySVG} className="absolute top-4 right-4 text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white border border-slate-600">Copiar SVG</button>
-          </div>
-          
-          <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center w-full justify-center">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-6">📊 {t('Eficacia: Pre vs Post')}</h4>
-            <div className="flex items-end justify-center gap-8 h-40 w-full px-4">
-              <div className="flex gap-2 h-full items-end">
-                <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bai/63)*100}%` }}>
-                  <span className="text-[10px] text-white font-bold mb-1">{firstSession.bai}</span>
-                </div>
-                <div className="w-10 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bai/63)*100}%` }}>
-                  <span className="text-[10px] text-white font-bold mb-1">{lastSession.bai}</span>
-                </div>
+        {isPharma ? (
+          /* VISTA EXCLUSIVA: GRÁFICA FARMACOLÓGICA */
+          <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative">
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 Evolución Farmacológica (Efectividad vs Riesgo)</h4>
+            {!hasPharma && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
+                 <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">No hay registros de prescripción farmacológica en las sesiones.</span>
               </div>
-              <div className="flex gap-2 h-full items-end">
-                <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(firstSession.bdi/63)*100}%` }}>
-                  <span className="text-[10px] text-white font-bold mb-1">{firstSession.bdi}</span>
-                </div>
-                <div className="w-10 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(lastSession.bdi/63)*100}%` }}>
-                  <span className="text-[10px] text-white font-bold mb-1">{lastSession.bdi}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-around w-full px-12 mt-4 text-[10px] text-slate-500 uppercase font-bold">
-              <span>{t('Ansiedad')}</span>
-              <span>{t('Depresión')}</span>
-            </div>
-          </div>
-
-          <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-center space-y-6">
-            <div>
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🌡️ {t('Adherencia Clínica')}</h4>
-              <div className="w-full bg-slate-800 rounded-full h-4">
-                <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-4 rounded-full" style={{ width: `${avanceBase}%` }}></div>
-              </div>
-              <p className="text-[10px] text-slate-400 mt-2">{Math.round(avanceBase)}% completado del protocolo.</p>
-            </div>
-            <div className="pt-4 border-t border-slate-800">
-              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 {t('Sentimiento Congruente')}</h4>
-              <div className={`text-2xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? t('Estable') : t('En Riesgo')}</div>
-              <p className="text-[10px] text-slate-400 mt-1">Score IA: {Math.round(sentimientoScore)}/100</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full">
-          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 {t('Curva de Tendencia (Síntomas)')}</h4>
-          {totalSessions < 2 ? (
-            <p className="text-[11px] text-slate-500 italic text-center py-8">{t('Requiere 2+ sesiones para curva.')}</p>
-          ) : (
-            <div className="relative w-full h-48 mt-2">
+            )}
+            <div className="relative w-full h-64 mt-2">
               <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
                 <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
-                <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.bai / 63) * 40}`).join(' ')} />
-                <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.bdi / 63) * 40}`).join(' ')} />
+                
+                {/* LÍNEA DE EFECTIVIDAD (VERDE) */}
+                <polyline fill="none" stroke="#10b981" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaEff / 100) * 40}`).join(' ')} />
+                {/* LÍNEA DE RIESGO (ROJO) */}
+                <polyline fill="none" stroke="#f43f5e" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaRisk / 100) * 40}`).join(' ')} />
+                
                 {chartData.map((d, i) => {
                   const cx = (i / Math.max(1, totalSessions - 1)) * 100;
                   return (
                     <g key={i}>
-                      <circle cx={cx} cy={40 - (d.bai / 63) * 40} r="1.5" fill="#f59e0b" />
-                      <circle cx={cx} cy={40 - (d.bdi / 63) * 40} r="1.5" fill="#3b82f6" />
+                      <circle cx={cx} cy={40 - (d.pharmaEff / 100) * 40} r="1.5" fill="#10b981" />
+                      <circle cx={cx} cy={40 - (d.pharmaRisk / 100) * 40} r="1.5" fill="#f43f5e" />
                       <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                      {d.pharmaDose && (
+                        <text x={cx} y={40 - (d.pharmaEff / 100) * 40 - 2} fontSize="2.5" fill="#a7f3d0" textAnchor="middle">{d.pharmaDose}</text>
+                      )}
                     </g>
                   );
                 })}
               </svg>
             </div>
-          )}
-        </div>
+            <div className="flex justify-center gap-6 mt-6 text-[10px] text-slate-300 uppercase font-bold">
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded-full"></div> Efectividad Percibida</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 bg-rose-500 rounded-full"></div> Riesgo / Efectos Adversos</span>
+            </div>
+          </div>
+        ) : (
+          /* VISTA NORMAL: GRÁFICAS MULTIAXIAL Y DE TENDENCIA O ESPECÍFICA */
+          <>
+            {isSpecialty ? (
+               <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative min-h-[300px]">
+                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 Modelado Visual Específico: {currentFocus.replace(/_/g, ' ')}</h4>
+                 {renderSpecialtyGraph()}
+               </div>
+            ) : (
+               <>
+                  <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+                    <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
+                      <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
+                      <div className="w-full h-48 flex justify-center" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
+                      <button onClick={handleCopySVG} className="absolute top-4 right-4 text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white border border-slate-600">Copiar SVG</button>
+                    </div>
+                    
+                    <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center w-full justify-center relative">
+                      <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-6">📊 {t('Eficacia: Pre vs Post')}</h4>
+                      {!hasScores && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
+                           <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para graficar</span>
+                        </div>
+                      )}
+                      <div className="flex items-end justify-center gap-8 h-40 w-full px-4">
+                        <div className="flex gap-2 h-full items-end">
+                          <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val1First/maxBarVal)*100}%` }}>
+                            <span className="text-[10px] text-white font-bold mb-1">{val1First}</span>
+                          </div>
+                          <div className="w-10 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val1Last/maxBarVal)*100}%` }}>
+                            <span className="text-[10px] text-white font-bold mb-1">{val1Last}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 h-full items-end">
+                          <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val2First/maxBarVal)*100}%` }}>
+                            <span className="text-[10px] text-white font-bold mb-1">{val2First}</span>
+                          </div>
+                          <div className="w-10 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val2Last/maxBarVal)*100}%` }}>
+                            <span className="text-[10px] text-white font-bold mb-1">{val2Last}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-around w-full px-4 mt-4 text-[10px] text-slate-500 uppercase font-bold text-center">
+                        <span className="w-1/2">{label1}</span>
+                        <span className="w-1/2">{label2}</span>
+                      </div>
+                    </div>
+
+                    <div className={`bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-center space-y-6 ${isFullscreen ? '' : 'md:col-span-2'}`}>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🌡️ {t('Adherencia Clínica')}</h4>
+                        <div className="w-full bg-slate-800 rounded-full h-4">
+                          <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-4 rounded-full" style={{ width: `${avanceBase}%` }}></div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-2">{Math.round(avanceBase)}% completado del protocolo base.</p>
+                      </div>
+                      <div className="pt-4 border-t border-slate-800">
+                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 {t('Sentimiento Congruente')}</h4>
+                        <div className={`text-2xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? t('Estable') : t('En Riesgo')}</div>
+                        <p className="text-[10px] text-slate-400 mt-1">Estimación de afecto integral: {Math.round(sentimientoScore)}/100</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative">
+                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 {t('Curva de Tendencia Dinámica')}</h4>
+                    {renderSpecialtyGraph()}
+                  </div>
+               </>
+            )}
+            
+            {/* ZONA DE COMENTARIOS IA Y PROFESIONAL DENTRO DE ESPECIALIDAD */}
+            {isSpecialty && (
+              <div className="mt-8 border-t border-slate-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-indigo-500/30 flex flex-col h-64">
+                   <div className="flex justify-between items-center mb-3">
+                     <h4 className="text-xs font-bold text-indigo-400 uppercase">🤖 Reseña Analítica de la IA</h4>
+                     <button onClick={handleGenerateAi} disabled={isGeneratingAi} className="text-[9px] bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded shadow">
+                       {isGeneratingAi ? 'Pensando...' : 'Generar Reseña'}
+                     </button>
+                   </div>
+                   <div className="text-[11px] text-slate-300 font-mono whitespace-pre-wrap flex-1 overflow-y-auto pr-2 bg-slate-900/50 p-3 rounded">
+                     {specialtyAiSummaries[currentFocus] || "Haga clic en 'Generar Reseña' para que la IA evalúe este trastorno específico basado en las sesiones y baterías del paciente."}
+                   </div>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-amber-500/30 flex flex-col h-64">
+                   <div className="flex justify-between items-center mb-3">
+                     <h4 className="text-xs font-bold text-amber-500 uppercase">🧑‍⚕️ Mis Comentarios Clínicos</h4>
+                     <span className="text-[9px] text-slate-500">Auto-guardado</span>
+                   </div>
+                   <textarea
+                     value={specialtyComments[currentFocus] || ''}
+                     onChange={(e) => handleCommentChange(e.target.value)}
+                     placeholder={`Añada sus observaciones privadas, pronóstico o diagnóstico diferencial sobre ${currentFocus}. La IA no modificará este espacio...`}
+                     className="w-full flex-1 p-3 bg-slate-900 border border-slate-700 rounded text-[11px] text-white focus:border-amber-500 outline-none resize-none font-sans leading-relaxed"
+                   />
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   };
@@ -565,7 +1053,6 @@ export default function App() {
     return {};
   });
 
-  // SOLUCIÓN PREVENCIÓN DE CRASHES EN EL CALENDARIO (Asegurar que sea Array)
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     let userKey = 'appointments_db';
     if (currentUser?.username) userKey = `appointments_db_${currentUser.username}`;
@@ -694,7 +1181,7 @@ export default function App() {
   }, [clinicalDatabase, appointments, currentUser]);
 
   const [activeCase, setActiveCase] = useState<ClinicalCase | null>(null);
-  const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS'>('HISTORIAL');
+  const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS_BASE' | 'ESPECIALIDADES' | 'FARMACOLOGIA' | 'PERSPECTIVAS' | 'EVOLUTIVA'>('HISTORIAL');
   const [clinicalSearchQuery, setClinicalSearchQuery] = useState('');
   const [searchFeedback, setSearchFeedback] = useState('');
 
@@ -721,7 +1208,6 @@ export default function App() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // ADMIN STATES
   const [editingUsername, setEditingUsername] = useState<string | null>(null);
   const [editPasswordInput, setEditPasswordInput] = useState('');
   const [editingExpiryUsername, setEditingExpiryUsername] = useState<string | null>(null);
@@ -738,12 +1224,20 @@ export default function App() {
   const [loginError, setLoginError] = useState('');
 
   const [newPatientData, setNewPatientForm] = useState({ id: '', patientName: '', sexo: 'Femenino', edad: '', estudios: '', origenProcedencia: '', ocupacion: '', estadoCivil: 'Soltero(a)', religion: '', datosProgenitores: '', motivoConsultaTextual: '', antecedentes: '', telefono: '', fotoUrl: '', rawNotes: '' });
+  const [pharmaInput, setPharmaInput] = useState({ active: false, name: '', dose: '', effectiveness: 50, risk: 10 });
   const [newSessionData, setNewSessionData] = useState<any>({ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: '', audioPath: '', videoUrl: '', manualBatteryFile: '' });
   const [sessionAreas, setSessionAreas] = useState({ sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 });
 
   const [isProcessingNotes, setIsProcessingNotes] = useState(false);
+  const [isProcessingSpecialtyAi, setIsProcessingSpecialtyAi] = useState(false);
+  
   const [notesResult, setNotesResult] = useState<string>(() => localStorage.getItem('last_notes_result') || '');
+  const [theoreticalAnalysisResult, setTheoreticalAnalysisResult] = useState<string>(() => localStorage.getItem('last_theoretical_result') || '');
+  const [evolutionaryAnalysisResult, setEvolutionaryAnalysisResult] = useState<string>(() => localStorage.getItem('last_evolutionary_result') || '');
+
   useEffect(() => { localStorage.setItem('last_notes_result', notesResult); }, [notesResult]);
+  useEffect(() => { localStorage.setItem('last_theoretical_result', theoreticalAnalysisResult); }, [theoreticalAnalysisResult]);
+  useEffect(() => { localStorage.setItem('last_evolutionary_result', evolutionaryAnalysisResult); }, [evolutionaryAnalysisResult]);
 
   const [scientificQuery, setScientificQuery] = useState<ScientificQuery>({ queryText: '', responseText: '', loading: false });
   const [selectedDsmTemplate, setSelectedDsmTemplate] = useState<Dsm5EvaluationTemplate | null>(null);
@@ -763,7 +1257,6 @@ export default function App() {
       if (!user.isActive || getDaysRemaining(user.licenseExpiry) < 0) { setLoginError('Cuenta inactiva o expirada.'); return; }
       if (user.passwordHash !== loginPassword) { setLoginError('Contraseña incorrecta.'); return; }
       
-      // LOAD DATA HERE TO PREVENT WIPING ON LOGIN
       const casesKey = `clinical_cases_db_${user.username}`;
       const savedCases = localStorage.getItem(casesKey);
       setClinicalDatabase(savedCases ? JSON.parse(savedCases) : {});
@@ -779,6 +1272,8 @@ export default function App() {
       setLoginError(''); 
       setActiveCase(null); 
       setNotesResult(''); 
+      setTheoreticalAnalysisResult('');
+      setEvolutionaryAnalysisResult('');
       setActiveCaseTab('HISTORIAL'); 
       setClinicalTab('BUSCAR');
     } else { setLoginError('Credenciales incorrectas.'); }
@@ -834,11 +1329,13 @@ export default function App() {
     });
     if (foundCase) {
       setActiveCase({ ...foundCase, sessions: foundCase.sessions || [], generalData: foundCase.generalData || {} as any });
-      setActiveCaseTab('HISTORIAL'); setSearchFeedback(`Expediente ${foundCase.id} cargado.`); setNotesResult(foundCase.structuredOutput || '');
+      setActiveCaseTab('HISTORIAL'); setSearchFeedback(`Expediente ${foundCase.id} cargado.`); 
+      setNotesResult(foundCase.structuredOutput || '');
+      setTheoreticalAnalysisResult((foundCase as any).theoreticalAnalysis || '');
+      setEvolutionaryAnalysisResult((foundCase as any).evolutionaryAnalysis || '');
     } else { setSearchFeedback(`Expediente no encontrado.`); setActiveCase(null); }
   };
 
-  // SOLUCIÓN PREVENCIÓN DE CRASHES EN EL CALENDARIO Y CÁLCULO DE FECHAS SEGURO
   const handleCreateAppointment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !selectedPatientId || !selectedDate) return;
@@ -860,7 +1357,6 @@ export default function App() {
     setShowCalendarModal(false); setSelectedPatientId(''); alert(`Cita agendada para ${patientName}`);
   };
 
-  // RESTAURADO: Botón de sincronización con Google Calendar en el componente
   const handleSyncToGoogleCalendar = (app: Appointment) => {
     try {
       if (!app.start || !app.end) return;
@@ -906,9 +1402,15 @@ export default function App() {
     e.preventDefault();
     if (!activeCase || !currentUser) return;
     const numSesion = activeCase.sessions.length + 1;
-    const updatedSessions = [...activeCase.sessions, { 
-      ...newSessionData, sessionNumber: numSesion, functionalAreas: sessionAreas 
-    } as any];
+    
+    const sessionPayload = { 
+      ...newSessionData, 
+      sessionNumber: numSesion, 
+      functionalAreas: sessionAreas,
+      pharma: pharmaInput.active ? { name: pharmaInput.name, dose: pharmaInput.dose, effectiveness: pharmaInput.effectiveness, risk: pharmaInput.risk } : null
+    } as any;
+
+    const updatedSessions = [...activeCase.sessions, sessionPayload];
     const updatedCase = { ...activeCase, sessions: updatedSessions };
     setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
     
@@ -922,6 +1424,12 @@ export default function App() {
     setShowNewSessionForm(false);
     setNewSessionData({ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: '', audioPath: '', videoUrl: '', manualBatteryFile: '' });
     setSessionAreas({ sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 });
+    setPharmaInput({ active: false, name: '', dose: '', effectiveness: 50, risk: 10 });
+  };
+
+  const handleUpdateActiveCase = (updatedCase: ClinicalCase) => {
+      setActiveCase(updatedCase);
+      setClinicalDatabase(prev => ({ ...prev, [updatedCase.id]: updatedCase }));
   };
 
   const handleProcessNotes = async () => {
@@ -933,28 +1441,121 @@ export default function App() {
       activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
       const result = await processClinicalNotes(fullNotesPayload, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
       const updatedCase = { ...activeCase, structuredOutput: result };
-      setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase })); setNotesResult(result);
+      handleUpdateActiveCase(updatedCase); setNotesResult(result);
     } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingNotes(false); }
+  };
+
+  const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY') => {
+    if (!activeCase || activeCase.sessions.length === 0) return;
+    setIsProcessingNotes(true);
+    try {
+      const lastSession = activeCase.sessions[activeCase.sessions.length - 1];
+      let fullNotesPayload = `=== HISTORIAL ===\nPaciente: ${activeCase.patientName}\n`;
+      activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
+      
+      let specialInstruction = "";
+      if (type === 'THEORETICAL') {
+          const corrienteMap: any = {
+             'FREUD': 'Psicoanálisis (Freud / Jung)',
+             'ERIKSON': 'Desarrollo Psicosocial (Erikson)',
+             'CBT': 'Terapia Cognitivo-Conductual (CBT)',
+             'HUMANISTA': 'Humanismo / Existencial (Rogers / Frankl)',
+             'SISTEMICA': 'Terapia Sistémica / Familiar',
+             'GESTALT': 'Terapia Gestalt'
+          };
+          const corrienteStr = corrienteMap[perspectivesFocus] || 'Psicología Clínica';
+          specialInstruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un experto en ${corrienteStr}. Analiza profunda y detalladamente este caso DESDE ESTA ÚNICA PERSPECTIVA TEÓRICA. Da tus comentarios y opinión clínica sobre el origen, mantenimiento de los síntomas y posibles mecanismos subyacentes. Ignora el formato de dictamen estándar. Escribe un ensayo analítico estructurado y profesional de unos 3 párrafos.\n\n`;
+      } else {
+          specialInstruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un experto en Psicología Evolutiva Darwiniana y Psicobiología. Analiza este caso explicando el "valor adaptativo" o "propósito de supervivencia" de los síntomas del paciente (ej. ansiedad como alerta temprana, depresión como conservación de energía). Ignora el formato estándar. Escribe un ensayo evolutivo profundo de unos 3 párrafos.\n\n`;
+      }
+
+      const payloadWithInstruction = specialInstruction + fullNotesPayload;
+      const result = await processClinicalNotes(payloadWithInstruction, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
+      
+      const updatedCase = { ...activeCase };
+      if (type === 'THEORETICAL') {
+         (updatedCase as any).theoreticalAnalysis = result;
+         setTheoreticalAnalysisResult(result);
+      } else {
+         (updatedCase as any).evolutionaryAnalysis = result;
+         setEvolutionaryAnalysisResult(result);
+      }
+      handleUpdateActiveCase(updatedCase); 
+    } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingNotes(false); }
+  };
+
+  const handleGenerateSpecialtyAi = async (focus: string) => {
+    if (!activeCase || activeCase.sessions.length === 0) return;
+    setIsProcessingSpecialtyAi(true);
+    try {
+      const lastSession = activeCase.sessions[activeCase.sessions.length - 1];
+      let fullNotesPayload = `=== HISTORIAL ===\nPaciente: ${activeCase.patientName}\n`;
+      activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
+      
+      const focusMap: any = {
+         'TRASTORNOS_NEURODESARROLLO': 'Trastornos del Neurodesarrollo (Autismo / TDAH)',
+         'ESPECTRO_ESQUIZOFRENIA_PSICOSIS': 'Espectro de la Esquizofrenia y Otros Trastornos Psicóticos',
+         'TRASTORNOS_BIPOLARES': 'Trastornos Bipolares y Trastornos Relacionados',
+         'TRASTORNOS_DEPRESIVOS': 'Trastornos Depresivos',
+         'TRASTORNOS_ANSIEDAD': 'Trastornos de Ansiedad',
+         'TOC_Y_RELACIONADOS': 'Trastorno Obsesivo-Compulsivo y Relacionados',
+         'TRAUMA_Y_ESTRES': 'Trastornos Relacionados con Traumas y Factores de Estrés',
+         'TRASTORNOS_DISOCIATIVOS': 'Trastornos Disociativos',
+         'SINTOMAS_SOMATICOS': 'Trastornos de Síntomas Somáticos',
+         'TCA_ALIMENTARIOS': 'Trastornos de la Conducta Alimentaria (TCA)',
+         'SUEÑO_VIGILIA': 'Trastornos del Sueño-Vigilia',
+         'DISFUNCIONES_SEXUALES': 'Disfunciones Sexuales y Parafilias',
+         'DISRUPTIVOS_IMPULSOS': 'Trastornos Disruptivos y Control de Impulsos',
+         'ADICCIONES_SUSTANCIAS': 'Trastornos Relacionados con Sustancias y Trastornos Adictivos',
+         'TRASTORNOS_NEUROCOGNITIVOS': 'Trastornos Neurocognitivos (Demencia, Alzheimer, Parkinson)',
+         'TRASTORNOS_PERSONALIDAD': 'Trastornos de la Personalidad'
+      };
+      
+      const instruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un especialista estricto en ${focusMap[focus] || focus} según el manual DSM-5. Analiza este caso centrándote ÚNICAMENTE en esta familia de trastornos. Evalúa los síntomas presentados, el riesgo asociado y la evolución. Sé muy conciso, clínico y directo (máximo 2 párrafos).\n\n`;
+      
+      const payloadWithInstruction = instruction + fullNotesPayload;
+      const result = await processClinicalNotes(payloadWithInstruction, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
+      
+      const updatedCase = { ...activeCase };
+      if (!(updatedCase as any).specialtyAiSummaries) (updatedCase as any).specialtyAiSummaries = {};
+      (updatedCase as any).specialtyAiSummaries[focus] = result;
+      
+      handleUpdateActiveCase(updatedCase);
+    } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingSpecialtyAi(false); }
   };
 
   const handleSaveDsmEvaluation = () => {
     if (!activeCase || !selectedDsmTemplate || !currentUser) return;
     if (verificationPassword !== currentUser.passwordHash) { alert("Firma inválida."); return; }
     const profTitle = getProfPrefix(currentUser.professionType);
-    let autoScoreStr = 'Evaluado';
-    if (['PHQ9', 'GAD7', 'HAM_A', 'HAM_D', 'YBOCS', 'ISI', 'SPIN'].includes(selectedDsmTemplate.id)) {
-       let numScore = 0;
-       Object.values(dsmAnswers).forEach(ans => { const match = ans.match(/\((\d+)\)/); if (match) numScore += parseInt(match[1]); });
-       autoScoreStr = `${selectedDsmTemplate.name.split(' ')[0]} (Score: ${numScore})`;
-    }
+    
+    let numScore = 0;
+    let canAutoScore = false;
+    Object.values(dsmAnswers).forEach(ans => { 
+      const match = ans.match(/\((\d+)\)/); 
+      if (match) { numScore += parseInt(match[1]); canAutoScore = true; } 
+    });
+    
+    let autoScoreStr = canAutoScore ? `${selectedDsmTemplate.name.split(' ')[0]} (Score: ${numScore})` : 'Evaluado';
+    
     const formattedResult = `EVALUACIÓN PSICOMÉTRICA INTERNACIONAL\nInstrumento: ${selectedDsmTemplate.name}\nEvaluador: ${profTitle} ${currentUser.fullName}\n\nRESULTADOS:\n${Object.entries(dsmAnswers).map(([q, ans]) => `• ${q}: ${ans}`).join('\n')}\n\n-> PUNTUACIÓN AUTOMÁTICA: ${autoScoreStr}`;
+    
+    const isAnxiety = ['BAI', 'HAM_A', 'GAD7', 'SPIN', 'YBOCS'].includes(selectedDsmTemplate.id);
+    const isDepression = ['BDI', 'HAM_D', 'PHQ9'].includes(selectedDsmTemplate.id);
+
     const updatedSessions = [...activeCase.sessions];
     if (updatedSessions.length > 0) {
       const lastIdx = updatedSessions.length - 1;
-      updatedSessions[lastIdx] = { ...updatedSessions[lastIdx], dsm5EvaluationName: selectedDsmTemplate.name, dsm5EvaluationResult: formattedResult, baiScore: selectedDsmTemplate.id.includes('BAI') ? autoScoreStr : updatedSessions[lastIdx].baiScore, bdiScore: selectedDsmTemplate.id.includes('BDI') ? autoScoreStr : updatedSessions[lastIdx].bdiScore };
+      updatedSessions[lastIdx] = { 
+        ...updatedSessions[lastIdx], 
+        dsm5EvaluationName: selectedDsmTemplate.name, 
+        dsm5EvaluationResult: formattedResult, 
+        baiScore: isAnxiety ? autoScoreStr : updatedSessions[lastIdx].baiScore, 
+        bdiScore: isDepression ? autoScoreStr : updatedSessions[lastIdx].bdiScore 
+      };
     }
     const updatedCase = { ...activeCase, sessions: updatedSessions };
-    setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
+    handleUpdateActiveCase(updatedCase);
     setShowDsmModal(false); setSelectedDsmTemplate(null); setDsmAnswers({}); setVerificationPassword(''); alert(`Evaluación guardada.`);
   };
 
@@ -1022,7 +1623,6 @@ export default function App() {
     }
   };
 
-  // PDF HTML GENERATOR
   const generateClinicalHistoryHTML = (c: ClinicalCase, targetLang: string, translatedDictamen: string): string => {
     const gd = c.generalData || {};
     let evaluacionesRealizadasHTML = '';
@@ -1033,8 +1633,34 @@ export default function App() {
       if (s.manualBatteryFile) {
         evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Batería Manual Subida (${s.date})</p><p style="font-size: 9pt;">Se adjuntó archivo físico al expediente digital.</p></div>`; 
       }
+      if (s.pharma && s.pharma.name) {
+        evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Prescripción Psiquiátrica (${s.date})</p><p style="font-size: 9pt;"><strong>Fármaco:</strong> ${s.pharma.name} (${s.pharma.dose}) | <strong>Efectividad:</strong> ${s.pharma.effectiveness}% | <strong>Riesgo Secundario:</strong> ${s.pharma.risk}%</p></div>`; 
+      }
     });
     
+    // INTEGRACIÓN DE COMENTARIOS PERSONALES Y RESEÑAS DE IA EN EL INFORME FINAL
+    let professionalOpinionHTML = '';
+    if ((c as any).professionalOpinion) {
+        professionalOpinionHTML += `<div style="margin-top: 20px;"><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; border-left: 4px solid #f59e0b;">COMENTARIOS Y OPINIÓN DEL PROFESIONAL</h2><div style="font-size: 10pt; white-space: pre-wrap; margin-top: 10px;">${(c as any).professionalOpinion}</div></div>`;
+    }
+
+    let extraSpecialtyCommentsHTML = '';
+    const spComms = (c as any).specialtyComments;
+    const spAi = (c as any).specialtyAiSummaries;
+    
+    if ((spComms && Object.keys(spComms).length > 0) || (spAi && Object.keys(spAi).length > 0)) {
+        extraSpecialtyCommentsHTML += `<div style="margin-top: 20px;"><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; border-left: 4px solid #6366f1;">MÓDULOS DE ESPECIALIDAD CLÍNICA (DSM-5)</h2>`;
+        
+        const allKeys = new Set([...Object.keys(spComms || {}), ...Object.keys(spAi || {})]);
+        allKeys.forEach(k => {
+           extraSpecialtyCommentsHTML += `<div style="margin-top: 15px; border: 1px solid #ddd; padding: 10px;"><h3 style="font-size: 10pt; font-weight: bold; color: #4f46e5; margin: 0 0 5px 0;">Foco: ${k.replace(/_/g, ' ')}</h3>`;
+           if (spAi && spAi[k]) extraSpecialtyCommentsHTML += `<p style="font-size: 9pt; margin: 0 0 5px 0;"><strong>Reseña Analítica IA:</strong></p><div style="font-size: 9pt; white-space: pre-wrap; margin-bottom: 10px;">${spAi[k]}</div>`;
+           if (spComms && spComms[k]) extraSpecialtyCommentsHTML += `<p style="font-size: 9pt; margin: 0 0 5px 0;"><strong>Observaciones del Profesional:</strong></p><div style="font-size: 9pt; white-space: pre-wrap;">${spComms[k]}</div>`;
+           extraSpecialtyCommentsHTML += `</div>`;
+        });
+        extraSpecialtyCommentsHTML += `</div>`;
+    }
+
     const legalNorm = t(getLegalNorm(currentUser?.countryCode || 'GT'), targetLang);
     const profTitle = getProfPrefix(currentUser?.professionType);
 
@@ -1060,13 +1686,15 @@ export default function App() {
         <p style="font-size: 10pt; margin: 0 0 8px 0;"><strong>Antecedentes:</strong> ${gd.antecedentes || 'Sin antecedentes.'}</p>
       </div>
       <div>
-        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">3. EVALUACIONES PSICOMÉTRICAS</h2>
+        <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">3. EVALUACIONES PSICOMÉTRICAS Y MÉDICAS</h2>
         ${evaluacionesRealizadasHTML || `<p style="font-size: 10pt; font-style: italic;">No se han aplicado baterías formales aún.</p>`}
       </div>
       <div>
         <h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; margin: 15px 0 8px 0; border-left: 4px solid #000;">4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)</h2>
         <div style="font-size: 10pt; margin: 0 0 10px 0; white-space: pre-wrap;">${translatedDictamen ? translatedDictamen : 'En proceso...'}</div>
       </div>
+      ${professionalOpinionHTML}
+      ${extraSpecialtyCommentsHTML}
       <div style="margin-top: 40px; text-align: center;">
         <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 5px auto;"></div>
         <p style="font-size: 10pt; margin: 0; font-weight: bold;">${profTitle} ${currentUser?.fullName || 'Profesional'}</p>
@@ -1103,9 +1731,18 @@ export default function App() {
 
   return (
     <div className={`min-h-screen flex flex-col ${th.bg} ${th.text} overflow-x-hidden transition-colors duration-300`}>
+      
+      {/* RENDERIZADO DE DASHBOARD EN PANTALLA COMPLETA */}
       {isFullscreenDashboard && activeCase && (
          <div className="fixed inset-0 z-[100] bg-slate-950 p-4 sm:p-8 overflow-y-auto">
-            <PatientDashboard activeCase={activeCase} isFullscreen={true} />
+            <PatientDashboard 
+               activeCase={activeCase} 
+               isFullscreen={true} 
+               dashboardType={isFullscreenDashboard} 
+               onUpdateCase={handleUpdateActiveCase} 
+               onGenerateSpecialtyAi={handleGenerateSpecialtyAi} 
+               isGeneratingAi={isProcessingSpecialtyAi} 
+            />
          </div>
       )}
 
@@ -1445,16 +2082,23 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className={`flex flex-col sm:flex-row gap-2 ${th.card} p-2 rounded-2xl border ${th.border} w-full`}>
-                        <button onClick={() => setActiveCaseTab('HISTORIAL')} className={`flex-1 py-2 rounded-xl text-xs font-bold ${activeCaseTab === 'HISTORIAL' ? 'bg-indigo-600 text-white' : `${th.textMuted}`}`}>📝 {t('Historial')}</button>
-                        <button onClick={() => setActiveCaseTab('ESTADISTICAS')} className={`flex-1 py-2 rounded-xl text-xs font-bold ${activeCaseTab === 'ESTADISTICAS' ? 'bg-indigo-600 text-white' : `${th.textMuted}`}`}>📈 {t('KPIs Empresariales')}</button>
+                      {/* TABS CON NOMBRE CORREGIDO Y ACCESO A DSM-5 */}
+                      <div className={`flex flex-wrap gap-2 ${th.card} p-2 rounded-2xl border ${th.border} w-full`}>
+                        <button onClick={() => setActiveCaseTab('HISTORIAL')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'HISTORIAL' ? 'bg-indigo-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>📝 Historial</button>
+                        <button onClick={() => setActiveCaseTab('ESTADISTICAS_BASE')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'ESTADISTICAS_BASE' ? 'bg-indigo-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>📈 KPIs Base</button>
+                        <button onClick={() => setActiveCaseTab('ESPECIALIDADES')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'ESPECIALIDADES' ? 'bg-fuchsia-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>🧠 Trastornos</button>
+                        <button onClick={() => setActiveCaseTab('PERSPECTIVAS')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'PERSPECTIVAS' ? 'bg-amber-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>🎭 Corrientes</button>
+                        <button onClick={() => setActiveCaseTab('EVOLUTIVA')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'EVOLUTIVA' ? 'bg-rose-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>🧬 Evolutiva</button>
+                        {currentUser?.professionType === 'PSIQUIATRA' && (
+                           <button onClick={() => setActiveCaseTab('FARMACOLOGIA')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'FARMACOLOGIA' ? 'bg-emerald-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>💊 Fármacos</button>
+                        )}
                       </div>
 
                       {activeCaseTab === 'HISTORIAL' && (
                         <div className={`${th.card} border ${th.border} rounded-2xl p-4 space-y-4`}>
                           <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-                            <span className={`text-xs font-bold ${th.textMuted}`}>Sesiones</span>
-                            <button onClick={() => setShowNewSessionForm(!showNewSessionForm)} className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-xl">➕ Nueva</button>
+                            <span className={`text-xs font-bold ${th.textMuted}`}>Sesiones del Paciente</span>
+                            <button onClick={() => setShowNewSessionForm(!showNewSessionForm)} className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-xl">➕ Nueva Sesión</button>
                           </div>
 
                           {showNewSessionForm && (
@@ -1462,6 +2106,41 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
+                              {currentUser?.professionType === 'PSIQUIATRA' && (
+                                <div className={`${th.card} p-3 rounded-xl border border-emerald-500/30 space-y-3`}>
+                                  <div className="flex justify-between items-center">
+                                     <label className="text-[10px] font-bold text-emerald-500 uppercase block">💊 Prescripción y Control Farmacológico</label>
+                                     <input type="checkbox" checked={pharmaInput.active} onChange={e => setPharmaInput(prev => ({...prev, active: e.target.checked}))} className="accent-emerald-500" />
+                                  </div>
+                                  
+                                  {pharmaInput.active && (
+                                     <div className="space-y-3 mt-2 border-t border-slate-700 pt-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                           <input type="text" placeholder="Nombre Fármaco (ej. Sertralina)" value={pharmaInput.name} onChange={e => setPharmaInput(prev => ({...prev, name: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded text-[10px] text-white`} required />
+                                           <input type="text" placeholder="Dosis (ej. 50mg/día)" value={pharmaInput.dose} onChange={e => setPharmaInput(prev => ({...prev, dose: e.target.value}))} className={`w-full p-2 ${th.input} border ${th.border} rounded text-[10px] text-white`} required />
+                                        </div>
+                                        <div className="space-y-2">
+                                           <div className="flex items-center gap-2">
+                                              <span className={`w-20 text-[9px] ${th.textMuted} leading-tight`}>Efectividad Percibida</span>
+                                              <input type="range" min="0" max="100" value={pharmaInput.effectiveness} onChange={e => setPharmaInput(prev => ({...prev, effectiveness: parseInt(e.target.value)}))} className="flex-1 accent-emerald-500" />
+                                              <span className="w-6 text-[9px] font-bold text-emerald-500 text-right">{pharmaInput.effectiveness}%</span>
+                                           </div>
+                                           <div className="flex items-center gap-2">
+                                              <span className={`w-20 text-[9px] ${th.textMuted} leading-tight`}>Riesgo / Efectos Adv.</span>
+                                              <input type="range" min="0" max="100" value={pharmaInput.risk} onChange={e => setPharmaInput(prev => ({...prev, risk: parseInt(e.target.value)}))} className="flex-1 accent-rose-500" />
+                                              <span className="w-6 text-[9px] font-bold text-rose-500 text-right">{pharmaInput.risk}%</span>
+                                           </div>
+                                        </div>
+                                     </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
+                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
+                                <input type="url" placeholder="Pegue la URL de la videollamada aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                              </div>
+
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
                                 <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
                                 <div className="space-y-2">
@@ -1491,11 +2170,6 @@ export default function App() {
                                     <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.concentration}</span>
                                   </div>
                                 </div>
-                              </div>
-
-                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
-                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
-                                <input type="url" placeholder="Pegue la URL de la videollamada aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                               </div>
 
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
@@ -1544,6 +2218,11 @@ export default function App() {
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
+                                {s.pharma && s.pharma.name && (
+                                   <div className="mt-1 p-1 bg-emerald-950/30 border border-emerald-500/20 rounded">
+                                      <p className="text-[9px] font-mono text-emerald-400">💊 Fármaco: {s.pharma.name} ({s.pharma.dose}) | Ef: {s.pharma.effectiveness}% | R: {s.pharma.risk}%</p>
+                                   </div>
+                                )}
                                 {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace de Sesión: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline font-bold">{s.videoUrl}</a></p>}
                                 {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1 font-bold">📎 Batería Manual Adjunta</p>}
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
@@ -1569,7 +2248,35 @@ export default function App() {
                         </div>
                       )}
 
-                      {activeCaseTab === 'ESTADISTICAS' && <PatientDashboard activeCase={activeCase} />}
+                      {/* RENDERIZADO CONDICIONAL DE DASHBOARDS */}
+                      {activeCaseTab === 'ESTADISTICAS_BASE' && <PatientDashboard activeCase={activeCase} dashboardType="BASE" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
+                      {activeCaseTab === 'ESPECIALIDADES' && <PatientDashboard activeCase={activeCase} dashboardType="SPECIALTY" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
+                      {activeCaseTab === 'FARMACOLOGIA' && <PatientDashboard activeCase={activeCase} dashboardType="PHARMA" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
+                      
+                      {activeCaseTab === 'PERSPECTIVAS' && (
+                        <>
+                           <PatientDashboard activeCase={activeCase} dashboardType="PERSPECTIVES" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />
+                           <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full mt-6`}>
+                             <h4 className="text-xs font-bold text-fuchsia-400 uppercase">🧠 Generar Análisis Teórico Completo</h4>
+                             <p className="text-[10px] text-slate-400">La IA analizará el caso actuando como experto en la corriente seleccionada.</p>
+                             <button onClick={() => handleProcessTheoreticalNotes('THEORETICAL')} disabled={isProcessingNotes} className="w-full py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded-xl text-xs shadow-md">
+                               {isProcessingNotes ? '⏳ Procesando Análisis Teórico...' : 'Analizar Corriente Actual (IA)'}
+                             </button>
+                           </div>
+                        </>
+                      )}
+                      {activeCaseTab === 'EVOLUTIVA' && (
+                        <>
+                           <PatientDashboard activeCase={activeCase} dashboardType="EVOLUTIONARY" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />
+                           <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full mt-6`}>
+                             <h4 className="text-xs font-bold text-rose-400 uppercase">🧬 Generar Análisis Evolutivo</h4>
+                             <p className="text-[10px] text-slate-400">La IA analizará el valor de supervivencia y adaptación darwiniana de los síntomas del paciente.</p>
+                             <button onClick={() => handleProcessTheoreticalNotes('EVOLUTIONARY')} disabled={isProcessingNotes} className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs shadow-md">
+                               {isProcessingNotes ? '⏳ Procesando Análisis Evolutivo...' : 'Analizar Valor Adaptativo (IA)'}
+                             </button>
+                           </div>
+                        </>
+                      )}
 
                       {/* SIEMPRE VISIBLE: CONSULTA ACADÉMICA / CIENTÍFICA */}
                       <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-3 w-full mt-6`}>
@@ -1582,10 +2289,15 @@ export default function App() {
 
                     </div>
 
-                    <div className="xl:col-span-7 space-y-6 w-full">
+                    <div className="xl:col-span-7 space-y-6 w-full flex flex-col">
+                      {/* VISTA DINÁMICA DEL TEXTO IA SEGÚN LA PESTAÑA ACTIVA */}
                       <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col min-h-[450px]`}>
                         <div className={`${th.input} px-4 py-4 border-b ${th.border} flex flex-wrap gap-2 justify-between items-center`}>
-                          <span className={`text-xs font-bold ${th.textMuted} uppercase`}>{t('Dictamen Clínico Profesional')}</span>
+                          <span className={`text-xs font-bold ${th.textMuted} uppercase`}>
+                            {activeCaseTab === 'PERSPECTIVAS' ? 'Análisis de Corrientes Psicológicas' : 
+                             activeCaseTab === 'EVOLUTIVA' ? 'Análisis Clínico Evolutivo' : 
+                             t('Dictamen Clínico Profesional')}
+                          </span>
                           <div className="flex flex-wrap items-center gap-2">
                              <select value={pdfLang} onChange={e => setPdfLang(e.target.value as any)} className={`text-[10px] p-1.5 rounded border ${th.border} ${th.card}`}>
                                <option value="ES">ES</option><option value="EN">EN</option>
@@ -1594,14 +2306,39 @@ export default function App() {
                              <button onClick={() => handleDownloadReport('DOC')} disabled={isGeneratingPdf} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">📝 Word (.doc)</button>
                           </div>
                         </div>
-                        <div className={`p-5 flex-1 text-[13px] ${th.text} font-mono whitespace-pre-wrap overflow-y-auto max-h-[800px]`}>
-                          {notesResult || "Presione 'Generar Dictamen IA'."}
+                        <div className={`p-5 flex-1 flex flex-col gap-4 overflow-y-auto max-h-[800px]`}>
+                          <div className={`text-[13px] ${th.text} font-mono whitespace-pre-wrap`}>
+                            {activeCaseTab === 'PERSPECTIVAS' 
+                               ? (theoreticalAnalysisResult || "Presione 'Analizar Corriente Actual (IA)' en la columna izquierda para obtener la opinión de la Inteligencia Artificial.")
+                               : activeCaseTab === 'EVOLUTIVA'
+                               ? (evolutionaryAnalysisResult || "Presione 'Analizar Valor Adaptativo (IA)' en la columna izquierda.")
+                               : (notesResult || "Presione 'Generar Dictamen IA'.")}
+                          </div>
+                          
+                          {/* SECCIÓN GLOBAL DE COMENTARIOS DEL PROFESIONAL SIN TOCAR LA IA */}
+                          <div className="mt-4 border-t border-slate-700 pt-4">
+                              <div className="flex justify-between items-center mb-2">
+                                  <h4 className="text-xs font-bold text-amber-500 uppercase">🧑‍⚕️ Mis Comentarios y Opinión Clínica (Privado)</h4>
+                                  <span className="text-[9px] text-slate-500">Se guarda automáticamente</span>
+                              </div>
+                              <textarea 
+                                  value={(activeCase as any).professionalOpinion || ''} 
+                                  onChange={(e) => {
+                                      const updatedCase = { ...activeCase, professionalOpinion: e.target.value };
+                                      setActiveCase(updatedCase);
+                                      setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
+                                  }}
+                                  rows={5} 
+                                  placeholder="Escriba aquí su propio análisis global, diagnóstico diferencial o plan de acción. Este texto NO será modificado por la IA y aparecerá en sus reportes..." 
+                                  className={`w-full p-3 ${th.input} border ${th.border} rounded-xl text-[12px] ${th.text} font-sans focus:border-amber-500 outline-none`} 
+                              />
+                          </div>
                         </div>
                       </div>
 
                       {/* RESULTADOS DE LA CONSULTA CIENTÍFICA */}
                       {scientificQuery.responseText && (
-                        <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col w-full overflow-hidden`}>
+                        <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col w-full overflow-hidden mt-6`}>
                           <div className={`${th.input} px-4 sm:px-6 py-4 border-b ${th.border} flex justify-between items-center`}>
                             <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-wide truncate`}>Resultados de Consulta Científica</span>
                             <button onClick={() => setScientificQuery(prev => ({ ...prev, responseText: '' }))} className={`${th.textMuted} hover:${th.text}`}>✕</button>
