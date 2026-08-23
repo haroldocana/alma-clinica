@@ -131,10 +131,8 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
 // Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
-  // Buscar explícitamente "Score: X" para obtener el punteo real generado por la IA
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
   if (scoreMatch) return parseInt(scoreMatch[1], 10);
-  // Si no encuentra la palabra "Score:", busca el último número aislado del string
   const lastNumberMatch = scoreStr.match(/(\d+)(?!.*\d)/);
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
@@ -405,6 +403,7 @@ export default function App() {
           </div>
         </div>
 
+        {/* AJUSTE DE GRID PARA MINI DASHBOARD ALINEADO */}
         <div className={`grid gap-4 ${isFullscreen ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
           <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
              <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
@@ -551,7 +550,7 @@ export default function App() {
   useEffect(() => {
     if (currentUser && psychologists[currentUser.username]) {
       const updatedUser = psychologists[currentUser.username];
-      if (updatedUser.hasVoiceModule !== currentUser.hasVoiceModule || updatedUser.abandonmentThreshold !== currentUser.abandonmentThreshold) {
+      if (updatedUser.hasVoiceModule !== currentUser.hasVoiceModule || updatedUser.abandonmentThreshold !== currentUser.abandonmentThreshold || updatedUser.professionType !== currentUser.professionType) {
         setCurrentUser(updatedUser);
         localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
       }
@@ -566,11 +565,17 @@ export default function App() {
     return {};
   });
 
+  // SOLUCIÓN PREVENCIÓN DE CRASHES EN EL CALENDARIO (Asegurar que sea Array)
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     let userKey = 'appointments_db';
     if (currentUser?.username) userKey = `appointments_db_${currentUser.username}`;
     const saved = localStorage.getItem(userKey);
-    if (saved) { try { return JSON.parse(saved); } catch (error) { return []; } }
+    if (saved) { 
+      try { 
+        const parsed = JSON.parse(saved); 
+        if (Array.isArray(parsed)) return parsed;
+      } catch (error) { return []; } 
+    }
     return [];
   });
 
@@ -726,7 +731,9 @@ export default function App() {
   const [regPassword, setRegPassword] = useState('');
   const [regFullName, setRegFullName] = useState('');
   const [regColegiado, setRegColegiado] = useState('');
+  const [regProfessionType, setRegProfessionType] = useState<'PSICOLOGO' | 'PSIQUIATRA'>('PSICOLOGO');
   const [regLicenseType, setRegLicenseType] = useState<'ESTANDAR' | 'PREMIUM' | 'DEMO'>('ESTANDAR');
+  const [regCountry, setRegCountry] = useState('GT'); 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -756,7 +763,25 @@ export default function App() {
     if (user) {
       if (!user.isActive || getDaysRemaining(user.licenseExpiry) < 0) { setLoginError('Cuenta inactiva o expirada.'); return; }
       if (user.passwordHash !== loginPassword) { setLoginError('Contraseña incorrecta.'); return; }
-      setCurrentUser(user); setLoginError(''); setActiveCase(null); setNotesResult(''); setActiveCaseTab('HISTORIAL'); setClinicalTab('BUSCAR');
+      
+      // LOAD DATA HERE TO PREVENT WIPING ON LOGIN
+      const casesKey = `clinical_cases_db_${user.username}`;
+      const savedCases = localStorage.getItem(casesKey);
+      setClinicalDatabase(savedCases ? JSON.parse(savedCases) : {});
+
+      const appKey = `appointments_db_${user.username}`;
+      const savedApps = localStorage.getItem(appKey);
+      try {
+         const parsedApps = savedApps ? JSON.parse(savedApps) : [];
+         setAppointments(Array.isArray(parsedApps) ? parsedApps : []);
+      } catch(e) { setAppointments([]); }
+
+      setCurrentUser(user); 
+      setLoginError(''); 
+      setActiveCase(null); 
+      setNotesResult(''); 
+      setActiveCaseTab('HISTORIAL'); 
+      setClinicalTab('BUSCAR');
     } else { setLoginError('Credenciales incorrectas.'); }
   };
 
@@ -767,7 +792,7 @@ export default function App() {
     const expiry = new Date();
     if (regLicenseType === 'DEMO') expiry.setDate(expiry.getDate() + 15); else expiry.setDate(expiry.getDate() + 365);
     const newPsychologist: any = { 
-      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: 'PSICOLOGO', specialty: '', professionalReview: '', abandonmentThreshold: 30 
+      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: regProfessionType, specialty: '', professionalReview: '', abandonmentThreshold: 30 
     };
     const updatedDb = { ...psychologists, [newPsychologist.username]: newPsychologist };
     setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
@@ -812,6 +837,39 @@ export default function App() {
       setActiveCase({ ...foundCase, sessions: foundCase.sessions || [], generalData: foundCase.generalData || {} as any });
       setActiveCaseTab('HISTORIAL'); setSearchFeedback(`Expediente ${foundCase.id} cargado.`); setNotesResult(foundCase.structuredOutput || '');
     } else { setSearchFeedback(`Expediente no encontrado.`); setActiveCase(null); }
+  };
+
+  // SOLUCIÓN PREVENCIÓN DE CRASHES EN EL CALENDARIO Y CÁLCULO DE FECHAS SEGURO
+  const handleCreateAppointment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser || !selectedPatientId || !selectedDate) return;
+    const patientName = clinicalDatabase[selectedPatientId] ? clinicalDatabase[selectedPatientId].patientName : 'Desconocido';
+    const startStr = `${selectedDate}T${startTime}:00`;
+    let endStr = startStr;
+    try {
+      const d = new Date(startStr);
+      if (!isNaN(d.getTime())) {
+        d.setMinutes(d.getMinutes() + durationMinutes);
+        endStr = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().substring(0, 19);
+      }
+    } catch(err) {}
+    
+    setAppointments(prev => {
+       const safeArray = Array.isArray(prev) ? prev : [];
+       return [...safeArray, { id: `APP-${Date.now()}`, patientId: selectedPatientId, patientName, doctorUsername: currentUser.username, title: `Consulta: ${patientName}`, start: startStr, end: endStr, status: 'SCHEDULED' }];
+    });
+    setShowCalendarModal(false); setSelectedPatientId(''); alert(`Cita agendada para ${patientName}`);
+  };
+
+  // RESTAURADO: Botón de sincronización con Google Calendar en el componente
+  const handleSyncToGoogleCalendar = (app: Appointment) => {
+    try {
+      if (!app.start || !app.end) return;
+      const startFmt = app.start.replace(/-|:|\.\d\d\d/g, "");
+      const endFmt = app.end.replace(/-|:|\.\d\d\d/g, "");
+      const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(app.title)}&dates=${startFmt}/${endFmt}&details=${encodeURIComponent(`ID Expediente: ${app.patientId}`)}&location=Clinica`;
+      window.open(gCalUrl, '_blank');
+    } catch (e) { alert("Error al generar el enlace para Google Calendar."); }
   };
 
   const connectMicrophone = async () => {
@@ -1099,6 +1157,10 @@ export default function App() {
                       <input type="text" required value={regColegiado} onChange={(e) => setRegColegiado(e.target.value)} placeholder={t('Colegiado')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                       
                       <div className={`grid grid-cols-2 gap-2 border-t ${th.border} pt-3`}>
+                        <select value={regProfessionType} onChange={(e) => setRegProfessionType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
+                          <option value="PSICOLOGO">Psicólogo Clínico</option>
+                          <option value="PSIQUIATRA">Médico Psiquiatra</option>
+                        </select>
                         <select value={regLicenseType} onChange={(e) => setRegLicenseType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
                           <option value="ESTANDAR">{t('Licencia ESTÁNDAR')}</option>
                           <option value="PREMIUM">{t('Licencia PREMIUM')}</option>
@@ -1172,6 +1234,7 @@ export default function App() {
                       <button onClick={() => handleSyncToGoogleCalendar(app)} className="bg-emerald-600 px-3 py-1 text-white rounded text-[10px] shadow font-bold">🗓️ Google Calendar</button>
                     </div>
                   ))}
+                  {myAppointments.length === 0 && <p className={`text-[11px] ${th.textMuted} italic`}>No hay citas programadas.</p>}
                 </div>
               </div>
             )}
@@ -1400,10 +1463,10 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
-                              {/* ENLACE DE SESIÓN EXTERNA (ZOOM, MEET, DRIVE) */}
+                              {/* ENLACE DE SESIÓN EXTERNA (ZOOM, MEET, DRIVE) AHORA ES INDEPENDIENTE */}
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
                                 <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>🔗 Enlace de Sesión (Zoom/Meet/Drive)</label>
-                                <input type="url" placeholder="Pegue la URL del video de la sesión aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                <input type="url" placeholder="Pegue la URL de la videollamada aquí..." value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                               </div>
 
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
@@ -1437,6 +1500,7 @@ export default function App() {
                                 </div>
                               </div>
 
+                              {/* GRABADORA Y DICTADO SIEMPRE ACTIVOS */}
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
                                 <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
                                 
