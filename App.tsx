@@ -131,12 +131,8 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
 // Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
-  
-  // Buscar explícitamente "Score: X" para obtener el punteo real
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
   if (scoreMatch) return parseInt(scoreMatch[1], 10);
-  
-  // Si no está formateado con "Score:", busca el último número del string
   const lastNumberMatch = scoreStr.match(/(\d+)(?!.*\d)/);
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
@@ -171,7 +167,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   
-  // IDIOMAS: Solo Español e Inglés habilitados.
+  // IDIOMAS: Solo Español e Inglés
   const [lang, setLang] = useState<'ES'|'EN'>('ES');
   const [pdfLang, setPdfLang] = useState<'ES'|'EN'>('ES');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -894,6 +890,15 @@ export default function App() {
     } catch (e: any) { alert("Error detallado: " + e.message); console.error(e); } finally { setIsDictatingVoice(false); }
   };
 
+  const handleScientificQuery = async () => {
+    if (!scientificQuery.queryText.trim()) return;
+    setScientificQuery(prev => ({ ...prev, loading: true }));
+    try {
+      const res = await queryScientificDatabase(scientificQuery.queryText);
+      setScientificQuery(prev => ({ ...prev, responseText: res }));
+    } catch (e: any) { alert("Error detallado: " + e.message); console.error(e); } finally { setScientificQuery(prev => ({ ...prev, loading: false })); }
+  };
+
   const handleOpenCertificateModal = (type: 'ATTENDANCE' | 'REFERRAL') => {
     if (!activeCase || !currentUser) return;
     setCertificateType(type);
@@ -1188,6 +1193,7 @@ export default function App() {
                         <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                       </form>
 
+                      {/* RESTAURADO: COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
                       <div className="space-y-6">
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
@@ -1213,12 +1219,15 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
+                        {/* ALERTAS CRÍTICAS DE VOZ (VAPI / ALMA) */}
                         {emergencyAlerts.map((alert: any) => (
                           <div key={alert?.id || Math.random()} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-red-500 animate-pulse"></div>
                             <div className="pl-3">
                               <h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia (Vapi / ALMA)</h3>
                               <p className="text-xs text-red-800 dark:text-red-200 mb-2">Paciente: {alert?.patientName}</p>
+                              
+                              {/* REPRODUCTOR DE AUDIO DE LA LLAMADA RESTAURADO */}
                               {alert?.audioUrl && (
                                 <div className="mt-2 flex flex-col gap-1">
                                   <span className="text-[10px] font-bold text-red-700 dark:text-red-300 uppercase">Audio de la intervención en crisis:</span>
@@ -1229,6 +1238,8 @@ export default function App() {
                             <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-4 sm:mt-0 px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl h-10 self-start sm:self-center shadow-md transition-colors">Analizar</button>
                           </div>
                         ))}
+                        
+                        {/* ALERTAS DE ABANDONO DE TRATAMIENTO */}
                         {abandonmentAlerts.map((alert: any) => (
                           <div key={alert?.id || Math.random()} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border">
                             <div>
@@ -1393,8 +1404,8 @@ export default function App() {
                                     <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                     <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
                                   </div>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
-                                  <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o Video Externo</label>
+                                  <input type="file" accept="audio/*, video/*" onChange={(e) => {
                                     if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
                                   }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                 </div>
@@ -1453,6 +1464,17 @@ export default function App() {
                         </div>
                       )}
 
+                      {/* RESTAURADO: CONSULTA ACADÉMICA / CIENTÍFICA */}
+                      {activeCaseTab === 'HISTORIAL' && (
+                        <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-3 w-full mt-6`}>
+                          <span className={`text-xs font-bold ${th.text} uppercase block tracking-wider truncate`}>🔬 {t('Consulta Académica / Científica')}</span>
+                          <textarea value={scientificQuery.queryText} onChange={(e) => setScientificQuery(prev => ({ ...prev, queryText: e.target.value }))} rows={2} placeholder={t('Consulte dudas teóricas, criterios del DSM-5, medicamentos...')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                          <button onClick={handleScientificQuery} disabled={scientificQuery.loading} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-semibold text-center transition-colors">
+                            {scientificQuery.loading ? t('Consultando Base de Datos...') : t('Realizar Consulta')}
+                          </button>
+                        </div>
+                      )}
+
                       {activeCaseTab === 'ESTADISTICAS' && <PatientDashboard activeCase={activeCase} />}
                     </div>
 
@@ -1472,6 +1494,19 @@ export default function App() {
                           {notesResult || "Presione 'Generar Dictamen IA'."}
                         </div>
                       </div>
+
+                      {/* RESULTADO DE LA CONSULTA CIENTÍFICA */}
+                      {scientificQuery.responseText && (
+                        <div className={`${th.card} border ${th.border} rounded-2xl flex flex-col w-full overflow-hidden`}>
+                          <div className={`${th.input} px-4 sm:px-6 py-4 border-b ${th.border} flex justify-between items-center`}>
+                            <span className={`text-xs font-bold ${th.textMuted} uppercase tracking-wide truncate`}>Resultados de Consulta Científica</span>
+                            <button onClick={() => setScientificQuery(prev => ({ ...prev, responseText: '' }))} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+                          </div>
+                          <div className={`p-4 sm:p-6 flex-1 text-xs ${th.text} font-mono whitespace-pre-wrap break-words leading-relaxed overflow-y-auto max-h-64 w-full`}>
+                            {scientificQuery.responseText}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
