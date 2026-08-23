@@ -239,7 +239,7 @@ export default function App() {
       'Ocupación': { ES: 'Ocupación', EN: 'Occupation' },
       'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level' },
       'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin' },
-      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)' , EN: 'Parental Data (Names, ages, status...)' },
+      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)' },
       '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint' },
       'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...' },
       'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...' },
@@ -1005,16 +1005,6 @@ export default function App() {
     return null;
   });
 
-  useEffect(() => {
-    if (currentUser && psychologists[currentUser.username]) {
-      const updatedUser = psychologists[currentUser.username];
-      if (updatedUser.hasVoiceModule !== currentUser.hasVoiceModule || updatedUser.abandonmentThreshold !== currentUser.abandonmentThreshold || updatedUser.professionType !== currentUser.professionType) {
-        setCurrentUser(updatedUser);
-        localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
-      }
-    }
-  }, [psychologists]);
-
   const [clinicalDatabase, setClinicalDatabase] = useState<Record<string, ClinicalCase>>(() => {
     let userKey = 'clinical_cases_db';
     if (currentUser?.username) userKey = `clinical_cases_db_${currentUser.username}`;
@@ -1035,6 +1025,37 @@ export default function App() {
     }
     return [];
   });
+
+  // 1. DESCARGAR expedientes de la nube al iniciar sesión
+  useEffect(() => {
+    async function descargarExpedientesNube() {
+      if (!currentUser) return;
+      try {
+        const expedientesRemotos = await loadClinicalCasesRemote(currentUser.username);
+        if (expedientesRemotos && Object.keys(expedientesRemotos).length > 0) {
+          setClinicalDatabase(prev => {
+            const fusion = { ...expedientesRemotos, ...prev };
+            localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(fusion));
+            return fusion;
+          });
+        }
+      } catch(e) {}
+    }
+    descargarExpedientesNube();
+  }, [currentUser]);
+
+  // 2. SUBIR expedientes a la nube cada vez que haya un cambio o nueva sesión
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(clinicalDatabase));
+      localStorage.setItem(`appointments_db_${currentUser.username}`, JSON.stringify(appointments));
+      
+      // CANDADO DE SEGURIDAD: Solo subimos a la nube si hay al menos 1 paciente.
+      if (Object.keys(clinicalDatabase).length > 0) {
+        saveClinicalCasesRemote(currentUser.username, clinicalDatabase).catch(()=>{});
+      }
+    }
+  }, [clinicalDatabase, appointments, currentUser]);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
@@ -1140,38 +1161,6 @@ export default function App() {
       setActiveCaseTab('HISTORIAL'); setSearchFeedback(`Expediente ${patientId} cargado.`); window.scrollTo({ top: 0, behavior: 'smooth' });
     } else { setSearchFeedback(`Expediente no encontrado.`); }
   };
-
-// 1. DESCARGAR expedientes de la nube al iniciar sesión
-  useEffect(() => {
-    async function descargarExpedientesNube() {
-      if (!currentUser) return;
-      try {
-        const expedientesRemotos = await loadClinicalCasesRemote(currentUser.username);
-        if (expedientesRemotos && Object.keys(expedientesRemotos).length > 0) {
-          setClinicalDatabase(prev => {
-            const fusion = { ...expedientesRemotos, ...prev };
-            localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(fusion));
-            return fusion;
-          });
-        }
-      } catch(e) {}
-    }
-    descargarExpedientesNube();
-  }, [currentUser]);
-
-  // 2. SUBIR expedientes a la nube cada vez que haya un cambio
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(clinicalDatabase));
-      localStorage.setItem(`appointments_db_${currentUser.username}`, JSON.stringify(appointments));
-      
-      // CANDADO DE SEGURIDAD: Solo subimos a la nube si hay al menos 1 paciente en la base de datos. 
-      // Esto evita sobreescribir la nube con una lista vacía si entramos desde un dispositivo nuevo.
-      if (Object.keys(clinicalDatabase).length > 0) {
-        saveClinicalCasesRemote(currentUser.username, clinicalDatabase).catch(()=>{});
-      }
-    }
-  }, [clinicalDatabase, appointments, currentUser]);
 
   const [activeCase, setActiveCase] = useState<ClinicalCase | null>(null);
   const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS_BASE' | 'ESPECIALIDADES' | 'FARMACOLOGIA' | 'PERSPECTIVAS' | 'EVOLUTIVA'>('HISTORIAL');
@@ -2035,9 +2024,9 @@ export default function App() {
                             <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                             
                             <div className="sm:col-span-2 space-y-1">
-                               <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
+                               <label className={`text-[9px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
                                <div className="flex gap-2">
-                                  <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setNewPatientForm(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.card} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
+                                  <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setNewPatientForm(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.input} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
                                   <input type="url" placeholder="O pegue una URL..." value={newPatientData.fotoUrl} onChange={(e) => setNewPatientForm(p => ({ ...p, fotoUrl: e.target.value }))} className={`flex-1 p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
                                </div>
                             </div>
