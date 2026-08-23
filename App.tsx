@@ -13,95 +13,34 @@ import {
 } from './services/geminiService';
 
 // ============================================================================
-// FUNCIONES AUXILIARES DE TIEMPO Y EXPORTACIÓN
+// FUNCIONES AUXILIARES
 // ============================================================================
 const getDaysRemaining = (expiryDateStr: string | undefined): number => {
   if (!expiryDateStr) return -1;
-  const today = new Date();
-  const expiry = new Date(expiryDateStr);
+  const today = new Date(); const expiry = new Date(expiryDateStr);
   if (isNaN(expiry.getTime())) return -1;
-  today.setHours(0, 0, 0, 0);
-  expiry.setHours(0, 0, 0, 0);
-  const diffTime = expiry.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  today.setHours(0, 0, 0, 0); expiry.setHours(0, 0, 0, 0);
+  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 const getDaysSince = (pastDateStr: string): number => {
   if (!pastDateStr) return 0;
-  const today = new Date();
-  const past = new Date(pastDateStr);
+  const today = new Date(); const past = new Date(pastDateStr);
   if (isNaN(past.getTime())) return 0;
-  today.setHours(0, 0, 0, 0);
-  past.setHours(0, 0, 0, 0);
-  const diffTime = today.getTime() - past.getTime();
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  today.setHours(0, 0, 0, 0); past.setHours(0, 0, 0, 0);
+  return Math.floor((today.getTime() - past.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 const exportHTMLToWord = (htmlContent: string, filename: string) => {
-  const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Documento</title></head><body>";
-  const postHtml = "</body></html>";
-  const html = preHtml + htmlContent + postHtml;
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Documento</title></head><body>${htmlContent}</body></html>`;
   const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = url;
-  link.download = filename + '.doc';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  link.href = URL.createObjectURL(blob); link.download = filename + '.doc';
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 };
 
-// MACHOTES CLÍNICOS PROFESIONALES
-const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: string, colegiado: string, specialty: string) => `
-  <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
-    <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
-      <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
-      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty \vert{}\vert{} 'Especialista en Salud Mental'} \vert{} Colegiado Activo:${colegiado}</p>
-      <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
-    </div>
-    <h2 style="text-align: center; font-size: 16px; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-decoration: underline;">${title}</h2>
-    <div style="font-size: 13px; line-height: 1.8; text-align: justify; margin-bottom: 50px; white-space: pre-wrap;">${bodyHtml}</div>
-    <div style="text-align: center; margin-top: 80px;">
-      <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px auto;"></div>
-      <p style="font-size: 14px; font-weight: bold; margin: 0;">${doctorName}</p>
-      <p style="font-size: 12px; margin: 2px 0;">Firma y Sello Profesional</p>
-    </div>
-  </div>
-`;
-
-const getPrescriptionLetterhead = (patientName: string, date: string, diagnostico: string, rx: string, indications: string, doctorName: string, colegiado: string, specialty: string) => `
-  <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #000; border: 1px solid #ccc; border-radius: 8px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
-      <div>
-        <h1 style="font-size: 20px; color: #059669; margin: 0;">${doctorName}</h1>
-        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty \vert{}\vert{} 'Médico Psiquiatra'} \vert{} Col: ${colegiado}</p>
-      </div>
-      <div style="text-align: right;">
-        <h2 style="font-size: 32px; color: #059669; margin: 0; font-family: serif;">Rx</h2>
-      </div>
-    </div>
-    <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border: 1px solid #e5e7eb; margin-bottom: 20px; font-size: 12px;">
-      <p style="margin: 0 0 5px 0;"><strong>Paciente:</strong> ${patientName}</p>
-      <p style="margin: 0 0 5px 0;"><strong>Fecha de emisión:</strong> ${date}</p>
-      <p style="margin: 0;"><strong>Diagnóstico CIE-11:</strong> ${diagnostico || 'Evaluación Clínica'}</p>
-    </div>
-    <div style="margin-bottom: 30px;">
-      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Medicamentos:</h3>
-      <p style="font-size: 15px; white-space: pre-wrap; font-family: monospace; color: #111827; margin-top: 10px;">${rx}</p>
-    </div>
-    <div style="margin-bottom: 40px;">
-      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Instrucciones:</h3>
-      <p style="font-size: 13px; white-space: pre-wrap; color: #1f2937; margin-top: 10px;">${indications}</p>
-    </div>
-    <div style="text-align: right; margin-top: 70px;">
-      <div style="border-top: 1px solid #000; width: 220px; margin-left: auto; margin-bottom: 5px;"></div>
-      <p style="font-size: 12px; margin: 0; padding-right: 60px;">Firma del Médico</p>
-    </div>
-  </div>
-`;
-
 // ============================================================================
-// BATERÍA COMPLETA INTERNACIONAL
+// BATERÍA CLÍNICA
 // ============================================================================
 const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'AQ10', name: 'AQ-10 (Espectro Autista / Asperger)', questions: ['A menudo noto pequeños sonidos cuando otros no lo hacen', 'Generalmente me concentro más en los pequeños detalles que en el panorama general', 'Me resulta fácil hacer más de una cosa a la vez', 'Si hay una interrupción, puedo volver a lo que estaba haciendo muy rápidamente', 'Me resulta fácil "leer entre líneas" cuando alguien me habla', 'Sé cómo darme cuenta si alguien que me escucha se está aburriendo', 'Cuando leo una historia, me resulta difícil entender las intenciones de los personajes', 'Me gusta recopilar información sobre categorías de cosas', 'Me resulta fácil darme cuenta de lo que alguien está pensando o sintiendo', 'Me resulta difícil entender las intenciones de las personas'], options: ['Totalmente en desacuerdo (0)', 'Un poco en desacuerdo (0)', 'Un poco de acuerdo (1)', 'Totalmente de acuerdo (1)'] },
@@ -128,12 +67,8 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en detalles?', '¿Dificultad para mantener atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
   { id: 'PCL5', name: 'PCL-5 (Trauma y TEPT)', questions: ['Recuerdos repetitivos e inquietantes de la experiencia estresante', 'Pesadillas de la experiencia', 'Evitar situaciones o lugares que le recuerden el evento', 'Creencias negativas fuertes sobre sí mismo', 'Estar muy alerta o vigilante'], options: ['Nada (0)', 'Un poco (1)', 'Moderadamente (2)', 'Bastante (3)', 'Extremadamente (4)'] }
 ];
+const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS.length > 0 ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))] : NUEVAS_EVALUACIONES;
 
-const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS.length > 0 
-  ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
-  : NUEVAS_EVALUACIONES;
-
-// Extracción precisa de números
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
@@ -142,31 +77,9 @@ const extractNumericScore = (scoreStr: string | undefined): number => {
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
 
-const generateSpiderChartSVG = (areas: any, t: (key: string, overrideLang?: string) => string, targetLang?: string) => {
-  const values = [areas.sleep || 5, areas.appetite || 5, areas.energy || 5, areas.social || 5, areas.concentration || 5];
-  const angles = [0, 72, 144, 216, 288].map(deg => (deg * Math.PI) / 180);
-  const getPoint = (val: number, angle: number, radiusMax: number = 40) => {
-    const r = (val / 10) * radiusMax;
-    return `${50 + r * Math.sin(angle)},${50 - r * Math.cos(angle)}`;
-  };
-  const pointsMax = angles.map(a => getPoint(10, a, 40)).join(' ');
-  const pointsData = values.map((v, i) => getPoint(v, angles[i], 40)).join(' ');
-
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 110" width="100%" height="100%" style="font-family: sans-serif; display: block; margin: 0 auto; max-width: 250px;">
-      <polygon points="${pointsMax}" fill="#1e293b" stroke="#334155" stroke-width="1" />
-      ${angles.map(a => `<line x1="50" y1="50" x2="${50 + 40 * Math.sin(a)}" y2="${50 - 40 * Math.cos(a)}" stroke="#334155" stroke-width="0.5" />`).join('')}
-      <polygon points="${pointsData}" fill="rgba(99, 102, 241, 0.4)" stroke="#6366f1" stroke-width="2" />
-      ${angles.map((a, i) => `<circle cx="${50 + (values[i] / 10) * 40 * Math.sin(a)}" cy="${50 - (values[i] / 10) * 40 * Math.cos(a)}" r="2" fill="#818cf8" />`).join('')}
-      <text x="50" y="7" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Sueño', targetLang)}</text>
-      <text x="96" y="38" font-size="5" fill="#94a3b8" text-anchor="start">${t('Apetito', targetLang)}</text>
-      <text x="80" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Energía', targetLang)}</text>
-      <text x="20" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Social', targetLang)}</text>
-      <text x="4" y="38" font-size="5" fill="#94a3b8" text-anchor="end">${t('Atención', targetLang)}</text>
-    </svg>
-  `;
-};
-
+// ============================================================================
+// COMPONENTE PRINCIPAL APP
+// ============================================================================
 export default function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.CLINICAL);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -178,8 +91,6 @@ export default function App() {
 
   // DASHBOARD STATES
   const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | null>(null);
-  
-  // DSM-5 COMPLETE CLASSIFICATION SELECTOR
   const [specialtyFocus, setSpecialtyFocus] = useState('TRASTORNOS_NEURODESARROLLO');
   const [perspectivesFocus, setPerspectivesFocus] = useState('FREUD'); 
 
@@ -195,14 +106,7 @@ export default function App() {
   };
 
   const t = (key: string, overrideLang?: string) => {
-    const activeLang = overrideLang || lang;
-    const dict: Record<string, { ES: string, EN: string }> = {
-      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant' },
-      'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report' },
-      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)' },
-      // ... (Rest of translations left intact for brevity, same as before)
-    };
-    return dict[key]?.[activeLang] || key;
+    return key; 
   };
 
   const getLegalNorm = (countryCode: string) => {
@@ -216,8 +120,10 @@ export default function App() {
     }
   };
 
+  const getProfPrefix = (profType?: string) => profType === 'PSIQUIATRA' ? 'Médico Psiquiatra' : 'Psicólogo(a) Clínico';
+
   // ==============================================================================================
-  // DASHBOARD DINÁMICO E INTELIGENTE EN 5 NIVELES 
+  // DASHBOARD DINÁMICO E INTELIGENTE EN 5 NIVELES
   // ==============================================================================================
   const PatientDashboard = ({ 
     activeCase, 
@@ -245,7 +151,6 @@ export default function App() {
     const sessions = activeCase.sessions || [];
     const totalSessions = sessions.length;
     
-    // EXTRACCIÓN ROBUSTA DE LA MEMORIA MULTI-DIAGNÓSTICO
     const chartData = sessions.map(s => {
       const ts = (s as any).testScores || {};
       const getLegacySc = (keys: string[]) => {
@@ -309,7 +214,6 @@ export default function App() {
     const firstSession = chartData[0] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
     const lastSession = chartData[totalSessions - 1] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
     
-    // Tratamiento especial para puntajes cognitivos (MMSE) donde mayor es mejor (invertir para gráfica de severidad)
     const normalizeScore = (val: number, key: string) => (key === 'cog' && val > 0) ? Math.max(0, 30 - val) : val;
 
     const val1First = normalizeScore((firstSession as any)[val1Key], val1Key); 
@@ -529,7 +433,6 @@ export default function App() {
         onUpdateCase(updated);
     };
 
-    // FUNCIONES DE DIBUJO DE GRÁFICAS ESPECÍFICAS INTERNACIONALES
     const renderSpecialtyGraph = () => {
         if (!hasScores) {
             return (
@@ -567,11 +470,11 @@ export default function App() {
             return (
                 <div className="flex flex-col justify-center h-48 w-full px-8 mt-2 space-y-6">
                     <div>
-                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{currentFocus==='TOC_Y_RELACIONADOS'?'Obsesiones':'Componente Primario'}</span><span>{valA} pts</span></div>
+                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{label1}</span><span>{valA} pts</span></div>
                        <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-indigo-500 h-4 rounded-full" style={{ width: `${(valA/maxVal)*100}%` }}></div></div>
                     </div>
                     <div>
-                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{currentFocus==='TOC_Y_RELACIONADOS'?'Compulsiones':'Componente Comórbido'}</span><span>{valB} pts</span></div>
+                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{label2}</span><span>{valB} pts</span></div>
                        <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-orange-500 h-4 rounded-full" style={{ width: `${(valB/maxVal)*100}%` }}></div></div>
                     </div>
                 </div>
@@ -614,7 +517,6 @@ export default function App() {
                 </div>
             );
         } else {
-            // Curva estándar Dual (Ansiedad, Depresión, Trauma, etc)
             return (
                 <div className="relative w-full h-48 mt-2">
                   <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
@@ -741,9 +643,7 @@ export default function App() {
                 <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
                 
-                {/* LÍNEA DE EFECTIVIDAD (VERDE) */}
                 <polyline fill="none" stroke="#10b981" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaEff / 100) * 40}`).join(' ')} />
-                {/* LÍNEA DE RIESGO (ROJO) */}
                 <polyline fill="none" stroke="#f43f5e" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaRisk / 100) * 40}`).join(' ')} />
                 
                 {chartData.map((d, i) => {
@@ -1450,7 +1350,6 @@ export default function App() {
       const lastIdx = updatedSessions.length - 1;
       const currentSession = updatedSessions[lastIdx];
       
-      // NUEVO: GUARDADO MULTI-DIAGNÓSTICO
       const newTestScores = { ...((currentSession as any).testScores || {}) };
       if (canAutoScore) {
          newTestScores[selectedDsmTemplate.id] = numScore;
@@ -1661,19 +1560,16 @@ export default function App() {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-xl shrink-0">Ψ</div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight truncate">{t('Asistente Clínica SaaS')}</h1>
+              <h1 className="text-xl font-bold tracking-tight truncate">Asistente Clínica SaaS</h1>
               <p className={`text-xs ${th.textMuted} truncate`}>EHR & Inteligencia Artificial</p>
             </div>
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-2 ${th.card} p-1 rounded-xl border ${th.border} w-full sm:w-auto`}>
-            <select value={lang} onChange={(e) => setLang(e.target.value as any)} className="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg outline-none cursor-pointer shadow hover:bg-indigo-500">
-              <option value="ES">🌐 ES</option><option value="EN">🌐 EN</option>
-            </select>
             <button onClick={toggleTheme} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${th.border} ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'}`}>{isDarkMode ? '☀️' : '🌙'}</button>
             <div className="w-px h-6 bg-slate-500/30 mx-1"></div>
-            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white' : th.textMuted}`}>🩺 {t('Clínico')}</button>
-            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white' : th.textMuted}`}>📅 {t('Agenda')}</button>
-            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white' : th.textMuted}`}>⚙️ {t('Admin')}</button>
+            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white' : th.textMuted}`}>🩺 Clínico</button>
+            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white' : th.textMuted}`}>📅 Agenda</button>
+            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white' : th.textMuted}`}>⚙️ Admin</button>
           </div>
         </div>
       </header>
@@ -1683,24 +1579,24 @@ export default function App() {
           <div className="max-w-4xl mx-auto space-y-8 w-full">
             {!isAdminAuthenticated ? (
               <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 max-w-md mx-auto`}>
-                <h2 className={`text-sm font-semibold ${th.text} text-center uppercase tracking-wider`}>{t('Consola Maestra de Licencias')}</h2>
+                <h2 className={`text-sm font-semibold ${th.text} text-center uppercase tracking-wider`}>Consola Maestra de Licencias</h2>
                 <form onSubmit={handleAdminAuth} className="space-y-3">
-                  <input type="password" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} placeholder={t('Clave de Administrador')} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} outline-none`} />
-                  <button type="submit" className="w-full py-2.5 bg-amber-600 font-semibold text-white rounded-xl text-xs">{t('Autenticar')}</button>
+                  <input type="password" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} placeholder="Clave de Administrador" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} outline-none`} />
+                  <button type="submit" className="w-full py-2.5 bg-amber-600 font-semibold text-white rounded-xl text-xs">Autenticar</button>
                 </form>
               </div>
             ) : (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 lg:col-span-5`}>
-                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Activar Nueva Licencia')}</h3>
+                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>Activar Nueva Licencia</h3>
                     <form onSubmit={handleRegisterLicense} className="space-y-3">
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="text" required value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder={t('Usuario')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
-                        <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder={t('Contraseña')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                        <input type="text" required value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder="Usuario" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                        <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Contraseña" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                       </div>
-                      <input type="text" required value={regFullName} onChange={(e) => setRegFullName(e.target.value)} placeholder={t('Nombre Completo')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
-                      <input type="text" required value={regColegiado} onChange={(e) => setRegColegiado(e.target.value)} placeholder={t('Colegiado')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                      <input type="text" required value={regFullName} onChange={(e) => setRegFullName(e.target.value)} placeholder="Nombre Completo" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                      <input type="text" required value={regColegiado} onChange={(e) => setRegColegiado(e.target.value)} placeholder="Colegiado" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                       
                       <div className={`grid grid-cols-2 gap-2 border-t ${th.border} pt-3`}>
                         <select value={regProfessionType} onChange={(e) => setRegProfessionType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
@@ -1708,19 +1604,18 @@ export default function App() {
                           <option value="PSIQUIATRA">Médico Psiquiatra</option>
                         </select>
                         <select value={regLicenseType} onChange={(e) => setRegLicenseType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
-                          <option value="ESTANDAR">{t('Licencia ESTÁNDAR')}</option>
-                          <option value="PREMIUM">{t('Licencia PREMIUM')}</option>
+                          <option value="ESTANDAR">Licencia ESTÁNDAR</option>
+                          <option value="PREMIUM">Licencia PREMIUM</option>
                           <option value="DEMO">Licencia DEMO (15 Días)</option>
                         </select>
                       </div>
                       
-                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs mt-2">{t('Activar Licencia')}</button>
+                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs mt-2">Activar Licencia</button>
                     </form>
                   </div>
 
-                  {/* ADMIN: BOTONES PARA CAMBIAR FECHAS DE EXPIRACIÓN Y CONTRASEÑAS */}
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-6 lg:col-span-7`}>
-                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Auditoría y Soporte')}</h3>
+                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>Auditoría y Soporte</h3>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                       {Object.values(psychologists).filter(p => p && p.username).map((p) => {
                         const rem = getDaysRemaining(p.licenseExpiry);
@@ -1770,8 +1665,8 @@ export default function App() {
             ) : (
               <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 shadow-xl space-y-6`}>
                 <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center border-b ${th.border} pb-4 gap-4`}>
-                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 {t('Agenda Médica')}</h2></div>
-                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ {t('Agendar Cita')}</button>
+                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 Agenda Médica</h2></div>
+                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ Agendar Cita</button>
                 </div>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {myAppointments.map(app => (
@@ -1791,12 +1686,12 @@ export default function App() {
           <div className="space-y-6 flex-1 flex flex-col w-full">
             {!currentUser ? (
               <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 max-w-md mx-auto`}>
-                <h2 className={`text-lg font-semibold ${th.text} text-center`}>{t('Acceso Profesional Clínico')}</h2>
+                <h2 className={`text-lg font-semibold ${th.text} text-center`}>Acceso Profesional Clínico</h2>
                 <form onSubmit={handleLogin} className="space-y-3">
-                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder={t('Usuario')} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
+                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder="Usuario" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   <input type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   {loginError && <p className="text-xs text-red-500">{loginError}</p>}
-                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">{t('Iniciar Sesión')}</button>
+                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">Iniciar Sesión</button>
                 </form>
               </div>
             ) : (
@@ -1805,18 +1700,18 @@ export default function App() {
                 <div className={`bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4`}>
                   <div className="min-w-0">
                     <h2 className={`text-lg font-semibold ${th.text} truncate`}>🥼 {getProfPrefix(currentUser.professionType)} {currentUser.fullName}</h2>
-                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>{t('Colegiado')}: {currentUser.colegiado} | {t('Plan')}: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
+                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>Colegiado: {currentUser.colegiado} | Plan: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
                   </div>
                   <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 {t('Respaldo JSON')}</button>
-                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">{t('Cerrar Sesión')}</button>
+                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 Respaldo JSON</button>
+                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">Cerrar Sesión</button>
                   </div>
                 </div>
 
                 <div className={`flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 border-b ${th.border} pb-4`}>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 {t('Búsqueda')}</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 Búsqueda</button>
                   <button onClick={() => { setActiveCase(null); setClinicalTab('ALERTAS'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'ALERTAS' ? 'bg-amber-600 text-white' : `${th.card} ${th.textMuted}`}`}>🚨 Alertas {totalAlerts > 0 && <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] ml-1">{totalAlerts}</span>}</button>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ {t('Mi Perfil')}</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ Mi Perfil</button>
                 </div>
 
                 {!activeCase && clinicalTab === 'PERFIL' && (
@@ -1827,14 +1722,14 @@ export default function App() {
                           <h4 className="text-xs font-bold text-indigo-500 uppercase">✏️ Datos Profesionales & Alertas</h4>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Título')}</label>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Título</label>
                               <select value={editProfessionType} onChange={(e) => setEditProfessionType(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`}>
-                                <option value="PSICOLOGO">{t('Psicólogo(a) Clínico')}</option>
-                                <option value="PSIQUIATRA">{t('Médico Psiquiatra')}</option>
+                                <option value="PSICOLOGO">Psicólogo(a) Clínico</option>
+                                <option value="PSIQUIATRA">Médico Psiquiatra</option>
                               </select>
                             </div>
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Nombre Completo')}</label>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Nombre Completo</label>
                               <input type="text" required value={editProfileName} onChange={(e) => setEditProfileName(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
                             </div>
                           </div>
@@ -1849,7 +1744,7 @@ export default function App() {
                             </select>
                           </div>
                         </div>
-                        <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
+                        <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">Guardar Perfil</button>
                       </form>
 
                       {/* COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
@@ -1857,7 +1752,7 @@ export default function App() {
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
                           <div>
-                            <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Usuario')}</label>
+                            <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Usuario</label>
                             <input type="text" disabled value={currentUser.username} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.textMuted} cursor-not-allowed font-mono opacity-60`} />
                           </div>
                           <button type="button" onClick={() => setShowPasswordModal(true)} className={`px-5 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold w-full mt-4 transition-colors`}>
@@ -1874,7 +1769,7 @@ export default function App() {
                   <div className="w-full">
                     {totalAlerts === 0 ? (
                       <div className={`text-center py-10 ${th.card} rounded-2xl border ${th.border}`}>
-                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>{t('Bandeja Limpia')}</p>
+                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>Bandeja Limpia</p>
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
@@ -1912,16 +1807,16 @@ export default function App() {
 
                 {!activeCase && clinicalTab === 'BUSCAR' && (
                   <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full`}>
-                    <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 {t('BÚSQUEDA DE EXPEDIENTES')}</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ {t('Nuevo Expediente')}</button></div>
+                    <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 BÚSQUEDA DE EXPEDIENTES</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ Nuevo Expediente</button></div>
                     {showRegisterForm && (
                       <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5 shadow-inner`}>
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>1. Datos Personales Básicos</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <input type="text" required placeholder={t('ID Expediente (Ej. PAC-001)')} value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" required placeholder={t('Nombre Completo')} value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder={t('Teléfono')} value={newPatientData.telefono} onChange={(e) => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder={t('Edad')} value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder="ID Expediente (Ej. PAC-001)" value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder="Nombre Completo" value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Teléfono" value={newPatientData.telefono} onChange={(e) => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                             
                             <div className="sm:col-span-2 space-y-1">
                                <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
@@ -1932,40 +1827,40 @@ export default function App() {
                             </div>
                             
                             <select value={newPatientData.sexo} onChange={(e) => setNewPatientForm(p => ({ ...p, sexo: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Femenino">{t('Femenino')}</option>
-                              <option value="Masculino">{t('Masculino')}</option>
-                              <option value="Otro">{t('Otro')}</option>
+                              <option value="Femenino">Femenino</option>
+                              <option value="Masculino">Masculino</option>
+                              <option value="Otro">Otro</option>
                             </select>
                             <select value={newPatientData.estadoCivil} onChange={(e) => setNewPatientForm(p => ({ ...p, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Soltero(a)">{t('Soltero(a)')}</option>
-                              <option value="Casado(a)">{t('Casado(a)')}</option>
-                              <option value="Divorciado(a)">{t('Divorciado(a)')}</option>
-                              <option value="Viudo(a)">{t('Viudo(a)')}</option>
-                              <option value="Unión Libre">{t('Unión Libre')}</option>
+                              <option value="Soltero(a)">Soltero(a)</option>
+                              <option value="Casado(a)">Casado(a)</option>
+                              <option value="Divorciado(a)">Divorciado(a)</option>
+                              <option value="Viudo(a)">Viudo(a)</option>
+                              <option value="Unión Libre">Unión Libre</option>
                             </select>
-                            <input type="text" placeholder={t('Religión')} value={newPatientData.religion} onChange={(e) => setNewPatientForm(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Religión" value={newPatientData.religion} onChange={(e) => setNewPatientForm(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>2. Contexto Sociodemográfico</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <input type="text" placeholder={t('Ocupación')} value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder={t('Grado de Estudios')} value={newPatientData.estudios} onChange={(e) => setNewPatientForm(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Ocupación" value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Grado de Estudios" value={newPatientData.estudios} onChange={(e) => setNewPatientForm(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Lugar de Origen / Procedencia" value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder="Datos de Progenitores (Nombres, edades, estado...)" value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta')}</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>3. Anamnesis y Motivo de Consulta</h4>
                           <div className="space-y-3">
-                            <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea rows={2} placeholder="Antecedentes Médicos / Psicológicos Previos..." value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea required rows={3} placeholder="Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)..." value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
-                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 {t('Guardar Expediente Clínico Completo')}</button>
+                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 Guardar Expediente Clínico Completo</button>
                       </form>
                     )}
                     
@@ -2348,82 +2243,6 @@ export default function App() {
         </div>
       )}
 
-      {/* NUEVO: MODAL PARA EDITAR EXPEDIENTE */}
-      {showEditPatientModal && activeCase && (
-        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
-          <div className={`${th.card} border ${th.border} rounded-2xl max-w-3xl w-full p-6 text-xs shadow-2xl max-h-[90vh] overflow-y-auto`}>
-            <div className={`flex justify-between items-center border-b ${th.border} pb-3 mb-4`}>
-              <h3 className={`text-sm font-bold ${th.text}`}>✏️ Editar Expediente Médico</h3>
-              <button onClick={() => setShowEditPatientModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
-            </div>
-            <form onSubmit={handleSaveEditPatient} className="space-y-5">
-              <div>
-                <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                  {/* ID BLOQUEADO (READONLY) */}
-                  <div className="sm:col-span-1">
-                    <label className={`text-[9px] ${th.textMuted} font-bold block mb-1`}>ID Expediente (Protegido)</label>
-                    <input type="text" readOnly value={editPatientData.id} className={`w-full p-2.5 bg-slate-800/50 border ${th.border} rounded-lg text-xs text-slate-500 cursor-not-allowed`} />
-                  </div>
-                  <div className="sm:col-span-3">
-                    <label className={`text-[9px] ${th.textMuted} font-bold block mb-1`}>Nombre Completo</label>
-                    <input type="text" required value={editPatientData.patientName} onChange={(e) => setEditPatientData(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  </div>
-                  
-                  <input type="text" placeholder={t('Teléfono')} value={editPatientData.telefono} onChange={(e) => setEditPatientData(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Edad')} value={editPatientData.edad} onChange={(e) => setEditPatientData(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  
-                  <div className="sm:col-span-2 space-y-1">
-                     <label className={`text-[9px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
-                     <div className="flex gap-2">
-                        <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setEditPatientData(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.input} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
-                        <input type="url" placeholder="O pegue una URL..." value={editPatientData.fotoUrl} onChange={(e) => setEditPatientData(p => ({ ...p, fotoUrl: e.target.value }))} className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                     </div>
-                  </div>
-                  
-                  <select value={editPatientData.sexo} onChange={(e) => setEditPatientData(p => ({ ...p, sexo: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                    <option value="Femenino">{t('Femenino')}</option>
-                    <option value="Masculino">{t('Masculino')}</option>
-                    <option value="Otro">{t('Otro')}</option>
-                  </select>
-                  <select value={editPatientData.estadoCivil} onChange={(e) => setEditPatientData(p => ({ ...p, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                    <option value="Soltero(a)">{t('Soltero(a)')}</option>
-                    <option value="Casado(a)">{t('Casado(a)')}</option>
-                    <option value="Divorciado(a)">{t('Divorciado(a)')}</option>
-                    <option value="Viudo(a)">{t('Viudo(a)')}</option>
-                    <option value="Unión Libre">{t('Unión Libre')}</option>
-                  </select>
-                  <input type="text" placeholder={t('Religión')} value={editPatientData.religion} onChange={(e) => setEditPatientData(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div>
-                <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <input type="text" placeholder={t('Ocupación')} value={editPatientData.ocupacion} onChange={(e) => setEditPatientData(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Grado de Estudios')} value={editPatientData.estudios} onChange={(e) => setEditPatientData(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={editPatientData.origenProcedencia} onChange={(e) => setEditPatientData(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={editPatientData.datosProgenitores} onChange={(e) => setEditPatientData(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div>
-                <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta Inicial')}</h4>
-                <div className="space-y-3">
-                  <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={editPatientData.antecedentes} onChange={(e) => setEditPatientData(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={editPatientData.motivoConsultaTextual} onChange={(e) => setEditPatientData(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div className={`flex justify-end gap-2 pt-3 border-t ${th.border}`}>
-                <button type="button" onClick={() => setShowEditPatientModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
-                <button type="submit" className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-colors">💾 Guardar Cambios</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* MODAL DE BATERIAS DSM-5 */}
       {showDsmModal && selectedDsmTemplate && (
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
@@ -2438,4 +2257,69 @@ export default function App() {
                   <p className={`${th.text} font-semibold mb-2`}>{idx + 1}. {q}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     {selectedDsmTemplate.options.map((option) => (
-                      <label key={option} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${dsmAnswers[q] === option ? 'bg-indigo-100 border-indigo-500 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-Soy un modelo de lenguage, por lo que no me han diseñado para eso.
+                      <label key={option} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${dsmAnswers[q] === option ? 'bg-indigo-100 border-indigo-500 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' : `${th.card} ${th.border} ${th.text} hover:border-indigo-500`}`}>
+                        <input type="radio" checked={dsmAnswers[q] === option} onChange={() => setDsmAnswers(prev => ({ ...prev, [q]: option }))} className="text-indigo-600" />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className={`${th.input} p-4 rounded-xl border ${th.border} mt-4`}>
+                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>Firma Digital para Guardar</label>
+                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder="Su clave de psicólogo/psiquiatra..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
+              </div>
+            </div>
+            <div className={`p-3 border-t ${th.border} ${th.input} flex justify-end gap-2`}>
+              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>Cancelar</button>
+              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">Firmar y Guardar en Expediente</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CALENDARIO */}
+      {showCalendarModal && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
+            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
+              <h3 className={`text-sm font-bold ${th.text}`}>➕ Agendar Nueva Cita</h3>
+              <button onClick={() => setShowCalendarModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <form onSubmit={handleCreateAppointment} className="space-y-4">
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente (Expediente Activo)</label>
+                <select required value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`}>
+                  <option value="" disabled>Seleccione un paciente...</option>
+                  {myPatients.map(p => (
+                    <option key={p.id} value={p.id}>{p.patientName} (Exp: {p.id})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Fecha</label>
+                  <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+                </div>
+                <div>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Hora</label>
+                  <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+                </div>
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Duración (Minutos)</label>
+                <input type="number" required min="15" step="15" value={durationMinutes} onChange={(e) => setDurationMinutes(parseInt(e.target.value))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
+              </div>
+              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 Guardar Cita</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* FIRMA DE DESARROLLADOR Y FOOTER */}
+      <footer className={`border-t ${th.border} ${th.bg} py-4 text-center text-xs ${th.textMuted} mt-auto w-full transition-colors duration-300`}>
+        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. Desarrollado por Harold.</p>
+      </footer>
+    </div>
+  );
+}
