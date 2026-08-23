@@ -115,7 +115,7 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'MSIBPD', name: 'MSI-BPD (Trastorno Límite de Personalidad - TLP)', questions: ['¿Relaciones interpersonales muy intensas pero inestables?', '¿Actos impulsivos de riesgo (gastos, sexo, sustancias)?', '¿Conductas o amenazas suicidas / autolesiones deliberadas?', '¿Cambios de humor repentinos y extremos?', '¿Sensación persistente de vacío interior?', '¿Miedo intenso e irrazonable al rechazo o abandono?', '¿Episodios de ira intensa fuera de control?', '¿Cambio dramático sobre opinión propia o valores?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'MDQ', name: 'MDQ (Detección de Trastorno Bipolar)', questions: ['¿Se sintió tan feliz o lleno de energía que otros notaron cambios?', '¿Se sintió tan irritable que le gritaba a la gente o peleaba?', '¿Se sentía mucho más seguro de sí mismo que de costumbre?', '¿Dormía mucho menos de lo habitual y no extrañaba el sueño?', '¿Hablaba mucho más o más rápido de lo habitual?', '¿Los pensamientos iban a toda velocidad por su cabeza?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'MMSE', name: 'MMSE (Mini-Mental State - Evaluación Cognitiva)', questions: ['Orientación Temporal (Año, estación, fecha, día, mes)', 'Orientación Espacial (Lugar, hospital, ciudad, país)', 'Fijación y Registro (Repetición de 3 palabras clave)', 'Atención y Cálculo (Sustracción de 7 en 7 o deletreo inverso)', 'Memoria de Evocación (Recordar las 3 palabras fijadas)'], options: ['Incorrecto (0)', 'Correcto (1)'] },
-  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfacción con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfaction con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
   { id: 'SPIN', name: 'SPIN (Inventario de Fobia Social)', questions: ['Tengo miedo a las personas con autoridad', 'Me molesta ruborizarme delante de la gente', 'Las fiestas y eventos me dan temor', 'Evito hablar con gente que no conozco', 'El temor a la crítica me paraliza'], options: ['Nada (0)', 'Un poco (1)', 'Moderado (2)', 'Mucho (3)', 'Extremadamente (4)'] },
   { id: 'EAT26', name: 'EAT-26 (Trastornos Conducta Alimentaria)', questions: ['Me aterroriza tener sobrepeso.', 'Evito comer cuando tengo hambre.', 'Me preocupo mucho por la comida.', 'Siento que los demás preferirían que yo comiese más.', 'Vomito después de haber comido.', 'Siento que la comida controla mi vida.'], options: ['Nunca (0)', 'A veces (1)', 'Siempre (2)'] },
   { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su maneira de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
@@ -709,13 +709,17 @@ export default function App() {
   const audioChunksRef = useRef<Blob[]>([]);
 
   // ADMIN STATES
+  const [editingUsername, setEditingUsername] = useState<string | null>(null);
+  const [editPasswordInput, setEditPasswordInput] = useState('');
+  const [editingExpiryUsername, setEditingExpiryUsername] = useState<string | null>(null);
+  const [editExpiryInput, setEditExpiryInput] = useState('');
+
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regFullName, setRegFullName] = useState('');
   const [regColegiado, setRegColegiado] = useState('');
   const [regLicenseType, setRegLicenseType] = useState<'ESTANDAR' | 'PREMIUM' | 'DEMO'>('ESTANDAR');
   const [regCountry, setRegCountry] = useState('GT'); 
-  const [regVoice, setRegVoice] = useState(false); 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -756,16 +760,23 @@ export default function App() {
     const expiry = new Date();
     if (regLicenseType === 'DEMO') expiry.setDate(expiry.getDate() + 15); else expiry.setDate(expiry.getDate() + 365);
     const newPsychologist: any = { 
-      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: 'PSICOLOGO', specialty: '', professionalReview: '', countryCode: regCountry, hasVoiceModule: regVoice, abandonmentThreshold: 30 
+      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: 'PSICOLOGO', specialty: '', professionalReview: '', countryCode: regCountry, abandonmentThreshold: 30 
     };
     const updatedDb = { ...psychologists, [newPsychologist.username]: newPsychologist };
     setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
     try { await savePsychologistsRemote(updatedDb); alert(`Licencia activada para: ${newPsychologist.fullName}`); } catch (error) {}
   };
 
-  const handleToggleVoiceModule = async (username: string) => {
-    const updatedDb = { ...psychologists, [username]: { ...psychologists[username], hasVoiceModule: !psychologists[username].hasVoiceModule } };
-    setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb)); await savePsychologistsRemote(updatedDb);
+  const handleUpdateUserPasswordAdmin = async (username: string) => {
+    if (!editPasswordInput.trim()) return;
+    const updatedDb = { ...psychologists, [username]: { ...psychologists[username], passwordHash: editPasswordInput.trim() } };
+    setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb)); await savePsychologistsRemote(updatedDb); alert(`Contraseña actualizada.`); setEditingUsername(null); setEditPasswordInput('');
+  };
+
+  const handleUpdateUserExpiryAdmin = async (username: string) => {
+    if (!editExpiryInput.trim()) return;
+    const updatedDb = { ...psychologists, [username]: { ...psychologists[username], licenseExpiry: editExpiryInput.trim(), isActive: true } };
+    setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb)); await savePsychologistsRemote(updatedDb); alert(`Fecha renovada.`); setEditingExpiryUsername(null); setEditExpiryInput('');
   };
 
   const handleRegisterPatient = (e: React.FormEvent) => {
@@ -1086,13 +1097,7 @@ export default function App() {
                         </select>
                       </div>
                       
-                      <div className="p-3 bg-indigo-900/10 border border-indigo-500/30 rounded mt-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={regVoice} onChange={(e) => setRegVoice(e.target.checked)} className="accent-indigo-500 w-4 h-4" />
-                          <span className="text-xs text-indigo-500 font-bold">Activar Módulo de Voz / Audios AI</span>
-                        </label>
-                      </div>
-                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs">{t('Activar Licencia')}</button>
+                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs mt-2">{t('Activar Licencia')}</button>
                     </form>
                   </div>
 
@@ -1102,14 +1107,32 @@ export default function App() {
                       {Object.values(psychologists).filter(p => p && p.username).map((p) => {
                         const rem = getDaysRemaining(p.licenseExpiry);
                         return (
-                          <div key={p.username} className={`p-3 ${th.input} rounded-xl border ${th.border} text-xs flex justify-between`}>
-                            <div>
-                              <span className={`font-bold ${th.text}`}>{p.fullName}</span>
-                              <span className={`block text-[10px] ${th.textMuted}`}>User: {p.username} | Exp: {p.licenseExpiry} ({rem} días)</span>
+                          <div key={p.username} className={`p-3 ${th.input} rounded-xl border ${th.border} text-xs flex flex-col gap-2`}>
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0 flex-1">
+                                <span className={`font-bold ${th.text}`}>{p.fullName}</span>
+                                <span className={`block text-[10px] ${th.textMuted}`}>User: {p.username} | Exp: {p.licenseExpiry} ({rem} días)</span>
+                              </div>
+                              <div className="flex gap-1">
+                                <button onClick={() => { setEditingExpiryUsername(editingExpiryUsername === p.username ? null : p.username); setEditExpiryInput(p.licenseExpiry); setEditingUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Renovar/Cambiar Fecha">📅</button>
+                                <button onClick={() => { setEditingUsername(editingUsername === p.username ? null : p.username); setEditPasswordInput(''); setEditingExpiryUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Cambiar Clave">🔑</button>
+                              </div>
                             </div>
-                            <button onClick={() => handleToggleVoiceModule(p.username)} className={`px-2 py-1 rounded text-[9px] font-bold ${p.hasVoiceModule ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400'}`}>
-                              Permiso Voz: {p.hasVoiceModule ? 'ON' : 'OFF'}
-                            </button>
+                            
+                            {editingUsername === p.username && (
+                              <div className={`mt-1 pt-2 border-t ${th.border} flex gap-2`}>
+                                <input type="text" value={editPasswordInput} onChange={(e) => setEditPasswordInput(e.target.value)} placeholder="Nueva clave..." className={`flex-1 p-1.5 ${th.card} border ${th.border} rounded text-[11px] ${th.text} min-w-0`} />
+                                <button onClick={() => handleUpdateUserPasswordAdmin(p.username)} className="px-3 py-1.5 bg-amber-600 text-white font-bold rounded text-[10px] shrink-0">Guardar</button>
+                              </div>
+                            )}
+
+                            {editingExpiryUsername === p.username && (
+                              <div className={`mt-1 pt-2 border-t ${th.border} flex gap-2 items-center`}>
+                                <span className={`text-[9px] ${th.textMuted}`}>Fecha:</span>
+                                <input type="date" value={editExpiryInput} onChange={(e) => setEditExpiryInput(e.target.value)} className={`flex-1 p-1.5 ${th.card} border ${th.border} rounded text-[11px] ${th.text} min-w-0`} />
+                                <button onClick={() => handleUpdateUserExpiryAdmin(p.username)} className="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded text-[10px] shrink-0">Renovar</button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -1380,34 +1403,30 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {currentUser?.hasVoiceModule ? (
-                                <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora de Sesión</label>
-                                  
-                                  {!isMicConnected ? (
-                                    <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
-                                      🔌 Conectar Micrófono del Dispositivo
-                                    </button>
-                                  ) : (
-                                    <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                                      {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
-                                    </button>
-                                  )}
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
+                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
+                                
+                                {!isMicConnected ? (
+                                  <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
+                                    🔌 Conectar Micrófono del Dispositivo
+                                  </button>
+                                ) : (
+                                  <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                                    {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
+                                  </button>
+                                )}
 
-                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
-                                  
-                                  <div className="flex gap-2 mt-2">
-                                    <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                                    <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
-                                  </div>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
-                                  <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
-                                    if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
-                                  }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
+                                
+                                <div className="flex gap-2 mt-2">
+                                  <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                  <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
                                 </div>
-                              ) : (
-                                <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Permiso de Voz Inactivo</p></div>
-                              )}
+                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
+                                <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
+                                  if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
+                                }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                              </div>
 
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
                                  <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📎 Subir Batería Resuelta Manualmente</label>
@@ -1462,7 +1481,7 @@ export default function App() {
 
                       {activeCaseTab === 'ESTADISTICAS' && <PatientDashboard activeCase={activeCase} />}
 
-                      {/* RESTAURADO SIEMPRE VISIBLE: CONSULTA ACADÉMICA / CIENTÍFICA */}
+                      {/* SIEMPRE VISIBLE: CONSULTA ACADÉMICA / CIENTÍFICA (Globalmente en la columna izquierda) */}
                       <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-3 w-full mt-6`}>
                         <span className={`text-xs font-bold ${th.text} uppercase block tracking-wider truncate`}>🔬 {t('Consulta Académica / Científica')}</span>
                         <textarea value={scientificQuery.queryText} onChange={(e) => setScientificQuery(prev => ({ ...prev, queryText: e.target.value }))} rows={2} placeholder={t('Consulte dudas teóricas, criterios del DSM-5, medicamentos...')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
