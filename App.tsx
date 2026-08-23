@@ -128,10 +128,17 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
   ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
   : NUEVAS_EVALUACIONES;
 
+// CORRECCIÓN APLICADA: Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
-  const match = scoreStr.match(/\d+/);
-  return match ? parseInt(match[0], 10) : 0;
+  
+  // Buscar explícitamente "Score: X" para obtener el punteo real
+  const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
+  if (scoreMatch) return parseInt(scoreMatch[1], 10);
+  
+  // Si no está formateado con "Score:", busca el último número del string
+  const lastNumberMatch = scoreStr.match(/(\d+)(?!.*\d)/);
+  return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
 
 const generateSpiderChartSVG = (areas: any, t: (key: string, overrideLang?: string) => string, targetLang?: string) => {
@@ -164,7 +171,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   
-  // SOLUCIÓN: Solo Español e Inglés habilitados.
+  // IDIOMAS: Solo Español e Inglés habilitados.
   const [lang, setLang] = useState<'ES'|'EN'>('ES');
   const [pdfLang, setPdfLang] = useState<'ES'|'EN'>('ES');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -481,10 +488,10 @@ export default function App() {
                 <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
-                <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bai / 63) * 40}`).join(' ')} />
-                <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / (totalSessions - 1)) * 100},${40 - (d.bdi / 63) * 40}`).join(' ')} />
+                <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.bai / 63) * 40}`).join(' ')} />
+                <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.bdi / 63) * 40}`).join(' ')} />
                 {chartData.map((d, i) => {
-                  const cx = (i / (totalSessions - 1)) * 100;
+                  const cx = (i / Math.max(1, totalSessions - 1)) * 100;
                   return (
                     <g key={i}>
                       <circle cx={cx} cy={40 - (d.bai / 63) * 40} r="1.5" fill="#f59e0b" />
@@ -573,6 +580,26 @@ export default function App() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
   const [passMessage, setPassMessage] = useState({ text: '', type: '' });
+
+  const handleUserChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    if (passForm.oldPass !== currentUser.passwordHash) { setPassMessage({ text: 'Contraseña actual incorrecta.', type: 'error' }); return; }
+    if (passForm.newPass !== passForm.confirmPass) { setPassMessage({ text: 'Las contraseñas no coinciden.', type: 'error' }); return; }
+    if (passForm.newPass.length < 6) { setPassMessage({ text: 'Debe tener al menos 6 caracteres.', type: 'error' }); return; }
+
+    const updatedUser = { ...currentUser, passwordHash: passForm.newPass };
+    const updatedDb = { ...psychologists, [currentUser.username]: updatedUser };
+    setPsychologists(updatedDb); setCurrentUser(updatedUser);
+    localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
+    localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
+    
+    try {
+      await savePsychologistsRemote(updatedDb);
+      setPassMessage({ text: '¡Contraseña actualizada!', type: 'success' });
+      setTimeout(() => { setShowPasswordModal(false); setPassForm({ oldPass: '', newPass: '', confirmPass: '' }); setPassMessage({ text: '', type: '' }); }, 2000);
+    } catch (error) { setPassMessage({ text: 'Error de red.', type: 'error' }); }
+  };
 
   const [editProfileName, setEditProfileName] = useState('');
   const [editProfessionType, setEditProfessionType] = useState('PSICOLOGO');
@@ -1156,6 +1183,21 @@ export default function App() {
                         </div>
                         <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                       </form>
+
+                      {/* RESTAURADO: COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
+                      <div className="space-y-6">
+                        <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
+                          <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
+                          <div>
+                            <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Usuario')}</label>
+                            <input type="text" disabled value={currentUser.username} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.textMuted} cursor-not-allowed font-mono opacity-60`} />
+                          </div>
+                          <button type="button" onClick={() => setShowPasswordModal(true)} className={`px-5 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold w-full mt-4 transition-colors`}>
+                            🔑 Cambiar Contraseña
+                          </button>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 )}
@@ -1248,7 +1290,6 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
-                              {/* RESTAURADO: SLIDERS MULTIAXIALES (SUEÑO, APETITO, ENERGIA, ETC) */}
                               <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
                                 <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
                                 <div className="space-y-2">
@@ -1280,35 +1321,30 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {currentUser?.hasVoiceModule ? (
-                                <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora de Sesión</label>
-                                  
-                                  {/* DOS PASOS: CONECTAR MICRÓFONO -> LUEGO GRABAR */}
-                                  {!isMicConnected ? (
-                                    <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
-                                      🔌 Conectar Micrófono del Dispositivo
-                                    </button>
-                                  ) : (
-                                    <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                                      {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
-                                    </button>
-                                  )}
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
+                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
+                                
+                                {!isMicConnected ? (
+                                  <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
+                                    🔌 Conectar Micrófono del Dispositivo
+                                  </button>
+                                ) : (
+                                  <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                                    {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
+                                  </button>
+                                )}
 
-                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
-                                  
-                                  <div className="flex gap-2 mt-2">
-                                    <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                                    <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
-                                  </div>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o Video Externo</label>
-                                  <input type="file" accept="audio/*, video/*" onChange={(e) => {
-                                    if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
-                                  }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
+                                
+                                <div className="flex gap-2 mt-2">
+                                  <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                  <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
                                 </div>
-                              ) : (
-                                <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Permiso de Voz Inactivo</p></div>
-                              )}
+                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
+                                <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
+                                  if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
+                                }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                              </div>
 
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
                                  <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📎 Subir Batería Resuelta Manualmente</label>
@@ -1388,6 +1424,34 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* RESTAURADO: MODAL PARA CAMBIAR CONTRASEÑA */}
+      {showPasswordModal && (
+        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+          <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
+            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
+              <h3 className={`text-sm font-bold ${th.text}`}>🔒 Cambiar Contraseña</h3>
+              <button onClick={() => setShowPasswordModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
+            </div>
+            <form onSubmit={handleUserChangePassword} className="space-y-4">
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Contraseña Actual</label>
+                <input type="password" required value={passForm.oldPass} onChange={e => setPassForm(p => ({...p, oldPass: e.target.value}))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text}`} />
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Nueva Contraseña</label>
+                <input type="password" required value={passForm.newPass} onChange={e => setPassForm(p => ({...p, newPass: e.target.value}))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text}`} />
+              </div>
+              <div>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Confirmar Nueva Contraseña</label>
+                <input type="password" required value={passForm.confirmPass} onChange={e => setPassForm(p => ({...p, confirmPass: e.target.value}))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text}`} />
+              </div>
+              {passMessage.text && <p className={`text-[10px] font-bold ${passMessage.type === 'error' ? 'text-red-500' : 'text-emerald-500'}`}>{passMessage.text}</p>}
+              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">Actualizar Contraseña</button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL PARA EXTENDER RECETA MÉDICA */}
       {showRecipeModal && activeCase && currentUser?.professionType === 'PSIQUIATRA' && (
