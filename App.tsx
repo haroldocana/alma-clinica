@@ -1053,13 +1053,17 @@ export default function App() {
     descargarExpedientesNube();
   }, [currentUser]);
 
-  // 2. SUBIR expedientes a la nube cada vez que haya un cambio o nueva sesión
+  // 2. SUBIR expedientes a la nube cada vez que haya un cambio
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(clinicalDatabase));
       localStorage.setItem(`appointments_db_${currentUser.username}`, JSON.stringify(appointments));
-      // Esta línea dispara el guardado al servidor de Google de fondo
-      saveClinicalCasesRemote(currentUser.username, clinicalDatabase).catch(()=>{});
+      
+      // CANDADO DE SEGURIDAD: Solo subimos a la nube si hay al menos 1 paciente en la base de datos. 
+      // Esto evita sobreescribir la nube con una lista vacía si entramos desde un dispositivo nuevo.
+      if (Object.keys(clinicalDatabase).length > 0) {
+        saveClinicalCasesRemote(currentUser.username, clinicalDatabase).catch(()=>{});
+      }
     }
   }, [clinicalDatabase, appointments, currentUser]);
 
