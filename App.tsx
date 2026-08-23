@@ -163,8 +163,10 @@ export default function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.CLINICAL);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
-  const [lang, setLang] = useState<'ES'|'EN'|'PT'|'IT'|'FR'>('ES');
-  const [pdfLang, setPdfLang] = useState<'ES'|'EN'|'PT'|'IT'|'FR'>('ES');
+  
+  // SOLUCIÓN: Solo Español e Inglés habilitados.
+  const [lang, setLang] = useState<'ES'|'EN'>('ES');
+  const [pdfLang, setPdfLang] = useState<'ES'|'EN'>('ES');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const th = {
@@ -180,135 +182,135 @@ export default function App() {
 
   const t = (key: string, overrideLang?: string) => {
     const activeLang = overrideLang || lang;
-    const dict: Record<string, { ES: string, EN: string, PT: string, IT: string, FR: string }> = {
-      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant', PT: 'Assistente Clínico SaaS', IT: 'Assistente Clinico SaaS', FR: 'Assistant Clinique SaaS' },
-      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)', PT: 'Sistema Clínico e Prontuários', IT: 'Sistema Clinico e Cartelle', FR: 'Système Clinique et Dossiers' },
-      'Clínico': { ES: 'Clínico', EN: 'Clinical', PT: 'Clínico', IT: 'Clinico', FR: 'Clinique' },
-      'Agenda': { ES: 'Agenda', EN: 'Schedule', PT: 'Agenda', IT: 'Agenda', FR: 'Agenda' },
-      'Admin': { ES: 'Admin', EN: 'Admin', PT: 'Admin', IT: 'Admin', FR: 'Admin' },
-      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access', PT: 'Acesso Profissional Clínico', IT: 'Accesso Professionale Clinico', FR: 'Accès Professionnel Clinique' },
-      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login', PT: 'Entrar', IT: 'Accedi', FR: 'Connexion' },
-      'Usuario': { ES: 'Usuario', EN: 'Username', PT: 'Usuário', IT: 'Utente', FR: 'Utilisateur' },
-      'Contraseña': { ES: 'Contraseña', EN: 'Password', PT: 'Senha', IT: 'Password', FR: 'Mot de passe' },
-      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console', PT: 'Console Mestre de Licenças', IT: 'Console Master Licenze', FR: 'Console Principale des Licences' },
-      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License', PT: 'Ativar Nova Licença', IT: 'Attiva Nuova Licenza', FR: 'Activer Nouvelle Licence' },
-      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support', PT: 'Auditoria e Suporte', IT: 'Audit e Supporto', FR: 'Audit et Support' },
-      'Búsqueda': { ES: 'Búsqueda', EN: 'Search', PT: 'Busca', IT: 'Ricerca', FR: 'Recherche' },
-      'Alertas': { ES: 'Alertas', EN: 'Alerts', PT: 'Alertas', IT: 'Avvisi', FR: 'Alertes' },
-      'Mi Perfil': { ES: 'Mi Perfil', EN: 'My Profile', PT: 'Meu Perfil', IT: 'Mio Profilo', FR: 'Mon Profil' },
-      'Respaldo JSON': { ES: 'Respaldo JSON', EN: 'JSON Backup', PT: 'Backup JSON', IT: 'Backup JSON', FR: 'Sauvegarde JSON' },
-      'Cerrar Sesión': { ES: 'Cerrar Sesión', EN: 'Logout', PT: 'Sair', IT: 'Esci', FR: 'Déconnexion' },
-      'BÚSQUEDA DE EXPEDIENTES': { ES: 'BÚSQUEDA DE EXPEDIENTES', EN: 'RECORD SEARCH', PT: 'BUSCA DE PRONTUÁRIOS', IT: 'RICERCA CARTELLE', FR: 'RECHERCHE DE DOSSIERS' },
-      'Nuevo Expediente': { ES: 'Nuevo Expediente', EN: 'New Record', PT: 'Novo Prontuário', IT: 'Nuova Cartella', FR: 'Nouveau Dossier' },
-      'Ocultar Formulario': { ES: 'Ocultar Formulario', EN: 'Hide Form', PT: 'Ocultar Formulário', IT: 'Nascondi Modulo', FR: 'Masquer le Formulaire' },
-      'Edad': { ES: 'Edad', EN: 'Age', PT: 'Idade', IT: 'Età', FR: 'Âge' },
-      'Teléfono': { ES: 'Teléfono', EN: 'Phone', PT: 'Telefone', IT: 'Telefono', FR: 'Téléphone' },
-      'Religión': { ES: 'Religión', EN: 'Religion', PT: 'Religião', IT: 'Religione', FR: 'Religion' },
-      'Femenino': { ES: 'Femenino', EN: 'Female', PT: 'Feminino', IT: 'Femmina', FR: 'Féminin' },
-      'Masculino': { ES: 'Masculino', EN: 'Male', PT: 'Masculino', IT: 'Maschio', FR: 'Masculin' },
-      'Otro': { ES: 'Otro', EN: 'Other', PT: 'Outro', IT: 'Altro', FR: 'Autre' },
-      'Soltero(a)': { ES: 'Soltero(a)', EN: 'Single', PT: 'Solteiro(a)', IT: 'Celibe/Nubile', FR: 'Célibataire' },
-      'Casado(a)': { ES: 'Casado(a)', EN: 'Married', PT: 'Casado(a)', IT: 'Sposato(a)', FR: 'Marié(e)' },
-      'Divorciado(a)': { ES: 'Divorciado(a)', EN: 'Divorced', PT: 'Divorciado(a)', IT: 'Divorziato(a)', FR: 'Divorcé(e)' },
-      'Viudo(a)': { ES: 'Viudo(a)', EN: 'Widowed', PT: 'Viúvo(a)', IT: 'Vedovo(a)', FR: 'Veuf(ve)' },
-      'Unión Libre': { ES: 'Unión Libre', EN: 'Domestic Partnership', PT: 'União Estável', IT: 'Convivenza', FR: 'Union Libre' },
-      'Psicólogo(a) Clínico': { ES: 'Psicólogo(a) Clínico', EN: 'Clinical Psychologist', PT: 'Psicólogo(a) Clínico', IT: 'Psicologo(a) Clinico', FR: 'Psychologue Clinicien' },
-      'Médico Psiquiatra': { ES: 'Médico Psiquiatra', EN: 'Psychiatrist', PT: 'Médico Psiquiatra', IT: 'Medico Psichiatra', FR: 'Médecin Psychiatre' },
-      '1. Datos Personales Básicos': { ES: '1. Datos Personales Básicos', EN: '1. Basic Personal Data', PT: '1. Dados Pessoais Básicos', IT: '1. Dati Personali di Base', FR: '1. Données Personnelles de Base' },
-      'ID Expediente (Ej. PAC-001)': { ES: 'ID Expediente (Ej. PAC-001)', EN: 'Record ID (E.g. PAC-001)', PT: 'ID do Prontuário', IT: 'ID Cartella', FR: 'ID Dossier' },
-      '2. Contexto Sociodemográfico': { ES: '2. Contexto Sociodemográfico', EN: '2. Sociodemographic Context', PT: '2. Contexto Sociodemográfico', IT: '2. Contesto Sociodemografico', FR: '2. Contexte Sociodémographique' },
-      'Ocupación': { ES: 'Ocupación', EN: 'Occupation', PT: 'Ocupação', IT: 'Occupazione', FR: 'Profession' },
-      'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level', PT: 'Grau de Escolaridade', IT: 'Livello di Istruzione', FR: 'Niveau d\'Éducation' },
-      'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin', PT: 'Local de Origem', IT: 'Luogo di Origine', FR: 'Lieu d\'Origine' },
-      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)', PT: 'Dados dos Pais', IT: 'Dati dei Genitori', FR: 'Données Parentales' },
-      '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint', PT: '3. Anamnese e Queixa Principal', IT: '3. Anamnesi e Motivo del Consulto', FR: '3. Anamnèse et Motif de Consultation' },
-      'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...', PT: 'Antecedentes Médicos / Psicológicos...', IT: 'Precedenti Medici / Psicologici...', FR: 'Antécédents Médicaux / Psychologiques...' },
-      'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...', PT: 'Motivo da Consulta...', IT: 'Motivo del Consulto...', FR: 'Motif de Consultation...' },
-      'Guardar Expediente Clínico Completo': { ES: 'Guardar Expediente Clínico Completo', EN: 'Save Complete Clinical Record', PT: 'Salvar Prontuário Clínico Completo', IT: 'Salva Cartella Clinica Completa', FR: 'Enregistrer le Dossier Clinique Complet' },
-      'Busque por nombre o ID...': { ES: 'Busque por nombre o ID...', EN: 'Search by name or ID...', PT: 'Busque por nome ou ID...', IT: 'Cerca per nome o ID...', FR: 'Recherche par nom ou ID...' },
-      'Buscar': { ES: 'Buscar', EN: 'Search', PT: 'Buscar', IT: 'Cerca', FR: 'Chercher' },
-      'Constancia': { ES: 'Constancia', EN: 'Certificate', PT: 'Declaração', IT: 'Certificato', FR: 'Attestation' },
-      'Referencia': { ES: 'Referencia', EN: 'Referral', PT: 'Encaminhamento', IT: 'Impegnativa', FR: 'Référence' },
-      'Extender Receta': { ES: 'Extender Receta', EN: 'Prescription', PT: 'Receituário', IT: 'Ricetta', FR: 'Ordonnance' },
-      'Historial': { ES: 'Historial', EN: 'History', PT: 'Histórico', IT: 'Cronologia', FR: 'Historique' },
-      'KPIs Empresariales': { ES: 'KPIs Empresariales', EN: 'Business KPIs', PT: 'KPIs Empresariais', IT: 'KPI Aziendali', FR: 'KPIs d\'Entreprise' },
-      'Sesiones': { ES: 'Sesiones', EN: 'Sessions', PT: 'Sessões', IT: 'Sessioni', FR: 'Sessions' },
-      'Nueva': { ES: 'Nueva', EN: 'New', PT: 'Nova', IT: 'Nuova', FR: 'Nouvelle' },
-      'Generar Dictamen IA': { ES: 'Generar Dictamen IA', EN: 'Generate AI Report', PT: 'Gerar Parecer IA', IT: 'Genera Referto IA', FR: 'Générer Rapport IA' },
-      '⏳ Procesando con IA...': { ES: '⏳ Procesando con IA...', EN: '⏳ Processing with AI...', PT: '⏳ Processando com IA...', IT: '⏳ Elaborazione con IA...', FR: '⏳ Traitement avec IA...' },
-      'Consulta Académica / Científica': { ES: 'Consulta Académica / Científica', EN: 'Academic / Scientific Query', PT: 'Consulta Acadêmica / Científica', IT: 'Consultazione Accademica / Scientifica', FR: 'Consultation Académique / Scientifique' },
-      'Consulte dudas teóricas, criterios del DSM-5, medicamentos...': { ES: 'Consulte dudas teóricas, criterios del DSM-5, medicamentos...', EN: 'Consult theoretical doubts, DSM-5 criteria, medications...', PT: 'Consulte dúvidas teóricas...', IT: 'Consulta dubbi teorici, criteri DSM-5...', FR: 'Consultez des doutes théoriques, critères du DSM-5...' },
-      'Consultando Base de Datos...': { ES: 'Consultando Base de Datos...', EN: 'Querying Database...', PT: 'Consultando Banco de Dados...', IT: 'Consultazione Database...', FR: 'Interrogation de la Base de Données...' },
-      'Realizar Consulta': { ES: 'Realizar Consulta', EN: 'Run Query', PT: 'Realizar Consulta', IT: 'Esegui Query', FR: 'Exécuter la Requête' },
-      'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report', PT: 'Parecer Clínico Profissional', IT: 'Referto Clinico Professionale', FR: 'Rapport Clinique Professionnel' },
-      'Generar PDF': { ES: 'Generar PDF', EN: 'Generate PDF', PT: 'Gerar PDF', IT: 'Genera PDF', FR: 'Générer PDF' },
-      'Nivel de Actividad Psicosocial (GAF / EEAG)': { ES: 'Nivel de Actividad Psicosocial (GAF / EEAG)', EN: 'Global Assessment of Functioning (GAF)', PT: 'Avaliação Global do Funcionamento (GAF)', IT: 'Valutazione Globale del Funzionamento (GAF)', FR: 'Évaluation Globale du Fonctionnement (GAF)' },
-      'GAF / EEAG': { ES: 'GAF / EEAG', EN: 'GAF Score', PT: 'Escore GAF', IT: 'Punteggio GAF', FR: 'Score GAF' },
-      'Estabilidad Neurovegetativa': { ES: 'Estabilidad Neurovegetativa', EN: 'Neurovegetative Stability', PT: 'Estabilidade Neurovegetativa', IT: 'Stabilità Neurovegetativa', FR: 'Stabilité Neurovégétative' },
-      'Respuesta Terapéutica (% Reducción)': { ES: 'Respuesta Terapéutica (% Reducción)', EN: 'Therapeutic Response (% Reduction)', PT: 'Resposta Terapêutica (% Redução)', IT: 'Risposta Terapeutica (% Riduzione)', FR: 'Réponse Thérapeutique (% Réduction)' },
-      'Riesgo Clínico Integrado': { ES: 'Riesgo Clínico Integrado', EN: 'Integrated Clinical Risk', PT: 'Risco Clínico Integrado', IT: 'Rischio Clinico Integrato', FR: 'Risque Clinique Intégré' },
-      'Funcionalidad Adaptativa': { ES: 'Funcionalidad Adaptativa', EN: 'Adaptive Functioning', PT: 'Funcionalidade Adaptativa', IT: 'Funzionalità Adattiva', FR: 'Fonctionnalité Adaptative' },
-      'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO': { ES: 'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', EN: 'PSYCHOLOGICAL AND MEDICAL CLINICAL RECORD', PT: 'PRONTUÁRIO CLÍNICO PSICOLÓGICO E MÉDICO', IT: 'CARTELLA CLINICA PSICOLOGICA E MEDICA', FR: 'DOSSIER CLINIQUE PSYCHOLOGIQUE ET MÉDICAL' },
-      'Protocolo de Gestión de Salud': { ES: 'Protocolo de Gestión de Salud', EN: 'Health Management Protocol', PT: 'Protocolo de Gestão de Saúde', IT: 'Protocollo di Gestione Sanitaria', FR: 'Protocole de Gestion de la Santé' },
-      '1. FICHA DE IDENTIFICACIÓN': { ES: '1. FICHA DE IDENTIFICACIÓN', EN: '1. IDENTIFICATION DATA', PT: '1. FICHA DE IDENTIFICAÇÃO', IT: '1. DATI DI IDENTIFICAZIONE', FR: '1. FICHE D\'IDENTIFICATION' },
-      'Nombre:': { ES: 'Nombre:', EN: 'Name:', PT: 'Nome:', IT: 'Nome:', FR: 'Nom:' },
-      'Expediente ID:': { ES: 'Expediente ID:', EN: 'Record ID:', PT: 'ID do Prontuário:', IT: 'ID Cartella:', FR: 'ID Dossier:' },
-      'Teléfono:': { ES: 'Teléfono:', EN: 'Phone:', PT: 'Telefone:', IT: 'Telefono:', FR: 'Téléphone:' },
-      'Sexo:': { ES: 'Sexo:', EN: 'Sex:', PT: 'Sexo:', IT: 'Sesso:', FR: 'Sexe:' },
-      'Edad:': { ES: 'Edad:', EN: 'Age:', PT: 'Idade:', IT: 'Età:', FR: 'Âge:' },
-      'Ocupación:': { ES: 'Ocupación:', EN: 'Occupation:', PT: 'Ocupação:', IT: 'Occupazione:', FR: 'Profession:' },
-      'Estado Civil:': { ES: 'Estado Civil:', EN: 'Marital Status:', PT: 'Estado Civil:', IT: 'Stato Civile:', FR: 'État Civil:' },
-      'Origen / Procedencia:': { ES: 'Origen / Procedencia:', EN: 'Origin:', PT: 'Origem:', IT: 'Origine:', FR: 'Origine:' },
-      'Religión:': { ES: 'Religión:', EN: 'Religion:', PT: 'Religião:', IT: 'Religione:', FR: 'Religion:' },
-      'Datos de Progenitores:': { ES: 'Datos de Progenitores:', EN: 'Parental Data:', PT: 'Dados dos Genitores:', IT: 'Dati dei Genitori:', FR: 'Données Parentales:' },
-      'Motivo Textual:': { ES: 'Motivo Textual:', EN: 'Textual Reason:', PT: 'Motivo Textual:', IT: 'Motivo Testuale:', FR: 'Raison Textuelle:' },
-      'Antecedentes Clínicos:': { ES: 'Antecedentes Clínicos:', EN: 'Clinical History:', PT: 'Antecedentes Clínicos:', IT: 'Precedenti Clinici:', FR: 'Antécédents Cliniques:' },
-      'Sin antecedentes.': { ES: 'Sin antecedentes.', EN: 'No previous history.', PT: 'Sem antecedentes.', IT: 'Nessun precedente.', FR: 'Aucun antécédent.' },
-      '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS': { ES: '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', EN: '3. PSYCHOMETRIC EVALUATIONS PERFORMED', PT: '3. AVALIAÇÕES PSICOMÉTRICAS REALIZADAS', IT: '3. VALUTAZIONI PSICOMETRICHE ESEGUITE', FR: '3. ÉVALUATIONS PSYCHOMÉTRIQUES RÉALISÉES' },
-      'No se han aplicado baterías psicométricas formales aún.': { ES: 'No se han aplicado baterías psicométricas formales aún.', EN: 'No formal psychometric batteries applied yet.', PT: 'Nenhuma bateria psicométrica formal aplicada ainda.', IT: 'Nessuna batteria psicometrica formale applicata ancora.', FR: 'Aucune batterie psychométrique formelle appliquée pour le moment.' },
-      '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)': { ES: '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', EN: '4. DIAGNOSTIC IMPRESSION AND REPORT (AI)', PT: '4. PARECER E IMPRESSÃO DIAGNÓSTICA (IA)', IT: '4. REFERTO E IMPRESSIONE DIAGNOSTICA (IA)', FR: '4. RAPPORT ET IMPRESSION DIAGNOSTIQUE (IA)' },
-      'En proceso de evaluación clínica acumulada.': { ES: 'En proceso de evaluación clínica acumulada.', EN: 'In the process of cumulative clinical evaluation.', PT: 'Em processo de avaliação clínica acumulada.', IT: 'In corso di valutazione clinica accumulata.', FR: 'En cours d\'évaluation clinique cumulée.' },
-      '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)': { ES: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', EN: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', PT: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', IT: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)', FR: '5. BUSINESS INTELLIGENCE CLINIQUE (KPIs)' },
-      'Termómetro de Adherencia (Avance)': { ES: 'Termómetro de Adherencia (Avance)', EN: 'Adherence Thermometer (Progress)', PT: 'Termômetro de Adesão (Avanço)', IT: 'Termometro di Aderenza (Progresso)', FR: 'Thermomètre d\'Adhérence (Progrès)' },
-      'Hacia el protocolo base de alta clínica (12 sesiones).': { ES: 'Hacia el protocolo base de alta clínica (12 sesiones).', EN: 'Towards the clinical discharge base protocol (12 sessions).', PT: 'Rumo ao protocolo base de alta clínica (12 sessões).', IT: 'Verso il protocollo base di dimissione clinica (12 sessioni).', FR: 'Vers le protocole de base de sortie clinique (12 sessions).' },
-      'Eficacia (Sesión 1 vs Actual)': { ES: 'Eficacia (Sesión 1 vs Actual)', EN: 'Efficacy (Session 1 vs Current)', PT: 'Eficácia (Sessão 1 vs Atual)', IT: 'Efficacia (Sessione 1 vs Attuale)', FR: 'Efficacité (Session 1 vs Actuelle)' },
-      'Ansiedad': { ES: 'Ansiedad', EN: 'Anxiety', PT: 'Ansiedade', IT: 'Ansia', FR: 'Anxiété' },
-      'Depresión': { ES: 'Depresión', EN: 'Depression', PT: 'Depressão', IT: 'Depressione', FR: 'Dépression' },
-      'Rueda Multiaxial de Vida (Última Evaluación)': { ES: 'Rueda Multiaxial de Vida (Última Evaluación)', EN: 'Multiaxial Wheel of Life (Last Evaluation)', PT: 'Roda Multiaxial de Vida (Última Avaliação)', IT: 'Ruota Multiassiale della Vita (Ultima Valutazione)', FR: 'Roue Multiaxiale de Vie (Dernière Évaluation)' },
-      'Sentimiento Congruente': { ES: 'Sentimiento Congruente', EN: 'Congruent Sentiment', PT: 'Sentimento Congruente', IT: 'Sentimento Congruente', FR: 'Sentiment Congruent' },
-      'Estable': { ES: 'Estable', EN: 'Stable', PT: 'Estável', IT: 'Stabile', FR: 'Stable' },
-      'En Riesgo': { ES: 'En Riesgo', EN: 'At Risk', PT: 'Em Risco', IT: 'A Rischio', FR: 'À Risque' },
-      'Especialidad:': { ES: 'Especialidad:', EN: 'Specialty:', PT: 'Especialidade:', IT: 'Specialità:', FR: 'Spécialité:' },
-      'Colegiado Activo:': { ES: 'Colegiado Activo:', EN: 'Active License:', PT: 'Registro Ativo:', IT: 'Licenza Attiva:', FR: 'Licence Active:' },
-      'Prueba:': { ES: 'Prueba:', EN: 'Test:', PT: 'Teste:', IT: 'Test:', FR: 'Test:' },
-      'Actual:': { ES: 'Actual:', EN: 'Current:', PT: 'Atual:', IT: 'Attuale:', FR: 'Actuel:' },
-      'N/A': { ES: 'N/A', EN: 'N/A', PT: 'N/A', IT: 'N/A', FR: 'N/A' },
-      'N/R': { ES: 'N/R', EN: 'N/R', PT: 'N/R', IT: 'N/R', FR: 'N/R' },
-      'Sueño': { ES: 'Sueño', EN: 'Sleep', PT: 'Sono', IT: 'Sonno', FR: 'Sommeil' },
-      'Apetito': { ES: 'Apetito', EN: 'Appetite', PT: 'Apetite', IT: 'Appetito', FR: 'Appétit' },
-      'Energía': { ES: 'Energía', EN: 'Energy', PT: 'Energia', IT: 'Energia', FR: 'Énergie' },
-      'Social': { ES: 'Social', EN: 'Social', PT: 'Social', IT: 'Sociale', FR: 'Social' },
-      'Atención': { ES: 'Atención', EN: 'Attention', PT: 'Atenção', IT: 'Attenzione', FR: 'Attention' },
-      'HIPAA Compliance & Privacy Rule': { ES: 'HIPAA Compliance & Privacy Rule', EN: 'HIPAA Compliance & Privacy Rule', PT: 'Conformidade HIPAA e Regra de Privacidade', IT: 'Conformità HIPAA e Regola sulla Privacy', FR: 'Conformité HIPAA et Règle de Confidentialité' },
-      'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente': { ES: 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente', EN: 'GDPR Compliance (Europe) / Patient Autonomy Law', PT: 'Conformidade RGPD (Europa) / Lei de Autonomia do Paciente', IT: 'Conformità GDPR (Europa) / Legge sull\'Autonomia del Paziente', FR: 'Conformité RGPD (Europe) / Loi sur l\'Autonomie du Patient' },
-      'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)': { ES: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)', EN: 'NOM-004-SSA3-2012 (Official Mexican Standard for Clinical Records)', PT: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana do Prontuário Clínico)', IT: 'NOM-004-SSA3-2012 (Standard Ufficiale Messicano per Cartelle Cliniche)', FR: 'NOM-004-SSA3-2012 (Norme Officielle Mexicaine pour les Dossiers Cliniques)' },
-      'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)': { ES: 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)', EN: 'Resolution 1995 of 1999 and 839 of 2017 (Clinical History)', PT: 'Resolução 1995 de 1999 e 839 de 2017 (História Clínica)', IT: 'Risoluzione 1995 del 1999 e 839 del 2017 (Storia Clinica)', FR: 'Résolution 1995 de 1999 et 839 de 2017 (Dossier Médical)' },
-      'Ley N° 20.584 (Derechos y Deberes del Paciente)': { ES: 'Ley N° 20.584 (Derechos y Deberes del Paciente)', EN: 'Law N° 20.584 (Patient Rights and Duties)', PT: 'Lei N° 20.584 (Direitos e Deveres do Paciente)', IT: 'Legge N° 20.584 (Diritti e Doveri del Paziente)', FR: 'Loi N° 20.584 (Droits et Devoirs du Patient)' },
-      'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)': { ES: 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)', EN: 'NTS N° 139-MINSA/2018/DGAIN (Clinical History Management)', PT: 'NTS N° 139-MINSA/2018/DGAIN (Gestão da História Clínica)', IT: 'NTS N° 139-MINSA/2018/DGAIN (Gestione della Storia Clinica)', FR: 'NTS N° 139-MINSA/2018/DGAIN (Gestion du Dossier Médical)' },
-      'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)': { ES: 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)', EN: 'Law 26.529 (Patient Rights, Clinical History & Informed Consent)', PT: 'Lei 26.529 (Direitos do Paciente, História Clínica e Consentimento Informado)', IT: 'Legge 26.529 (Diritti del Paziente, Storia Clinica e Consenso Informato)', FR: 'Loi 26.529 (Droits du Patient, Dossier Médical et Consentement Éclairé)' },
-      'Código de Salud (Decreto 90-97) / Normativa MSPAS': { ES: 'Código de Salud (Decreto 90-97) / Normativa MSPAS', EN: 'Health Code (Decree 90-97) / MSPAS Regulations', PT: 'Código de Saúde (Decreto 90-97) / Normativas MSPAS', IT: 'Codice della Salute (Decreto 90-97) / Normative MSPAS', FR: 'Code de la Santé (Décret 90-97) / Réglementations MSPAS' },
-      'Cumplimiento de Confidencialidad y Ética Profesional Internacional': { ES: 'Cumplimiento de Confidencialidad y Ética Profesional Internacional', EN: 'Compliance with Confidentiality and International Professional Ethics', PT: 'Cumprimento de Confidencialidade e Ética Profissional Internacional', IT: 'Conformità alla Riservatezza ed Etica Professionale Internazionale', FR: 'Conformité à la Confidentialité et à l\'Éthique Professionnelle Internationale' },
-      'A QUIEN INTERESE:': { ES: 'A QUIEN INTERESE:', EN: 'TO WHOM IT MAY CONCERN:', PT: 'A QUEM POSSA INTERESSAR:', IT: 'A CHI DI COMPETENZA:', FR: 'À QUI DE DROIT:' },
-      'Por medio de la presente se hace constar que el/la paciente': { ES: 'Por medio de la presente se hace constar que el/la paciente', EN: 'This is to certify that the patient', PT: 'Por meio desta certifica-se que o/a paciente', IT: 'Si certifica con la presente che il/la paziente', FR: 'Par la présente, il est certifié que le/la patient(e)' },
-      'expediente': { ES: 'expediente', EN: 'record', PT: 'prontuário', IT: 'cartella', FR: 'dossier' },
-      'ha asistido a su proceso clínico.': { ES: 'ha asistido a su proceso clínico.', EN: 'has attended their clinical process.', PT: 'compareceu ao seu processo clínico.', IT: 'ha partecipato al suo processo clinico.', FR: 'a assisté à son processus clinique.' },
-      'Atentamente,': { ES: 'Atentamente,', EN: 'Sincerely,', PT: 'Atenciosamente,', IT: 'Cordiali saluti,', FR: 'Cordialement,' },
-      'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL': { ES: 'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL', EN: 'INTERNATIONAL PSYCHOMETRIC EVALUATION', PT: 'AVALIAÇÃO PSICOMÉTRICA INTERNACIONAL', IT: 'VALUTAZIONE PSICOMETRICA INTERNAZIONALE', FR: 'ÉVALUATION PSYCHOMÉTRIQUE INTERNATIONALE' },
-      'Instrumento:': { ES: 'Instrumento:', EN: 'Instrument:', PT: 'Instrumento:', IT: 'Strumento:', FR: 'Instrument:' },
-      'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:', PT: 'Avaliador:', IT: 'Valutatore:', FR: 'Évaluateur:' },
-      'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:', PT: 'RESULTADOS E PONTUAÇÕES:', IT: 'RISULTATI E PUNTEGGI:', FR: 'RÉSULTATS ET SCORES:' },
-      'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:', PT: 'PONTUAÇÃO AUTOMÁTICA:', IT: 'PUNTEGGIO AUTOMATICO:', FR: 'SCORE AUTOMATIQUE:' },
-      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.', PT: 'Desenvolvido por Harold.', IT: 'Sviluppato da Harold.', FR: 'Développé par Harold.' }
+    const dict: Record<string, { ES: string, EN: string }> = {
+      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant' },
+      'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report' },
+      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)' },
+      'Clínico': { ES: 'Clínico', EN: 'Clinical' },
+      'Agenda': { ES: 'Agenda', EN: 'Schedule' },
+      'Admin': { ES: 'Admin', EN: 'Admin' },
+      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access' },
+      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login' },
+      'Usuario': { ES: 'Usuario', EN: 'Username' },
+      'Contraseña': { ES: 'Contraseña', EN: 'Password' },
+      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console' },
+      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License' },
+      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support' },
+      'Búsqueda': { ES: 'Búsqueda', EN: 'Search' },
+      'Alertas': { ES: 'Alertas', EN: 'Alerts' },
+      'Mi Perfil': { ES: 'Mi Perfil', EN: 'My Profile' },
+      'Respaldo JSON': { ES: 'Respaldo JSON', EN: 'JSON Backup' },
+      'Cerrar Sesión': { ES: 'Cerrar Sesión', EN: 'Logout' },
+      'BÚSQUEDA DE EXPEDIENTES': { ES: 'BÚSQUEDA DE EXPEDIENTES', EN: 'RECORD SEARCH' },
+      'Nuevo Expediente': { ES: 'Nuevo Expediente', EN: 'New Record' },
+      'Ocultar Formulario': { ES: 'Ocultar Formulario', EN: 'Hide Form' },
+      'Edad': { ES: 'Edad', EN: 'Age' },
+      'Teléfono': { ES: 'Teléfono', EN: 'Phone' },
+      'Religión': { ES: 'Religión', EN: 'Religion' },
+      'Femenino': { ES: 'Femenino', EN: 'Female' },
+      'Masculino': { ES: 'Masculino', EN: 'Male' },
+      'Otro': { ES: 'Otro', EN: 'Other' },
+      'Soltero(a)': { ES: 'Soltero(a)', EN: 'Single' },
+      'Casado(a)': { ES: 'Casado(a)', EN: 'Married' },
+      'Divorciado(a)': { ES: 'Divorciado(a)', EN: 'Divorced' },
+      'Viudo(a)': { ES: 'Viudo(a)', EN: 'Widowed' },
+      'Unión Libre': { ES: 'Unión Libre', EN: 'Domestic Partnership' },
+      'Psicólogo(a) Clínico': { ES: 'Psicólogo(a) Clínico', EN: 'Clinical Psychologist' },
+      'Médico Psiquiatra': { ES: 'Médico Psiquiatra', EN: 'Psychiatrist' },
+      '1. Datos Personales Básicos': { ES: '1. Datos Personales Básicos', EN: '1. Basic Personal Data' },
+      'ID Expediente (Ej. PAC-001)': { ES: 'ID Expediente (Ej. PAC-001)', EN: 'Record ID (E.g. PAC-001)' },
+      '2. Contexto Sociodemográfico': { ES: '2. Contexto Sociodemográfico', EN: '2. Sociodemographic Context' },
+      'Ocupación': { ES: 'Ocupación', EN: 'Occupation' },
+      'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level' },
+      'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin' },
+      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)' },
+      '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint' },
+      'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...' },
+      'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...' },
+      'Guardar Expediente Clínico Completo': { ES: 'Guardar Expediente Clínico Completo', EN: 'Save Complete Clinical Record' },
+      'Busque por nombre o ID...': { ES: 'Busque por nombre o ID...', EN: 'Search by name or ID...' },
+      'Buscar': { ES: 'Buscar', EN: 'Search' },
+      'Constancia': { ES: 'Constancia', EN: 'Certificate' },
+      'Referencia': { ES: 'Referencia', EN: 'Referral' },
+      'Extender Receta': { ES: 'Extender Receta', EN: 'Prescription' },
+      'Historial': { ES: 'Historial', EN: 'History' },
+      'KPIs Empresariales': { ES: 'KPIs Empresariales', EN: 'Business KPIs' },
+      'Sesiones': { ES: 'Sesiones', EN: 'Sessions' },
+      'Nueva': { ES: 'Nueva', EN: 'New' },
+      'Generar Dictamen IA': { ES: 'Generar Dictamen IA', EN: 'Generate AI Report' },
+      '⏳ Procesando con IA...': { ES: '⏳ Procesando con IA...', EN: '⏳ Processing with AI...' },
+      'Consulta Académica / Científica': { ES: 'Consulta Académica / Científica', EN: 'Academic / Scientific Query' },
+      'Consulte dudas teóricas, criterios del DSM-5, medicamentos...': { ES: 'Consulte dudas teóricas, criterios del DSM-5, medicamentos...', EN: 'Consult theoretical doubts, DSM-5 criteria, medications...' },
+      'Consultando Base de Datos...': { ES: 'Consultando Base de Datos...', EN: 'Querying Database...' },
+      'Realizar Consulta': { ES: 'Realizar Consulta', EN: 'Run Query' },
+      'Generar PDF': { ES: 'Generar PDF', EN: 'Generate PDF' },
+      'Nivel de Actividad Psicosocial (GAF / EEAG)': { ES: 'Nivel de Actividad Psicosocial (GAF / EEAG)', EN: 'Global Assessment of Functioning (GAF)' },
+      'GAF / EEAG': { ES: 'GAF / EEAG', EN: 'GAF Score' },
+      'Estabilidad Neurovegetativa': { ES: 'Estabilidad Neurovegetativa', EN: 'Neurovegetative Stability' },
+      'Respuesta Terapéutica (% Reducción)': { ES: 'Respuesta Terapéutica (% Reducción)', EN: 'Therapeutic Response (% Reduction)' },
+      'Riesgo Clínico Integrado': { ES: 'Riesgo Clínico Integrado', EN: 'Integrated Clinical Risk' },
+      'Funcionalidad Adaptativa': { ES: 'Funcionalidad Adaptativa', EN: 'Adaptive Functioning' },
+      'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO': { ES: 'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', EN: 'PSYCHOLOGICAL AND MEDICAL CLINICAL RECORD' },
+      'Protocolo de Gestión de Salud': { ES: 'Protocolo de Gestión de Salud', EN: 'Health Management Protocol' },
+      '1. FICHA DE IDENTIFICACIÓN': { ES: '1. FICHA DE IDENTIFICACIÓN', EN: '1. IDENTIFICATION DATA' },
+      'Nombre:': { ES: 'Nombre:', EN: 'Name:' },
+      'Expediente ID:': { ES: 'Expediente ID:', EN: 'Record ID:' },
+      'Teléfono:': { ES: 'Teléfono:', EN: 'Phone:' },
+      'Sexo:': { ES: 'Sexo:', EN: 'Sex:' },
+      'Edad:': { ES: 'Edad:', EN: 'Age:' },
+      'Ocupación:': { ES: 'Ocupación:', EN: 'Occupation:' },
+      'Estado Civil:': { ES: 'Estado Civil:', EN: 'Marital Status:' },
+      'Origen / Procedencia:': { ES: 'Origen / Procedencia:', EN: 'Origin:' },
+      'Religión:': { ES: 'Religión:', EN: 'Religion:' },
+      'Datos de Progenitores:': { ES: 'Datos de Progenitores:', EN: 'Parental Data:' },
+      'Motivo Textual:': { ES: 'Motivo Textual:', EN: 'Textual Reason:' },
+      'Antecedentes Clínicos:': { ES: 'Antecedentes Clínicos:', EN: 'Clinical History:' },
+      'Sin antecedentes.': { ES: 'Sin antecedentes.', EN: 'No previous history.' },
+      '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS': { ES: '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', EN: '3. PSYCHOMETRIC EVALUATIONS PERFORMED' },
+      'No se han aplicado baterías psicométricas formales aún.': { ES: 'No se han aplicado baterías psicométricas formales aún.', EN: 'No formal psychometric batteries applied yet.' },
+      '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)': { ES: '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', EN: '4. DIAGNOSTIC IMPRESSION AND REPORT (AI)' },
+      'En proceso de evaluación clínica acumulada.': { ES: 'En proceso de evaluación clínica acumulada.', EN: 'In the process of cumulative clinical evaluation.' },
+      '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)': { ES: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', EN: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)' },
+      'Termómetro de Adherencia (Avance)': { ES: 'Termómetro de Adherencia (Avance)', EN: 'Adherence Thermometer (Progress)' },
+      'Hacia el protocolo base de alta clínica (12 sesiones).': { ES: 'Hacia el protocolo base de alta clínica (12 sesiones).', EN: 'Towards the clinical discharge base protocol (12 sessions).' },
+      'Eficacia (Sesión 1 vs Actual)': { ES: 'Eficacia (Sesión 1 vs Actual)', EN: 'Efficacy (Session 1 vs Current)' },
+      'Ansiedad': { ES: 'Ansiedad', EN: 'Anxiety' },
+      'Depresión': { ES: 'Depresión', EN: 'Depression' },
+      'Rueda Multiaxial de Vida (Última Evaluación)': { ES: 'Rueda Multiaxial de Vida (Última Evaluación)', EN: 'Multiaxial Wheel of Life (Last Evaluation)' },
+      'Sentimiento Congruente': { ES: 'Sentimiento Congruente', EN: 'Congruent Sentiment' },
+      'Estable': { ES: 'Estable', EN: 'Stable' },
+      'En Riesgo': { ES: 'En Riesgo', EN: 'At Risk' },
+      'Especialidad:': { ES: 'Especialidad:', EN: 'Specialty:' },
+      'Colegiado Activo:': { ES: 'Colegiado Activo:', EN: 'Active License:' },
+      'Prueba:': { ES: 'Prueba:', EN: 'Test:' },
+      'Actual:': { ES: 'Actual:', EN: 'Current:' },
+      'N/A': { ES: 'N/A', EN: 'N/A' },
+      'N/R': { ES: 'N/R', EN: 'N/R' },
+      'Sueño': { ES: 'Sueño', EN: 'Sleep' },
+      'Apetito': { ES: 'Apetito', EN: 'Appetite' },
+      'Energía': { ES: 'Energía', EN: 'Energy' },
+      'Social': { ES: 'Social', EN: 'Social' },
+      'Atención': { ES: 'Atención', EN: 'Attention' },
+      'HIPAA Compliance & Privacy Rule': { ES: 'HIPAA Compliance & Privacy Rule', EN: 'HIPAA Compliance & Privacy Rule' },
+      'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente': { ES: 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente', EN: 'GDPR Compliance (Europe) / Patient Autonomy Law' },
+      'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)': { ES: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)', EN: 'NOM-004-SSA3-2012 (Official Mexican Standard for Clinical Records)' },
+      'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)': { ES: 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)', EN: 'Resolution 1995 of 1999 and 839 of 2017 (Clinical History)' },
+      'Ley N° 20.584 (Derechos y Deberes del Paciente)': { ES: 'Ley N° 20.584 (Derechos y Deberes del Paciente)', EN: 'Law N° 20.584 (Patient Rights and Duties)' },
+      'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)': { ES: 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)', EN: 'NTS N° 139-MINSA/2018/DGAIN (Clinical History Management)' },
+      'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)': { ES: 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)', EN: 'Law 26.529 (Patient Rights, Clinical History & Informed Consent)' },
+      'Código de Salud (Decreto 90-97) / Normativa MSPAS': { ES: 'Código de Salud (Decreto 90-97) / Normativa MSPAS', EN: 'Health Code (Decree 90-97) / MSPAS Regulations' },
+      'Cumplimiento de Confidencialidad y Ética Profesional Internacional': { ES: 'Cumplimiento de Confidencialidad y Ética Profesional Internacional', EN: 'Compliance with Confidentiality and International Professional Ethics' },
+      'A QUIEN INTERESE:': { ES: 'A QUIEN INTERESE:', EN: 'TO WHOM IT MAY CONCERN:' },
+      'Por medio de la presente se hace constar que el/la paciente': { ES: 'Por medio de la presente se hace constar que el/la paciente', EN: 'This is to certify that the patient' },
+      'expediente': { ES: 'expediente', EN: 'record' },
+      'ha asistido a su proceso clínico.': { ES: 'ha asistido a su proceso clínico.', EN: 'has attended their clinical process.' },
+      'Atentamente,': { ES: 'Atentamente,', EN: 'Sincerely,' },
+      'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL': { ES: 'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL', EN: 'INTERNATIONAL PSYCHOMETRIC EVALUATION' },
+      'Instrumento:': { ES: 'Instrumento:', EN: 'Instrument:' },
+      'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:' },
+      'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:' },
+      'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:' },
+      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.' }
     };
     return dict[key]?.[activeLang] || key;
   };
@@ -360,7 +362,7 @@ export default function App() {
     const handleCopySVG = () => {
       const svg = generateSpiderChartSVG(lastSessionAreas, t);
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML."));
+        navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML.")).catch(() => alert("Error al copiar SVG."));
       } else {
         alert("La copia al portapapeles no está disponible en este entorno (asegúrese de usar HTTPS).");
       }
@@ -399,7 +401,7 @@ export default function App() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial')}</span>
+             <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
              <div className="text-2xl font-bold text-indigo-400 mt-1">{gafScore} / 100</div>
              <p className="text-[10px] text-slate-500 mt-1">{gafScore >= 71 ? 'Síntomas leves / Buen funcionamiento' : gafScore >= 51 ? 'Dificultades moderadas' : 'Alteración grave'}</p>
           </div>
@@ -557,6 +559,20 @@ export default function App() {
     if (saved) { try { return JSON.parse(saved); } catch (e) { } }
     return {};
   });
+
+  // RESTAURADA SINCRONIZACION REMOTA DE EXPEDIENTES
+  useEffect(() => {
+    if (currentUser && Object.keys(clinicalDatabase).length > 0) {
+      const keyLocal = `clinical_cases_db_${currentUser.username}`;
+      const dataStr = JSON.stringify(clinicalDatabase);
+      localStorage.setItem(keyLocal, dataStr);
+      const lastSaved = sessionStorage.getItem(`last_saved_${currentUser.username}`);
+      if (lastSaved !== dataStr) {
+        saveClinicalCasesRemote(currentUser.username, clinicalDatabase);
+        sessionStorage.setItem(`last_saved_${currentUser.username}`, dataStr);
+      }
+    }
+  }, [clinicalDatabase, currentUser]);
 
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     let userKey = 'appointments_db';
@@ -748,6 +764,23 @@ export default function App() {
       sessions: [{ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: newPatientData.rawNotes || newPatientData.motivoConsultaTextual || 'Evaluación inicial.', baiScore: 'Pendiente', bdiScore: 'Pendiente', audioPath: '', dsm5EvaluationName: '', dsm5EvaluationResult: '', functionalAreas: { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 } } as any]
     };
     setClinicalDatabase(prev => ({ ...prev, [formattedId]: newCase })); setActiveCase(newCase); setActiveCaseTab('HISTORIAL'); setShowRegisterForm(false);
+  };
+
+  // SOLUCIÓN AL PROBLEMA DE BÚSQUEDA: Función conectada correctamente al onSubmit del Form
+  const handleClinicalSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    const searchTerm = clinicalSearchQuery.toLowerCase().trim();
+    const foundCase = Object.values(clinicalDatabase).find(c => {
+      if (!c || c.doctorUsername !== currentUser.username) return false;
+      return c.id?.toLowerCase() === searchTerm || 
+             c.patientName?.toLowerCase().includes(searchTerm) || 
+             (c.generalData?.telefono && c.generalData.telefono.toLowerCase().includes(searchTerm));
+    });
+    if (foundCase) {
+      setActiveCase({ ...foundCase, sessions: foundCase.sessions || [], generalData: foundCase.generalData || {} as any });
+      setActiveCaseTab('HISTORIAL'); setSearchFeedback(`Expediente ${foundCase.id} cargado.`); setNotesResult(foundCase.structuredOutput || '');
+    } else { setSearchFeedback(`Expediente no encontrado.`); setActiveCase(null); }
   };
 
   const toggleRecording = async () => {
@@ -960,6 +993,9 @@ export default function App() {
             </div>
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-2 ${th.card} p-1 rounded-xl border ${th.border} w-full sm:w-auto`}>
+            <select value={lang} onChange={(e) => setLang(e.target.value as any)} className="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg outline-none cursor-pointer shadow hover:bg-indigo-500">
+              <option value="ES">🌐 ES</option><option value="EN">🌐 EN</option>
+            </select>
             <button onClick={toggleTheme} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${th.border} ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'}`}>{isDarkMode ? '☀️' : '🌙'}</button>
             <div className="w-px h-6 bg-slate-500/30 mx-1"></div>
             <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white' : th.textMuted}`}>🩺 {t('Clínico')}</button>
@@ -1156,10 +1192,13 @@ export default function App() {
                         <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold">💾 Guardar Expediente</button>
                       </form>
                     )}
-                    <div className="flex flex-col sm:flex-row gap-2 w-full">
-                      <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder="Busque por nombre o ID..." className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text}`} />
-                      <button type="button" onClick={(e) => { e.preventDefault(); handleClinicalSearch(e as any); }} className="py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs font-bold">Buscar</button>
-                    </div>
+                    
+                    {/* SOLUCIÓN AL BUG DE BÚSQUEDA APLICADA AQUÍ */}
+                    <form onSubmit={handleClinicalSearch} className="flex flex-col sm:flex-row gap-2 w-full">
+                      <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder="Busque por nombre o ID..." className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text} focus:outline-none`} />
+                      <button type="submit" className="w-full sm:w-auto py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs text-center font-bold">Buscar</button>
+                    </form>
+
                     {searchFeedback && <p className="text-xs text-indigo-500 mt-2">{searchFeedback}</p>}
                   </div>
                 )}
@@ -1204,7 +1243,7 @@ export default function App() {
                                   {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all">✓ Audio vinculado: {newSessionData.audioPath}</p>}
                                   <div className="flex gap-2 mt-2">
                                     <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                                    <button type="button" onClick={handleAiDictationAssist} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px]">✨ IA</button>
+                                    <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
                                   </div>
                                   <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o Video Local</label>
                                   <input type="file" accept="audio/*, video/*" onChange={(e) => {
@@ -1272,7 +1311,7 @@ export default function App() {
                           <span className={`text-xs font-bold ${th.textMuted} uppercase`}>{t('Dictamen Clínico Profesional')}</span>
                           <div className="flex flex-wrap items-center gap-2">
                              <select value={pdfLang} onChange={e => setPdfLang(e.target.value as any)} className={`text-[10px] p-1.5 rounded border ${th.border} ${th.card}`}>
-                               <option value="ES">ES</option><option value="EN">EN</option><option value="PT">PT</option>
+                               <option value="ES">ES</option><option value="EN">EN</option>
                              </select>
                              <button onClick={() => handleDownloadReport('PDF')} disabled={isGeneratingPdf} className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold">📄 PDF</button>
                              <button onClick={() => handleDownloadReport('DOC')} disabled={isGeneratingPdf} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">📝 Word (.doc)</button>
@@ -1344,7 +1383,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE BATERIAS DSM-5 (AÑADIDO PARA EVITAR PANTALLA BLANCA SI EL ESTADO EXISTE) */}
+      {/* MODAL DE BATERIAS DSM-5 */}
       {showDsmModal && selectedDsmTemplate && (
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden text-xs shadow-2xl`}>
@@ -1379,7 +1418,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CALENDARIO (AÑADIDO PARA EVITAR PANTALLA BLANCA) */}
+      {/* MODAL DE CALENDARIO */}
       {showCalendarModal && (
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
