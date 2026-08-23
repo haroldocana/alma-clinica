@@ -131,8 +131,10 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
 // Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
+  // Buscar explícitamente "Score: X" para obtener el punteo real generado por la IA
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
   if (scoreMatch) return parseInt(scoreMatch[1], 10);
+  // Si no encuentra la palabra "Score:", busca el último número aislado del string
   const lastNumberMatch = scoreStr.match(/(\d+)(?!.*\d)/);
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
@@ -403,7 +405,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* AJUSTE PARA EL MINI-DASHBOARD: Apila en 2 columnas en lugar de 4 si no está en pantalla completa */}
+        <div className={`grid gap-4 ${isFullscreen ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
           <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
              <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('Nivel de Actividad Psicosocial (GAF / EEAG)')}</span>
              <div className="text-2xl font-bold text-indigo-400 mt-1">{gafScore} / 100</div>
@@ -426,7 +429,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* AJUSTE PARA LAS GRÁFICAS: Si está en pantalla completa son 3 columnas, si no, se apilan verticalmente */}
+        <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
           <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
             <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
             <div className="w-full h-48 flex justify-center" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
@@ -607,6 +611,14 @@ export default function App() {
     try { await savePsychologistsRemote(updatedDb); alert('¡Perfil y configuraciones actualizados con éxito!'); } catch (error) {}
   };
 
+  const handleExportBackup = () => {
+    if (!currentUser) return;
+    const myCases = Object.values(clinicalDatabase).filter(c => c && c.doctorUsername === currentUser.username);
+    const respaldoMaestro = { fecha_respaldo: new Date().toISOString(), psicologo: currentUser.fullName, colegiado: currentUser.colegiado, expedientes_clinicos: myCases };
+    const blob = new Blob([JSON.stringify(respaldoMaestro, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `Respaldo_${currentUser.username}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  };
+
   const handleUserChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -718,6 +730,7 @@ export default function App() {
   const [regColegiado, setRegColegiado] = useState('');
   const [regLicenseType, setRegLicenseType] = useState<'ESTANDAR' | 'PREMIUM' | 'DEMO'>('ESTANDAR');
   const [regCountry, setRegCountry] = useState('GT'); 
+  const [regVoice, setRegVoice] = useState(false); 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -1101,7 +1114,7 @@ export default function App() {
                     </form>
                   </div>
 
-                  {/* RESTAURADO EN AUDITORÍA: BOTONES PARA CAMBIAR FECHAS DE EXPIRACIÓN Y CONTRASEÑAS */}
+                  {/* ADMIN: BOTONES PARA CAMBIAR FECHAS DE EXPIRACIÓN Y CONTRASEÑAS */}
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-6 lg:col-span-7`}>
                     <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Auditoría y Soporte')}</h3>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
@@ -1159,7 +1172,7 @@ export default function App() {
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {myAppointments.map(app => (
                     <div key={app.id} className={`p-3 ${th.input} rounded-lg border ${th.border} text-xs flex justify-between items-center`}>
-                      <div><span className="font-bold text-indigo-500">{app.patientName}</span><p className={`text-[11px] ${th.textMuted}`}>{app.start.replace('T', ' - ')}</p></div>
+                      <div><span className="font-bold text-indigo-500">{app.patientName}</span><p className={`text-[11px] ${th.textMuted}`}>{app.start?.replace('T', ' - ')}</p></div>
                     </div>
                   ))}
                 </div>
@@ -1189,6 +1202,7 @@ export default function App() {
                     <p className={`text-xs ${th.textMuted} font-mono truncate`}>{t('Colegiado')}: {currentUser.colegiado} | {t('Plan')}: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
                   </div>
                   <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 {t('Respaldo JSON')}</button>
                     <button onClick={() => { setCurrentUser(null); setActiveCase(null); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">{t('Cerrar Sesión')}</button>
                   </div>
                 </div>
@@ -1263,6 +1277,7 @@ export default function App() {
                             <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-4 sm:mt-0 px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl h-10 self-start sm:self-center shadow-md transition-colors">Analizar</button>
                           </div>
                         ))}
+                        {/* ALERTAS DE ABANDONO DE TRATAMIENTO */}
                         {abandonmentAlerts.map((alert: any) => (
                           <div key={alert?.id || Math.random()} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border">
                             <div>
@@ -1407,7 +1422,6 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* GRABADORA SIEMPRE ACTIVA */}
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
                                 <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
                                 
@@ -1460,6 +1474,7 @@ export default function App() {
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
+                                {s.videoUrl && <p className="text-[10px] text-blue-500 mt-1 truncate">🔗 Enlace: <a href={s.videoUrl} target="_blank" rel="noreferrer" className="underline">{s.videoUrl}</a></p>}
                                 {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1 font-bold">📎 Batería Manual Adjunta</p>}
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
                               </div>
