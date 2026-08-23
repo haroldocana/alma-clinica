@@ -13,34 +13,95 @@ import {
 } from './services/geminiService';
 
 // ============================================================================
-// FUNCIONES AUXILIARES
+// FUNCIONES AUXILIARES DE TIEMPO Y EXPORTACIÓN
 // ============================================================================
 const getDaysRemaining = (expiryDateStr: string | undefined): number => {
   if (!expiryDateStr) return -1;
-  const today = new Date(); const expiry = new Date(expiryDateStr);
+  const today = new Date();
+  const expiry = new Date(expiryDateStr);
   if (isNaN(expiry.getTime())) return -1;
-  today.setHours(0, 0, 0, 0); expiry.setHours(0, 0, 0, 0);
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  today.setHours(0, 0, 0, 0);
+  expiry.setHours(0, 0, 0, 0);
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 const getDaysSince = (pastDateStr: string): number => {
   if (!pastDateStr) return 0;
-  const today = new Date(); const past = new Date(pastDateStr);
+  const today = new Date();
+  const past = new Date(pastDateStr);
   if (isNaN(past.getTime())) return 0;
-  today.setHours(0, 0, 0, 0); past.setHours(0, 0, 0, 0);
-  return Math.floor((today.getTime() - past.getTime()) / (1000 * 60 * 60 * 24));
+  today.setHours(0, 0, 0, 0);
+  past.setHours(0, 0, 0, 0);
+  const diffTime = today.getTime() - past.getTime();
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 };
 
 const exportHTMLToWord = (htmlContent: string, filename: string) => {
-  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Documento</title></head><body>${htmlContent}</body></html>`;
+  const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Documento</title></head><body>";
+  const postHtml = "</body></html>";
+  const html = preHtml + htmlContent + postHtml;
   const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob); link.download = filename + '.doc';
-  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  link.href = url;
+  link.download = filename + '.doc';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
+// MACHOTES CLÍNICOS PROFESIONALES (MEMBRETES)
+const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: string, colegiado: string, specialty: string) => `
+  <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
+    <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
+      <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
+      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty || 'Especialista en Salud Mental'} | Colegiado Activo: ${colegiado}</p>
+      <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
+    </div>
+    <h2 style="text-align: center; font-size: 16px; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-decoration: underline;">${title}</h2>
+    <div style="font-size: 13px; line-height: 1.8; text-align: justify; margin-bottom: 50px; white-space: pre-wrap;">${bodyHtml}</div>
+    <div style="text-align: center; margin-top: 80px;">
+      <div style="border-top: 1px solid #000; width: 250px; margin: 0 auto 10px auto;"></div>
+      <p style="font-size: 14px; font-weight: bold; margin: 0;">${doctorName}</p>
+      <p style="font-size: 12px; margin: 2px 0;">Firma y Sello Profesional</p>
+    </div>
+  </div>
+`;
+
+const getPrescriptionLetterhead = (patientName: string, date: string, diagnostico: string, rx: string, indications: string, doctorName: string, colegiado: string, specialty: string) => `
+  <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #000; border: 1px solid #ccc; border-radius: 8px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 20px; color: #059669; margin: 0;">${doctorName}</h1>
+        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty || 'Médico Psiquiatra'} | Col: ${colegiado}</p>
+      </div>
+      <div style="text-align: right;">
+        <h2 style="font-size: 32px; color: #059669; margin: 0; font-family: serif;">Rx</h2>
+      </div>
+    </div>
+    <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border: 1px solid #e5e7eb; margin-bottom: 20px; font-size: 12px;">
+      <p style="margin: 0 0 5px 0;"><strong>Paciente:</strong> ${patientName}</p>
+      <p style="margin: 0 0 5px 0;"><strong>Fecha de emisión:</strong> ${date}</p>
+      <p style="margin: 0;"><strong>Diagnóstico CIE-11:</strong> ${diagnostico || 'Evaluación Clínica'}</p>
+    </div>
+    <div style="margin-bottom: 30px;">
+      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Medicamentos:</h3>
+      <p style="font-size: 15px; white-space: pre-wrap; font-family: monospace; color: #111827; margin-top: 10px;">${rx}</p>
+    </div>
+    <div style="margin-bottom: 40px;">
+      <h3 style="font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #374151;">Instrucciones:</h3>
+      <p style="font-size: 13px; white-space: pre-wrap; color: #1f2937; margin-top: 10px;">${indications}</p>
+    </div>
+    <div style="text-align: right; margin-top: 70px;">
+      <div style="border-top: 1px solid #000; width: 220px; margin-left: auto; margin-bottom: 5px;"></div>
+      <p style="font-size: 12px; margin: 0; padding-right: 60px;">Firma del Médico</p>
+    </div>
+  </div>
+`;
+
 // ============================================================================
-// BATERÍA CLÍNICA
+// BATERÍA COMPLETA INTERNACIONAL (AMPLIADA CON ADICCIONES DIGITALES/SEXUALES Y DEMENCIA)
 // ============================================================================
 const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'AQ10', name: 'AQ-10 (Espectro Autista / Asperger)', questions: ['A menudo noto pequeños sonidos cuando otros no lo hacen', 'Generalmente me concentro más en los pequeños detalles que en el panorama general', 'Me resulta fácil hacer más de una cosa a la vez', 'Si hay una interrupción, puedo volver a lo que estaba haciendo muy rápidamente', 'Me resulta fácil "leer entre líneas" cuando alguien me habla', 'Sé cómo darme cuenta si alguien que me escucha se está aburriendo', 'Cuando leo una historia, me resulta difícil entender las intenciones de los personajes', 'Me gusta recopilar información sobre categorías de cosas', 'Me resulta fácil darme cuenta de lo que alguien está pensando o sintiendo', 'Me resulta difícil entender las intenciones de las personas'], options: ['Totalmente en desacuerdo (0)', 'Un poco en desacuerdo (0)', 'Un poco de acuerdo (1)', 'Totalmente de acuerdo (1)'] },
@@ -67,8 +128,12 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en detalles?', '¿Dificultad para mantener atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
   { id: 'PCL5', name: 'PCL-5 (Trauma y TEPT)', questions: ['Recuerdos repetitivos e inquietantes de la experiencia estresante', 'Pesadillas de la experiencia', 'Evitar situaciones o lugares que le recuerden el evento', 'Creencias negativas fuertes sobre sí mismo', 'Estar muy alerta o vigilante'], options: ['Nada (0)', 'Un poco (1)', 'Moderadamente (2)', 'Bastante (3)', 'Extremadamente (4)'] }
 ];
-const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS.length > 0 ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))] : NUEVAS_EVALUACIONES;
 
+const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS.length > 0 
+  ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
+  : NUEVAS_EVALUACIONES;
+
+// Extracción precisa de números
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
@@ -77,9 +142,31 @@ const extractNumericScore = (scoreStr: string | undefined): number => {
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
 
-// ============================================================================
-// COMPONENTE PRINCIPAL APP
-// ============================================================================
+const generateSpiderChartSVG = (areas: any, t: (key: string, overrideLang?: string) => string, targetLang?: string) => {
+  const values = [areas.sleep || 5, areas.appetite || 5, areas.energy || 5, areas.social || 5, areas.concentration || 5];
+  const angles = [0, 72, 144, 216, 288].map(deg => (deg * Math.PI) / 180);
+  const getPoint = (val: number, angle: number, radiusMax: number = 40) => {
+    const r = (val / 10) * radiusMax;
+    return `${50 + r * Math.sin(angle)},${50 - r * Math.cos(angle)}`;
+  };
+  const pointsMax = angles.map(a => getPoint(10, a, 40)).join(' ');
+  const pointsData = values.map((v, i) => getPoint(v, angles[i], 40)).join(' ');
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 110" width="100%" height="100%" style="font-family: sans-serif; display: block; margin: 0 auto; max-width: 250px;">
+      <polygon points="${pointsMax}" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      ${angles.map(a => `<line x1="50" y1="50" x2="${50 + 40 * Math.sin(a)}" y2="${50 - 40 * Math.cos(a)}" stroke="#334155" stroke-width="0.5" />`).join('')}
+      <polygon points="${pointsData}" fill="rgba(99, 102, 241, 0.4)" stroke="#6366f1" stroke-width="2" />
+      ${angles.map((a, i) => `<circle cx="${50 + (values[i] / 10) * 40 * Math.sin(a)}" cy="${50 - (values[i] / 10) * 40 * Math.cos(a)}" r="2" fill="#818cf8" />`).join('')}
+      <text x="50" y="7" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Sueño', targetLang)}</text>
+      <text x="96" y="38" font-size="5" fill="#94a3b8" text-anchor="start">${t('Apetito', targetLang)}</text>
+      <text x="80" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Energía', targetLang)}</text>
+      <text x="20" y="98" font-size="5" fill="#94a3b8" text-anchor="middle">${t('Social', targetLang)}</text>
+      <text x="4" y="38" font-size="5" fill="#94a3b8" text-anchor="end">${t('Atención', targetLang)}</text>
+    </svg>
+  `;
+};
+
 export default function App() {
   const [mode, setMode] = useState<AppMode>(AppMode.CLINICAL);
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -89,9 +176,9 @@ export default function App() {
   const [pdfLang, setPdfLang] = useState<'ES'|'EN'>('ES');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  // DASHBOARD STATES
+  // DASHBOARD STATES AMPLIADOS
   const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | null>(null);
-  const [specialtyFocus, setSpecialtyFocus] = useState('TRASTORNOS_NEURODESARROLLO');
+  const [specialtyFocus, setSpecialtyFocus] = useState('PSICOSIS_ESQUIZOFRENIA');
   const [perspectivesFocus, setPerspectivesFocus] = useState('FREUD'); 
 
   const th = {
@@ -106,7 +193,141 @@ export default function App() {
   };
 
   const t = (key: string, overrideLang?: string) => {
-    return key; 
+    const activeLang = overrideLang || lang;
+    const dict: Record<string, { ES: string, EN: string }> = {
+      'Asistente Clínica SaaS': { ES: 'Asistente Clínica SaaS', EN: 'SaaS Clinical Assistant' },
+      'Dictamen Clínico Profesional': { ES: 'Dictamen Clínico Profesional', EN: 'Professional Clinical Report' },
+      'Sistema Clínico e Historiales (Multi-tenant)': { ES: 'Sistema Clínico e Historiales (Multi-tenant)', EN: 'Clinical System & Records (Multi-tenant)' },
+      'Clínico': { ES: 'Clínico', EN: 'Clinical' },
+      'Agenda': { ES: 'Agenda', EN: 'Schedule' },
+      'Admin': { ES: 'Admin', EN: 'Admin' },
+      'Acceso Profesional Clínico': { ES: 'Acceso Profesional Clínico', EN: 'Clinical Professional Access' },
+      'Iniciar Sesión': { ES: 'Iniciar Sesión', EN: 'Login' },
+      'Usuario': { ES: 'Usuario', EN: 'Username' },
+      'Contraseña': { ES: 'Contraseña', EN: 'Password' },
+      'Consola Maestra de Licencias': { ES: 'Consola Maestra de Licencias', EN: 'Master License Console' },
+      'Activar Nueva Licencia': { ES: 'Activar Nueva Licencia', EN: 'Activate New License' },
+      'Auditoría y Soporte': { ES: 'Auditoría y Soporte', EN: 'Audit & Support' },
+      'Búsqueda': { ES: 'Búsqueda', EN: 'Search' },
+      'Alertas': { ES: 'Alertas', EN: 'Alerts' },
+      'Mi Perfil': { ES: 'Mi Perfil', EN: 'My Profile' },
+      'Respaldo JSON': { ES: 'Respaldo JSON', EN: 'JSON Backup' },
+      'Cerrar Sesión': { ES: 'Cerrar Sesión', EN: 'Logout' },
+      'BÚSQUEDA DE EXPEDIENTES': { ES: 'BÚSQUEDA DE EXPEDIENTES', EN: 'RECORD SEARCH' },
+      'Nuevo Expediente': { ES: 'Nuevo Expediente', EN: 'New Record' },
+      'Ocultar Formulario': { ES: 'Ocultar Formulario', EN: 'Hide Form' },
+      'Edad': { ES: 'Edad', EN: 'Age' },
+      'Teléfono': { ES: 'Teléfono', EN: 'Phone' },
+      'Religión': { ES: 'Religión', EN: 'Religion' },
+      'Femenino': { ES: 'Femenino', EN: 'Female' },
+      'Masculino': { ES: 'Masculino', EN: 'Male' },
+      'Otro': { ES: 'Otro', EN: 'Other' },
+      'Soltero(a)': { ES: 'Soltero(a)', EN: 'Single' },
+      'Casado(a)': { ES: 'Casado(a)', EN: 'Married' },
+      'Divorciado(a)': { ES: 'Divorciado(a)', EN: 'Divorced' },
+      'Viudo(a)': { ES: 'Viudo(a)', EN: 'Widowed' },
+      'Unión Libre': { ES: 'Unión Libre', EN: 'Domestic Partnership' },
+      'Psicólogo(a) Clínico': { ES: 'Psicólogo(a) Clínico', EN: 'Clinical Psychologist' },
+      'Médico Psiquiatra': { ES: 'Médico Psiquiatra', EN: 'Psychiatrist' },
+      '1. Datos Personales Básicos': { ES: '1. Datos Personales Básicos', EN: '1. Basic Personal Data' },
+      'ID Expediente (Ej. PAC-001)': { ES: 'ID Expediente (Ej. PAC-001)', EN: 'Record ID (E.g. PAC-001)' },
+      '2. Contexto Sociodemográfico': { ES: '2. Contexto Sociodemográfico', EN: '2. Sociodemographic Context' },
+      'Ocupación': { ES: 'Ocupación', EN: 'Occupation' },
+      'Grado de Estudios': { ES: 'Grado de Estudios', EN: 'Education Level' },
+      'Lugar de Origen / Procedencia': { ES: 'Lugar de Origen / Procedencia', EN: 'Place of Origin' },
+      'Datos de Progenitores (Nombres, edades, estado...)': { ES: 'Datos de Progenitores (Nombres, edades, estado...)', EN: 'Parental Data (Names, ages, status...)' },
+      '3. Anamnesis y Motivo de Consulta': { ES: '3. Anamnesis y Motivo de Consulta', EN: '3. Anamnesis and Chief Complaint' },
+      'Antecedentes Médicos / Psicológicos Previos...': { ES: 'Antecedentes Médicos / Psicológicos Previos...', EN: 'Previous Medical / Psychological History...' },
+      'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...': { ES: 'Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...', EN: 'Chief Complaint (Describe the exact reason the patient is attending)...' },
+      'Guardar Expediente Clínico Completo': { ES: 'Guardar Expediente Clínico Completo', EN: 'Save Complete Clinical Record' },
+      'Busque por nombre o ID...': { ES: 'Busque por nombre o ID...', EN: 'Search by name or ID...' },
+      'Buscar': { ES: 'Buscar', EN: 'Search' },
+      'Constancia': { ES: 'Constancia', EN: 'Certificate' },
+      'Referencia': { ES: 'Referencia', EN: 'Referral' },
+      'Extender Receta': { ES: 'Extender Receta', EN: 'Prescription' },
+      'Historial': { ES: 'Historial', EN: 'History' },
+      'KPIs Empresariales': { ES: 'KPIs Empresariales', EN: 'Business KPIs' },
+      'Sesiones': { ES: 'Sesiones', EN: 'Sessions' },
+      'Nueva': { ES: 'Nueva', EN: 'New' },
+      'Generar Dictamen IA': { ES: 'Generar Dictamen IA', EN: 'Generate AI Report' },
+      '⏳ Procesando con IA...': { ES: '⏳ Procesando con IA...', EN: '⏳ Processing with AI...' },
+      'Consulta Académica / Científica': { ES: 'Consulta Académica / Científica', EN: 'Academic / Scientific Query' },
+      'Consulte dudas teóricas, criterios del DSM-5, medicamentos...': { ES: 'Consulte dudas teóricas, criterios del DSM-5, medicamentos...', EN: 'Consult theoretical doubts, DSM-5 criteria, medications...' },
+      'Consultando Base de Datos...': { ES: 'Consultando Base de Datos...', EN: 'Querying Database...' },
+      'Realizar Consulta': { ES: 'Realizar Consulta', EN: 'Run Query' },
+      'Generar PDF': { ES: 'Generar PDF', EN: 'Generate PDF' },
+      'Nivel de Actividad Psicosocial (GAF / EEAG)': { ES: 'Nivel de Actividad Psicosocial (GAF / EEAG)', EN: 'Global Assessment of Functioning (GAF)' },
+      'GAF / EEAG': { ES: 'GAF / EEAG', EN: 'GAF Score' },
+      'Estabilidad Neurovegetativa': { ES: 'Estabilidad Neurovegetativa', EN: 'Neurovegetative Stability' },
+      'Respuesta Terapéutica (% Reducción)': { ES: 'Respuesta Terapéutica (% Reducción)', EN: 'Therapeutic Response (% Reduction)' },
+      'Riesgo Clínico Integrado': { ES: 'Riesgo Clínico Integrado', EN: 'Integrated Clinical Risk' },
+      'Funcionalidad Adaptativa': { ES: 'Funcionalidad Adaptativa', EN: 'Adaptive Functioning' },
+      'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO': { ES: 'EXPEDIENTE CLÍNICO PSICOLÓGICO Y MÉDICO', EN: 'PSYCHOLOGICAL AND MEDICAL CLINICAL RECORD' },
+      'Protocolo de Gestión de Salud': { ES: 'Protocolo de Gestión de Salud', EN: 'Health Management Protocol' },
+      '1. FICHA DE IDENTIFICACIÓN': { ES: '1. FICHA DE IDENTIFICACIÓN', EN: '1. IDENTIFICATION DATA' },
+      'Nombre:': { ES: 'Nombre:', EN: 'Name:' },
+      'Expediente ID:': { ES: 'Expediente ID:', EN: 'Record ID:' },
+      'Teléfono:': { ES: 'Teléfono:', EN: 'Phone:' },
+      'Sexo:': { ES: 'Sexo:', EN: 'Sex:' },
+      'Edad:': { ES: 'Edad:', EN: 'Age:' },
+      'Ocupación:': { ES: 'Ocupación:', EN: 'Occupation:' },
+      'Estado Civil:': { ES: 'Estado Civil:', EN: 'Marital Status:' },
+      'Origen / Procedencia:': { ES: 'Origen / Procedencia:', EN: 'Origin:' },
+      'Religión:': { ES: 'Religión:', EN: 'Religion:' },
+      'Datos de Progenitores:': { ES: 'Datos de Progenitores:', EN: 'Parental Data:' },
+      'Motivo Textual:': { ES: 'Motivo Textual:', EN: 'Textual Reason:' },
+      'Antecedentes Clínicos:': { ES: 'Antecedentes Clínicos:', EN: 'Clinical History:' },
+      'Sin antecedentes.': { ES: 'Sin antecedentes.', EN: 'No previous history.' },
+      '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS': { ES: '3. BATERÍAS Y EVALUACIONES PSICOMÉTRICAS REALIZADAS', EN: '3. PSYCHOMETRIC EVALUATIONS PERFORMED' },
+      'No se han aplicado baterías psicométricas formales aún.': { ES: 'No se han aplicado baterías psicométricas formales aún.', EN: 'No formal psychometric batteries applied yet.' },
+      '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)': { ES: '4. DICTAMEN E IMPRESIÓN DIAGNÓSTICA (IA)', EN: '4. DIAGNOSTIC IMPRESSION AND REPORT (AI)' },
+      'En proceso de evaluación clínica acumulada.': { ES: 'En proceso de evaluación clínica acumulada.', EN: 'In the process of cumulative clinical evaluation.' },
+      '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)': { ES: '5. BUSINESS INTELLIGENCE CLÍNICO (KPIs)', EN: '5. CLINICAL BUSINESS INTELLIGENCE (KPIs)' },
+      'Termómetro de Adherencia (Avance)': { ES: 'Termómetro de Adherencia (Avance)', EN: 'Adherence Thermometer (Progress)' },
+      'Hacia el protocolo base de alta clínica (12 sesiones).': { ES: 'Hacia el protocolo base de alta clínica (12 sesiones).', EN: 'Towards the clinical discharge base protocol (12 sessions).' },
+      'Eficacia (Sesión 1 vs Actual)': { ES: 'Eficacia (Sesión 1 vs Actual)', EN: 'Efficacy (Session 1 vs Current)' },
+      'Ansiedad': { ES: 'Ansiedad', EN: 'Anxiety' },
+      'Depresión': { ES: 'Depresión', EN: 'Depression' },
+      'Rueda Multiaxial de Vida (Última Evaluación)': { ES: 'Rueda Multiaxial de Vida (Última Evaluación)', EN: 'Multiaxial Wheel of Life (Last Evaluation)' },
+      'Sentimiento Congruente': { ES: 'Sentimiento Congruente', EN: 'Congruent Sentiment' },
+      'Estable': { ES: 'Estable', EN: 'Stable' },
+      'En Riesgo': { ES: 'En Riesgo', EN: 'At Risk' },
+      'Especialidad:': { ES: 'Especialidad:', EN: 'Specialty:' },
+      'Colegiado Activo:': { ES: 'Colegiado Activo:', EN: 'Active License:' },
+      'Prueba:': { ES: 'Prueba:', EN: 'Test:' },
+      'Actual:': { ES: 'Actual:', EN: 'Current:' },
+      'N/A': { ES: 'N/A', EN: 'N/A' },
+      'N/R': { ES: 'N/R', EN: 'N/R' },
+      'Sueño': { ES: 'Sueño', EN: 'Sleep' },
+      'Apetito': { ES: 'Apetito', EN: 'Appetite' },
+      'Energía': { ES: 'Energía', EN: 'Energy' },
+      'Social': { ES: 'Social', EN: 'Social' },
+      'Atención': { ES: 'Atención', EN: 'Attention' },
+      'HIPAA Compliance & Privacy Rule': { ES: 'HIPAA Compliance & Privacy Rule', EN: 'HIPAA Compliance & Privacy Rule' },
+      'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente': { ES: 'Cumplimiento RGPD (Europa) / Ley de Autonomía del Paciente', EN: 'GDPR Compliance (Europe) / Patient Autonomy Law' },
+      'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)': { ES: 'NOM-004-SSA3-2012 (Norma Oficial Mexicana del Expediente Clínico)', EN: 'NOM-004-SSA3-2012 (Official Mexican Standard for Clinical Records)' },
+      'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)': { ES: 'Resolución 1995 de 1999 y Resolución 839 de 2017 (Historia Clínica)', EN: 'Resolution 1995 of 1999 and 839 of 2017 (Clinical History)' },
+      'Ley N° 20.584 (Derechos y Deberes del Paciente)': { ES: 'Ley N° 20.584 (Derechos y Deberes del Paciente)', EN: 'Law N° 20.584 (Patient Rights and Duties)' },
+      'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)': { ES: 'NTS N° 139-MINSA/2018/DGAIN (Gestión de la Historia Clínica)', EN: 'NTS N° 139-MINSA/2018/DGAIN (Clinical History Management)' },
+      'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)': { ES: 'Ley 26.529 (Derechos del Paciente, Historia Clínica y Consentimiento Informado)', EN: 'Law 26.529 (Patient Rights, Clinical History & Informed Consent)' },
+      'Código de Salud (Decreto 90-97) / Normativa MSPAS': { ES: 'Código de Salud (Decreto 90-97) / Normativa MSPAS', EN: 'Health Code (Decree 90-97) / MSPAS Regulations' },
+      'Cumplimiento de Confidencialidad y Ética Profesional Internacional': { ES: 'Cumplimiento de Confidencialidad y Ética Profesional Internacional', EN: 'Compliance with Confidentiality and International Professional Ethics' },
+      'A QUIEN INTERESE:': { ES: 'A QUIEN INTERESE:', EN: 'TO WHOM IT MAY CONCERN:' },
+      'Por medio de la presente se hace constar que el/la paciente': { ES: 'Por medio de la presente se hace constar que el/la paciente', EN: 'This is to certify that the patient' },
+      'expediente': { ES: 'expediente', EN: 'record' },
+      'ha asistido a su proceso clínico.': { ES: 'ha asistido a su proceso clínico.', EN: 'has attended their clinical process.' },
+      'Atentamente,': { ES: 'Atentamente,', EN: 'Sincerely,' },
+      'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL': { ES: 'EVALUACIÓN PSICOMÉTRICA INTERNACIONAL', EN: 'INTERNATIONAL PSYCHOMETRIC EVALUATION' },
+      'Instrumento:': { ES: 'Instrumento:', EN: 'Instrument:' },
+      'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:' },
+      'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:' },
+      'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:' },
+      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.' },
+      'Bandeja Limpia': { ES: 'Bandeja Limpia', EN: 'Clean Inbox' },
+      'Índice Severidad (ISC)': { ES: 'Índice Severidad (ISC)', EN: 'Severity Index (ISC)' },
+      'Riesgo Clínico': { ES: 'Riesgo Clínico', EN: 'Clinical Risk' }
+    };
+    return dict[key]?.[activeLang] || key;
   };
 
   const getLegalNorm = (countryCode: string) => {
@@ -120,11 +341,7 @@ export default function App() {
     }
   };
 
-  const getProfPrefix = (profType?: string) => profType === 'PSIQUIATRA' ? 'Médico Psiquiatra' : 'Psicólogo(a) Clínico';
-
-  // ==============================================================================================
-  // DASHBOARD DINÁMICO E INTELIGENTE EN 5 NIVELES
-  // ==============================================================================================
+  // DASHBOARD DINÁMICO E INTELIGENTE EN 5 NIVELES (CON MÓDULO DE COMENTARIOS INCRUSTADO EN ESPECIALIDAD)
   const PatientDashboard = ({ 
     activeCase, 
     isFullscreen, 
@@ -152,30 +369,24 @@ export default function App() {
     const totalSessions = sessions.length;
     
     const chartData = sessions.map(s => {
-      const ts = (s as any).testScores || {};
-      const getLegacySc = (keys: string[]) => {
+      const getSc = (keys: string[]) => {
         let sc = 0;
         if (keys.some(k => s.baiScore?.includes(k))) sc = Math.max(sc, extractNumericScore(s.baiScore));
         if (keys.some(k => s.bdiScore?.includes(k))) sc = Math.max(sc, extractNumericScore(s.bdiScore));
         if (keys.some(k => s.dsm5EvaluationName?.includes(k))) sc = Math.max(sc, extractNumericScore(s.dsm5EvaluationResult));
         return sc;
       };
-
       return {
         session: `S${s.sessionNumber}`,
-        ans: ts['BAI'] || ts['HAM_A'] || ts['GAD7'] || ts['SPIN'] || getLegacySc(['BAI', 'HAM', 'GAD', 'SPIN', 'Ansiedad']), 
-        dep: ts['BDI'] || ts['HAM_D'] || ts['PHQ9'] || getLegacySc(['BDI', 'HAM', 'PHQ', 'Depresión']),
-        psi: ts['PQB'] || getLegacySc(['PQ', 'Psicosis', 'Esquizofrenia']),
-        aut: ts['AQ10'] || getLegacySc(['AQ', 'Autismo', 'Asperger']),
-        add: ts['DAST10'] || ts['AUDIT'] || ts['EAT26'] || getLegacySc(['DAST', 'AUDIT', 'EAT', 'Adiccion', 'TCA']),
-        beh: ts['IAT'] || ts['SAST'] || getLegacySc(['IAT', 'SAST', 'Digital', 'Sexual', 'Ludopatía']),
-        tdah: ts['ASRS'] || getLegacySc(['ASRS', 'TDAH']),
-        tlp: ts['MSIBPD'] || getLegacySc(['MSIBPD', 'TLP', 'BPD', 'Personalidad']),
-        cog: ts['MMSE'] || ts['FAQ'] || getLegacySc(['MMSE', 'FAQ', 'Cognitiva', 'Alzheimer', 'Parkinson', 'Demencia']),
-        bip: ts['MDQ'] || getLegacySc(['MDQ', 'Bipolar', 'Manía']),
-        trauma: ts['PCL5'] || getLegacySc(['PCL', 'TEPT', 'Trauma', 'Estrés']),
-        toc: ts['YBOCS'] || getLegacySc(['YBOCS', 'TOC', 'Obsesivo']),
-        sleep: ts['ISI'] || getLegacySc(['ISI', 'Sueño', 'Insomnio']),
+        ans: getSc(['BAI', 'HAM', 'GAD', 'SPIN', 'YBOCS', 'Ansiedad']) || extractNumericScore(s.baiScore), 
+        dep: getSc(['BDI', 'HAM', 'PHQ', 'Depresión']) || extractNumericScore(s.bdiScore),
+        psi: getSc(['PQ', 'Psicosis', 'Esquizofrenia']),
+        aut: getSc(['AQ', 'Autismo', 'Asperger']),
+        add: getSc(['DAST', 'AUDIT', 'EAT', 'Adiccion', 'TCA', 'IAT', 'SAST', 'Digital', 'Sexual']),
+        beh: getSc(['IAT', 'SAST', 'Digital', 'Sexual', 'Ludopatía']),
+        tdah: getSc(['ASRS', 'TDAH']),
+        tlp: getSc(['MSIBPD', 'TLP', 'BPD']),
+        cog: getSc(['MMSE', 'FAQ', 'Cognitiva', 'Alzheimer', 'Parkinson', 'Demencia']),
         pharmaName: s.pharma?.name || '',
         pharmaDose: s.pharma?.dose || '',
         pharmaEff: s.pharma?.effectiveness || 0,
@@ -187,19 +398,12 @@ export default function App() {
     let label1 = 'ANSIEDAD'; let label2 = 'DEPRESIÓN';
     
     if (isSpecialty) {
-        if (currentFocus === 'TRASTORNOS_ANSIEDAD') { val1Key = 'ans'; val2Key = 'dep'; label1 = 'ANSIEDAD GENERALIZADA'; label2 = 'DEPRESIÓN (Comorbilidad)'; }
-        else if (currentFocus === 'TRASTORNOS_DEPRESIVOS') { val1Key = 'dep'; val2Key = 'ans'; label1 = 'DEPRESIÓN MAYOR'; label2 = 'ANSIEDAD SECUNDARIA'; }
-        else if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') { val1Key = 'psi'; val2Key = 'dep'; label1 = 'SÍNTOMAS POSITIVOS (Psicosis)'; label2 = 'DEPRESIÓN / SÍNT. NEGATIVOS'; }
-        else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') { val1Key = 'aut'; val2Key = 'tdah'; label1 = 'ESPECTRO AUTISTA (AQ-10)'; label2 = 'TDAH / DISFUNCIÓN EJECUTIVA'; }
-        else if (currentFocus === 'TRASTORNOS_BIPOLARES') { val1Key = 'bip'; val2Key = 'dep'; label1 = 'MANÍA / HIPOMANÍA (MDQ)'; label2 = 'EPISODIO DEPRESIVO'; }
-        else if (currentFocus === 'TOC_Y_RELACIONADOS') { val1Key = 'toc'; val2Key = 'ans'; label1 = 'OBSESIONES / COMPULSIONES'; label2 = 'ANSIEDAD REACTIVA'; }
-        else if (currentFocus === 'TRAUMA_Y_ESTRES') { val1Key = 'trauma'; val2Key = 'ans'; label1 = 'INTRUSIÓN / TEPT (PCL-5)'; label2 = 'HIPERALERTA / ANSIEDAD'; }
-        else if (currentFocus === 'TCA_ALIMENTARIOS') { val1Key = 'add'; val2Key = 'ans'; label1 = 'SEVERIDAD TCA (EAT-26)'; label2 = 'ANSIEDAD COMÓRBIDA'; }
-        else if (currentFocus === 'ADICCIONES_SUSTANCIAS' || currentFocus === 'DISRUPTIVOS_IMPULSOS') { val1Key = 'add'; val2Key = 'beh'; label1 = 'USO DE SUSTANCIAS (AUDIT/DAST)'; label2 = 'ADICCIÓN CONDUCTUAL (IAT/SAST)'; }
-        else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') { val1Key = 'cog'; val2Key = 'dep'; label1 = 'DETERIORO COGNITIVO (MMSE/FAQ)'; label2 = 'SÍNTOMAS AFECTIVOS'; }
-        else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') { val1Key = 'tlp'; val2Key = 'dep'; label1 = 'SEVERIDAD TLP / INESTABILIDAD'; label2 = 'VACÍO / DEPRESIÓN'; }
-        else if (currentFocus === 'SUEÑO_VIGILIA') { val1Key = 'sleep'; val2Key = 'ans'; label1 = 'SEVERIDAD DE INSOMNIO (ISI)'; label2 = 'ANSIEDAD NOCTURNA'; }
-        else { val1Key = 'ans'; val2Key = 'dep'; label1 = 'SINTOMATOLOGÍA PRINCIPAL'; label2 = 'AFECTACIÓN SECUNDARIA'; }
+        if (currentFocus === 'PSICOSIS_ESQUIZOFRENIA') { val1Key = 'psi'; val2Key = 'dep'; label1 = 'PSICOSIS (PQ-B)'; label2 = 'DEPRESIÓN (Comorbilidad)'; }
+        else if (currentFocus === 'ESPECTRO_AUTISTA') { val1Key = 'aut'; val2Key = 'ans'; label1 = 'AUTISMO (AQ-10)'; label2 = 'ANSIEDAD (Comorbilidad)'; }
+        else if (currentFocus === 'ADICCIONES_COMPORTAMENTALES_TCA') { val1Key = 'add'; val2Key = 'beh'; label1 = 'SUSTANCIAS / TCA'; label2 = 'ADICCIÓN CONDUCTUAL (Digital/Sexual)'; }
+        else if (currentFocus === 'TDAH') { val1Key = 'tdah'; val2Key = 'ans'; label1 = 'TDAH (ASRS)'; label2 = 'ANSIEDAD (Comorbilidad)'; }
+        else if (currentFocus === 'TLP') { val1Key = 'tlp'; val2Key = 'dep'; label1 = 'SEVERIDAD TLP'; label2 = 'DEPRESIÓN (Comorbilidad)'; }
+        else if (currentFocus === 'NEURODEGENERATIVO') { val1Key = 'cog'; val2Key = 'dep'; label1 = 'DETERIORO COGNITIVO (MMSE/FAQ)'; label2 = 'SÍNTOMAS AFECTIVOS'; }
     } else if (isPerspectives) {
         if (currentFocus === 'FREUD') { label1 = 'Tensión del Ello (Ansiedad)'; label2 = 'Carga Melancólica (Depresión)'; }
         else if (currentFocus === 'ERIKSON') { label1 = 'Crisis No Resuelta (Ansiedad)'; label2 = 'Estancamiento (Depresión)'; }
@@ -211,9 +415,10 @@ export default function App() {
         label1 = 'Activación Simpática (Lucha/Huida)'; label2 = 'Hibernación Conservadora (Retirada)';
     }
 
-    const firstSession = chartData[0] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
-    const lastSession = chartData[totalSessions - 1] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, bip: 0, trauma: 0, toc: 0, sleep: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
+    const firstSession = chartData[0] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
+    const lastSession = chartData[totalSessions - 1] || { ans: 0, dep: 0, psi: 0, aut: 0, add: 0, beh: 0, tdah: 0, tlp: 0, cog: 0, pharmaEff: 0, pharmaRisk: 0, pharmaName: '', pharmaDose: '' };
     
+    // Tratamiento especial para puntajes cognitivos (MMSE) donde mayor es mejor (invertir para gráfica de severidad)
     const normalizeScore = (val: number, key: string) => (key === 'cog' && val > 0) ? Math.max(0, 30 - val) : val;
 
     const val1First = normalizeScore((firstSession as any)[val1Key], val1Key); 
@@ -238,16 +443,19 @@ export default function App() {
     let nivelSeveridad = 'Leve';
     let riesgo = 'Bajo Riesgo';
 
-    if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
+    if (currentFocus === 'PSICOSIS_ESQUIZOFRENIA') {
        if (val1Last > 5) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
        if (val1Last > 12) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
-    } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') {
+    } else if (currentFocus === 'ESPECTRO_AUTISTA') {
        if (val1Last >= 6) { nivelSeveridad = 'Apoyo Requerido'; riesgo = 'Seguimiento'; }
        else { nivelSeveridad = 'Subclínico'; riesgo = 'Bajo Riesgo'; }
-    } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') {
+    } else if (currentFocus === 'TDAH') {
+       if (val1Last > 12) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
+       if (val1Last > 18) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
+    } else if (currentFocus === 'TLP') {
        if (val1Last > 3) { nivelSeveridad = 'Moderado'; riesgo = 'Precaución'; }
        if (val1Last > 5) { nivelSeveridad = 'Severo'; riesgo = 'Alto Riesgo'; }
-    } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
+    } else if (currentFocus === 'NEURODEGENERATIVO') {
        if (val1Last > 10) { nivelSeveridad = 'Deterioro Moderado'; riesgo = 'Asistencia Requerida'; }
        if (val1Last > 20) { nivelSeveridad = 'Deterioro Severo'; riesgo = 'Dependencia Total'; }
     } else {
@@ -340,7 +548,7 @@ export default function App() {
             { title: t('Índice Severidad (ISC)'), value: `${severidadMaxima} pts`, sub: nivelSeveridad, colorClass: 'text-rose-400' },
             { title: t('Riesgo Clínico'), value: riesgo, sub: 'Estimación algorítmica', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : (riesgo === 'Precaución' ? 'text-amber-500' : 'text-emerald-500') }
         ];
-    } else if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
+    } else if (currentFocus === 'PSICOSIS_ESQUIZOFRENIA') {
         const ivp = Math.round((val1Last / 12) * 100) || 0;
         kpiCards = [
             { title: 'Vulnerabilidad a Psicosis (IVP)', value: `${ivp}%`, sub: 'Escala PQ-B', colorClass: 'text-fuchsia-400' },
@@ -350,17 +558,17 @@ export default function App() {
             { title: 'Desorganización Cognitiva', value: `${(10 - lastSessionAreas.concentration) * 10}%`, sub: 'Déficit de atención', colorClass: 'text-blue-400' },
             { title: 'Alerta de Brote', value: riesgo, sub: 'Monitoreo preventivo', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
         ];
-    } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO') {
+    } else if (currentFocus === 'ESPECTRO_AUTISTA') {
         const masking = Math.round(((lastSessionAreas.social + (lastSession.ans||0)/20*10) / 2) * 10);
         kpiCards = [
             { title: 'Cociente Autista (AQ-10)', value: `${val1Last} / 10`, sub: val1Last >= 6 ? 'Criterio Clínico Cumplido' : 'Subclínico', colorClass: 'text-teal-400' },
             { title: 'Nivel de Apoyo Requerido', value: val1Last >= 8 ? 'Nivel 2/3' : val1Last >= 6 ? 'Nivel 1' : 'Autónomo', sub: 'Basado en funcionalidad', colorClass: 'text-indigo-400' },
             { title: 'Burnout Autista (Riesgo)', value: `${Math.round(((10 - lastSessionAreas.energy) + (10 - lastSessionAreas.sleep))/20 * 100)}%`, sub: 'Sobrecarga sensorial/energética', colorClass: 'text-rose-400' },
             { title: 'Nivel de Enmascaramiento', value: `${masking}%`, sub: 'Camouflage social vs Estrés', colorClass: 'text-purple-400' },
-            { title: 'Carga TDAH (ASRS)', value: `${val2Last} / 24`, sub: 'Comorbilidad atencional', colorClass: 'text-orange-400' },
+            { title: 'Foco e Hiperfijación', value: `${lastSessionAreas.concentration * 10}%`, sub: 'Capacidad atencional', colorClass: 'text-blue-400' },
             { title: 'Regulación Emocional', value: sentimientoScore >= 50 ? 'Estable' : 'Desregulada', sub: 'Afecto y ansiedad', colorClass: sentimientoScore >= 50 ? 'text-emerald-400' : 'text-amber-400' }
         ];
-    } else if (currentFocus === 'TCA_ALIMENTARIOS' || currentFocus === 'ADICCIONES_SUSTANCIAS' || currentFocus === 'DISRUPTIVOS_IMPULSOS') {
+    } else if (currentFocus === 'ADICCIONES_COMPORTAMENTALES_TCA') {
         kpiCards = [
             { title: 'Severidad Sustancias/TCA', value: `${val1Last} pts`, sub: 'Escalas EAT-26 / DAST / AUDIT', colorClass: 'text-red-400' },
             { title: 'Adicción Digital / Sexual', value: `${val2Last} pts`, sub: 'Escalas IAT / SAST', colorClass: 'text-fuchsia-400' },
@@ -369,7 +577,16 @@ export default function App() {
             { title: 'Aislamiento Social', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Red de apoyo funcional', colorClass: 'text-orange-400' },
             { title: 'Riesgo de Recaída', value: riesgo, sub: 'Vulnerabilidad actual', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
         ];
-    } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD') {
+    } else if (currentFocus === 'TDAH') {
+        kpiCards = [
+            { title: 'Carga Sintomática ASRS', value: `${val1Last} / 24`, sub: 'Déficit de Atención', colorClass: 'text-orange-400' },
+            { title: 'Disfunción Ejecutiva', value: `${(10 - lastSessionAreas.concentration) * 10}%`, sub: 'Concentración y Enfoque', colorClass: 'text-fuchsia-400' },
+            { title: 'Inquietud Motora', value: val1Last > 12 ? 'Alta' : 'Baja', sub: 'Hiperactividad', colorClass: val1Last > 12 ? 'text-red-400' : 'text-emerald-400' },
+            { title: 'Desempeño Social', value: `${lastSessionAreas.social * 10}%`, sub: 'Integración', colorClass: 'text-blue-400' },
+            { title: 'Desgaste Energético', value: `${(10 - lastSessionAreas.energy) * 10}%`, sub: 'Agotamiento', colorClass: 'text-amber-400' },
+            { title: 'Riesgo Funcional', value: riesgo, sub: 'Impacto diario', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
+        ];
+    } else if (currentFocus === 'TLP') {
         kpiCards = [
             { title: 'Severidad TLP (MSI-BPD)', value: `${val1Last} / 8`, sub: 'Trastorno Límite', colorClass: 'text-rose-400' },
             { title: 'Desregulación Emocional', value: `${100 - sentimientoScore}%`, sub: 'Fluctuación del afecto', colorClass: 'text-purple-400' },
@@ -378,7 +595,7 @@ export default function App() {
             { title: 'Miedo al Abandono', value: `${(10 - lastSessionAreas.social) * 10}%`, sub: 'Inestabilidad interpersonal', colorClass: 'text-orange-400' },
             { title: 'Alerta de Crisis', value: riesgo, sub: 'Vulnerabilidad actual', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
         ];
-    } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
+    } else if (currentFocus === 'NEURODEGENERATIVO') {
         const mmseScore = (lastSession.cog && lastSession.cog > 0) ? (30 - val1Last) : 0; 
         kpiCards = [
             { title: 'Deterioro Cognitivo (MMSE)', value: mmseScore > 0 ? `${mmseScore} / 30` : 'N/A', sub: nivelSeveridad, colorClass: val1Last > 10 ? 'text-rose-400' : 'text-indigo-400' },
@@ -388,19 +605,15 @@ export default function App() {
             { title: 'Memoria y Concentración', value: `${lastSessionAreas.concentration * 10}%`, sub: 'Reserva cognitiva', colorClass: 'text-blue-400' },
             { title: 'Sobrecarga del Cuidador', value: riesgo === 'Dependencia Total' ? 'Crítica' : 'Monitorear', sub: 'Impacto familiar', colorClass: riesgo === 'Dependencia Total' ? 'text-red-500' : 'text-fuchsia-400' }
         ];
-    } else {
-        kpiCards = [
-            { title: 'Carga Sintomática Principal', value: `${val1Last} pts`, sub: label1, colorClass: 'text-orange-400' },
-            { title: 'Comorbilidad Asociada', value: `${val2Last} pts`, sub: label2, colorClass: 'text-fuchsia-400' },
-            { title: 'Impacto Funcional (GAF)', value: `${gafScore}%`, sub: 'Desempeño global', colorClass: 'text-indigo-400' },
-            { title: 'Desempeño Social', value: `${lastSessionAreas.social * 10}%`, sub: 'Integración', colorClass: 'text-blue-400' },
-            { title: 'Desgaste Energético', value: `${(10 - lastSessionAreas.energy) * 10}%`, sub: 'Agotamiento sistémico', colorClass: 'text-amber-400' },
-            { title: 'Riesgo Funcional', value: riesgo, sub: 'Impacto diario', colorClass: riesgo === 'Alto Riesgo' ? 'text-red-500' : 'text-emerald-500' }
-        ];
     }
 
     const handleCopySVG = () => {
-      alert("La gráfica ha sido registrada.");
+      const svg = generateSpiderChartSVG(lastSessionAreas, t);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(svg).then(() => alert("Gráfico SVG copiado al portapapeles. Puede pegarlo en Word o HTML.")).catch(() => alert("Error al copiar SVG."));
+      } else {
+        alert("La copia al portapapeles no está disponible en este entorno (asegúrese de usar HTTPS).");
+      }
     };
 
     const getDashboardTitle = () => {
@@ -408,7 +621,7 @@ export default function App() {
        if (isPerspectives) return '🎭 ANÁLISIS DE CORRIENTES TEÓRICAS';
        if (isEvolutionary) return '🧬 PSICOLOGÍA EVOLUTIVA Y ADAPTATIVA';
        if (isBase) return '📊 BUSINESS INTELLIGENCE CLÍNICO';
-       return '🧠 ANÁLISIS POR TRASTORNO / ENFERMEDAD';
+       return '🧠 MÓDULO DE ESPECIALIDAD CLÍNICA';
     }
 
     const getDashboardSubtitle = () => {
@@ -416,9 +629,10 @@ export default function App() {
        if (isPerspectives) return 'Interpretación de síntomas según escuelas psicológicas y dinámicas subyacentes.';
        if (isEvolutionary) return 'Análisis Darwiniano del valor adaptativo y de supervivencia de la sintomatología actual.';
        if (isBase) return 'Medición de adherencia, evolución de síntomas y áreas funcionales.';
-       return 'Gráficos Internacionales y KPIs especializados basados en el DSM-5.';
+       return 'KPIs especializados y análisis de comorbilidades en tiempo real.';
     }
 
+    // ACCESO A DATOS DINÁMICOS DE IA Y COMENTARIOS
     const specialtyAiSummaries = (activeCase as any).specialtyAiSummaries || {};
     const specialtyComments = (activeCase as any).specialtyComments || {};
 
@@ -433,118 +647,6 @@ export default function App() {
         onUpdateCase(updated);
     };
 
-    const renderSpecialtyGraph = () => {
-        if (!hasScores) {
-            return (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
-                 <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para generar gráfico</span>
-              </div>
-            );
-        }
-
-        if (currentFocus === 'ESPECTRO_ESQUIZOFRENIA_PSICOSIS') {
-            const pos = val1Last; 
-            const neg = (10 - lastSessionAreas.social) * 3; 
-            const cog = (10 - lastSessionAreas.concentration) * 3; 
-            const maxVal = Math.max(10, pos, neg, cog) * 1.2;
-            return (
-                <div className="flex items-end justify-around h-40 w-full px-8 mt-4">
-                  <div className="flex flex-col items-center gap-2">
-                     <div className="w-12 bg-rose-500 rounded-t relative flex items-end justify-center" style={{ height: `${(pos/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{pos}</span></div>
-                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Síntomas<br/>Positivos</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                     <div className="w-12 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(neg/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{neg}</span></div>
-                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Síntomas<br/>Negativos</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                     <div className="w-12 bg-slate-500 rounded-t relative flex items-end justify-center" style={{ height: `${(cog/maxVal)*100}%` }}><span className="text-[10px] text-white font-bold mb-1">{cog}</span></div>
-                     <span className="text-[9px] font-bold text-slate-400 uppercase text-center w-20">Afectación<br/>Cognitiva</span>
-                  </div>
-                </div>
-            );
-        } else if (currentFocus === 'TRASTORNOS_NEURODESARROLLO' || currentFocus === 'TOC_Y_RELACIONADOS') {
-            const valA = val1Last;
-            const valB = val2Last;
-            const maxVal = Math.max(10, valA, valB) * 1.2;
-            return (
-                <div className="flex flex-col justify-center h-48 w-full px-8 mt-2 space-y-6">
-                    <div>
-                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{label1}</span><span>{valA} pts</span></div>
-                       <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-indigo-500 h-4 rounded-full" style={{ width: `${(valA/maxVal)*100}%` }}></div></div>
-                    </div>
-                    <div>
-                       <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1"><span>{label2}</span><span>{valB} pts</span></div>
-                       <div className="w-full bg-slate-800 rounded-full h-4"><div className="bg-orange-500 h-4 rounded-full" style={{ width: `${(valB/maxVal)*100}%` }}></div></div>
-                    </div>
-                </div>
-            );
-        } else if (currentFocus === 'TRASTORNOS_PERSONALIDAD' || currentFocus === 'TRASTORNOS_BIPOLARES') {
-            return (
-                <div className="relative w-full h-48 mt-2">
-                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                    <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
-                    <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
-                    <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
-                    <polyline fill="none" stroke="#f43f5e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => {
-                       const variance = i % 2 === 0 ? normalizeScore((d as any)[val1Key], val1Key) : normalizeScore((d as any)[val2Key], val2Key);
-                       return `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (variance / maxLineVal) * 40}`;
-                    }).join(' ')} />
-                  </svg>
-                  <p className="absolute bottom-0 w-full text-center text-[9px] text-rose-500 font-bold mt-2">Variabilidad y Picos de Labilidad Emocional / Ánimo</p>
-                </div>
-            );
-        } else if (currentFocus === 'TRASTORNOS_NEUROCOGNITIVOS') {
-            return (
-                <div className="relative w-full h-48 mt-2 bg-slate-900 rounded border border-slate-700">
-                  <div className="absolute bottom-0 w-full bg-red-900/30" style={{height: '80%'}}></div> {/* < 24 pts MMSE */}
-                  <span className="absolute bottom-1 right-2 text-[9px] text-red-500 font-bold">Zona de Deterioro (&lt;24 pts)</span>
-                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible absolute inset-0" preserveAspectRatio="none">
-                    <polyline fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore(d.cog, 'cog') / 30) * 40}`).join(' ')} />
-                    {chartData.map((d, i) => {
-                      const cx = (i / Math.max(1, totalSessions - 1)) * 100;
-                      const score = normalizeScore(d.cog, 'cog');
-                      const actualMmse = score > 0 ? 30 - score : 0;
-                      return (
-                        <g key={i}>
-                          <circle cx={cx} cy={40 - (score / 30) * 40} r="1.5" fill="#3b82f6" />
-                          <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
-                          {actualMmse > 0 && <text x={cx} y={40 - (score / 30) * 40 - 2} fontSize="2.5" fill="#fff" textAnchor="middle">{actualMmse}</text>}
-                        </g>
-                      );
-                    })}
-                  </svg>
-                </div>
-            );
-        } else {
-            return (
-                <div className="relative w-full h-48 mt-2">
-                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                    <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
-                    <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
-                    <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
-                    <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40}`).join(' ')} />
-                    <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40}`).join(' ')} />
-                    {chartData.map((d, i) => {
-                      const cx = (i / Math.max(1, totalSessions - 1)) * 100;
-                      return (
-                        <g key={i}>
-                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40} r="1.5" fill="#f59e0b" />
-                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40} r="1.5" fill="#3b82f6" />
-                          <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
-                        </g>
-                      );
-                    })}
-                  </svg>
-                  <div className="flex justify-center gap-6 mt-6 text-[10px] text-slate-300 uppercase font-bold">
-                    <span className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-full"></div> {label1}</span>
-                    <span className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div> {label2}</span>
-                  </div>
-                </div>
-            );
-        }
-    };
-
     return (
       <div id={`kpi-dashboard-${dashboardType}`} className={`bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full ${isFullscreen ? 'min-h-screen overflow-y-auto' : 'overflow-hidden'}`}>
         <div className="border-b border-slate-800 pb-3 flex justify-between items-center flex-wrap gap-4">
@@ -556,24 +658,14 @@ export default function App() {
             
             {dashboardType === 'SPECIALTY' && (
               <div className="flex items-center gap-2 mr-2">
-                 <span className="text-[10px] font-bold text-indigo-400 uppercase hidden sm:inline">Clasificación DSM-5:</span>
+                 <span className="text-[10px] font-bold text-indigo-400 uppercase hidden sm:inline">Foco Clínico:</span>
                  <select value={specialtyFocus} onChange={(e) => setSpecialtyFocus(e.target.value)} className="bg-slate-800 text-xs text-white font-bold p-1.5 rounded-lg border border-indigo-500/50 outline-none cursor-pointer hover:bg-slate-700 transition">
-                    <option value="TRASTORNOS_NEURODESARROLLO">Neurodesarrollo (Autismo / TDAH)</option>
-                    <option value="ESPECTRO_ESQUIZOFRENIA_PSICOSIS">Espectro de la Esquizofrenia (Psicosis)</option>
-                    <option value="TRASTORNOS_BIPOLARES">Trastornos Bipolares y Relacionados</option>
-                    <option value="TRASTORNOS_DEPRESIVOS">Trastornos Depresivos</option>
-                    <option value="TRASTORNOS_ANSIEDAD">Trastornos de Ansiedad</option>
-                    <option value="TOC_Y_RELACIONADOS">Trastorno Obsesivo-Compulsivo (TOC)</option>
-                    <option value="TRAUMA_Y_ESTRES">Trauma y Factores de Estrés (TEPT)</option>
-                    <option value="TRASTORNOS_DISOCIATIVOS">Trastornos Disociativos</option>
-                    <option value="SINTOMAS_SOMATICOS">Síntomas Somáticos</option>
-                    <option value="TCA_ALIMENTARIOS">Trastornos Conducta Alimentaria (TCA)</option>
-                    <option value="SUEÑO_VIGILIA">Trastornos del Sueño-Vigilia</option>
-                    <option value="DISFUNCIONES_SEXUALES">Disfunciones Sexuales y Parafilias</option>
-                    <option value="DISRUPTIVOS_IMPULSOS">Disruptivos y Control de Impulsos</option>
-                    <option value="ADICCIONES_SUSTANCIAS">Adicciones (Sustancias, Digitales, Sexuales)</option>
-                    <option value="TRASTORNOS_NEUROCOGNITIVOS">Neurocognitivos (Alzheimer, Parkinson)</option>
-                    <option value="TRASTORNOS_PERSONALIDAD">Trastornos de la Personalidad (TLP)</option>
+                    <option value="PSICOSIS_ESQUIZOFRENIA">Psicosis / Esquizofrenia</option>
+                    <option value="ESPECTRO_AUTISTA">Autismo / Asperger</option>
+                    <option value="ADICCIONES_COMPORTAMENTALES_TCA">Adicciones (Sustancias/Sexuales/Digitales) y TCA</option>
+                    <option value="TDAH">TDAH (Déficit de Atención)</option>
+                    <option value="TLP">Trastorno Límite (TLP)</option>
+                    <option value="NEURODEGENERATIVO">Neurodegenerativo (Alzheimer/Parkinson/Demencia)</option>
                  </select>
               </div>
             )}
@@ -643,7 +735,9 @@ export default function App() {
                 <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
                 <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
                 
+                {/* LÍNEA DE EFECTIVIDAD (VERDE) */}
                 <polyline fill="none" stroke="#10b981" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaEff / 100) * 40}`).join(' ')} />
+                {/* LÍNEA DE RIESGO (ROJO) */}
                 <polyline fill="none" stroke="#f43f5e" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (d.pharmaRisk / 100) * 40}`).join(' ')} />
                 
                 {chartData.map((d, i) => {
@@ -667,77 +761,95 @@ export default function App() {
             </div>
           </div>
         ) : (
-          /* VISTA NORMAL: GRÁFICAS MULTIAXIAL Y DE TENDENCIA O ESPECÍFICA */
+          /* VISTA NORMAL: GRÁFICAS MULTIAXIAL Y DE TENDENCIA */
           <>
-            {isSpecialty ? (
-               <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative min-h-[300px]">
-                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 Modelado Visual Específico: {currentFocus.replace(/_/g, ' ')}</h4>
-                 {renderSpecialtyGraph()}
-               </div>
-            ) : (
-               <>
-                  <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
-                    <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
-                      <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
-                      <div className="w-full h-48 flex justify-center" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
-                      <button onClick={handleCopySVG} className="absolute top-4 right-4 text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white border border-slate-600">Copiar SVG</button>
+            <div className={`grid gap-6 ${isFullscreen ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+              <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center justify-center relative">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🕸️ {t('Rueda Multiaxial')}</h4>
+                <div className="w-full h-48 flex justify-center" dangerouslySetInnerHTML={{ __html: generateSpiderChartSVG(lastSessionAreas, t) }} />
+                <button onClick={handleCopySVG} className="absolute top-4 right-4 text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-white border border-slate-600">Copiar SVG</button>
+              </div>
+              
+              <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center w-full justify-center relative">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-6">📊 {t('Eficacia: Pre vs Post')}</h4>
+                {!hasScores && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
+                     <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para graficar</span>
+                  </div>
+                )}
+                <div className="flex items-end justify-center gap-8 h-40 w-full px-4">
+                  <div className="flex gap-2 h-full items-end">
+                    <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val1First/maxBarVal)*100}%` }}>
+                      <span className="text-[10px] text-white font-bold mb-1">{val1First}</span>
                     </div>
-                    
-                    <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col items-center w-full justify-center relative">
-                      <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-6">📊 {t('Eficacia: Pre vs Post')}</h4>
-                      {!hasScores && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
-                           <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para graficar</span>
-                        </div>
-                      )}
-                      <div className="flex items-end justify-center gap-8 h-40 w-full px-4">
-                        <div className="flex gap-2 h-full items-end">
-                          <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val1First/maxBarVal)*100}%` }}>
-                            <span className="text-[10px] text-white font-bold mb-1">{val1First}</span>
-                          </div>
-                          <div className="w-10 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val1Last/maxBarVal)*100}%` }}>
-                            <span className="text-[10px] text-white font-bold mb-1">{val1Last}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 h-full items-end">
-                          <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val2First/maxBarVal)*100}%` }}>
-                            <span className="text-[10px] text-white font-bold mb-1">{val2First}</span>
-                          </div>
-                          <div className="w-10 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val2Last/maxBarVal)*100}%` }}>
-                            <span className="text-[10px] text-white font-bold mb-1">{val2Last}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-around w-full px-4 mt-4 text-[10px] text-slate-500 uppercase font-bold text-center">
-                        <span className="w-1/2">{label1}</span>
-                        <span className="w-1/2">{label2}</span>
-                      </div>
-                    </div>
-
-                    <div className={`bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-center space-y-6 ${isFullscreen ? '' : 'md:col-span-2'}`}>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🌡️ {t('Adherencia Clínica')}</h4>
-                        <div className="w-full bg-slate-800 rounded-full h-4">
-                          <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-4 rounded-full" style={{ width: `${avanceBase}%` }}></div>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-2">{Math.round(avanceBase)}% completado del protocolo base.</p>
-                      </div>
-                      <div className="pt-4 border-t border-slate-800">
-                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 {t('Sentimiento Congruente')}</h4>
-                        <div className={`text-2xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? t('Estable') : t('En Riesgo')}</div>
-                        <p className="text-[10px] text-slate-400 mt-1">Estimación de afecto integral: {Math.round(sentimientoScore)}/100</p>
-                      </div>
+                    <div className="w-10 bg-amber-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val1Last/maxBarVal)*100}%` }}>
+                      <span className="text-[10px] text-white font-bold mb-1">{val1Last}</span>
                     </div>
                   </div>
-
-                  <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 {t('Curva de Tendencia Dinámica')}</h4>
-                    {renderSpecialtyGraph()}
+                  <div className="flex gap-2 h-full items-end">
+                    <div className="w-10 bg-slate-700 rounded-t relative flex items-end justify-center" style={{ height: `${(val2First/maxBarVal)*100}%` }}>
+                      <span className="text-[10px] text-white font-bold mb-1">{val2First}</span>
+                    </div>
+                    <div className="w-10 bg-blue-500 rounded-t relative flex items-end justify-center" style={{ height: `${(val2Last/maxBarVal)*100}%` }}>
+                      <span className="text-[10px] text-white font-bold mb-1">{val2Last}</span>
+                    </div>
                   </div>
-               </>
-            )}
+                </div>
+                <div className="flex justify-around w-full px-4 mt-4 text-[10px] text-slate-500 uppercase font-bold text-center">
+                  <span className="w-1/2">{label1}</span>
+                  <span className="w-1/2">{label2}</span>
+                </div>
+              </div>
+
+              <div className={`bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-center space-y-6 ${isFullscreen ? '' : 'md:col-span-2'}`}>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">🌡️ {t('Adherencia Clínica')}</h4>
+                  <div className="w-full bg-slate-800 rounded-full h-4">
+                    <div className="bg-gradient-to-r from-red-500 to-emerald-500 h-4 rounded-full" style={{ width: `${avanceBase}%` }}></div>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-2">{Math.round(avanceBase)}% completado del protocolo base.</p>
+                </div>
+                <div className="pt-4 border-t border-slate-800">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">🧭 {t('Sentimiento Congruente')}</h4>
+                  <div className={`text-2xl font-bold ${sentimientoColor}`}>{sentimientoScore >= 50 ? t('Estable') : t('En Riesgo')}</div>
+                  <p className="text-[10px] text-slate-400 mt-1">Estimación de afecto integral: {Math.round(sentimientoScore)}/100</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 overflow-hidden w-full relative">
+              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">📈 {t('Curva de Tendencia Dinámica')}</h4>
+              {!hasScores && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm z-10 rounded-xl">
+                   <span className="text-[11px] font-bold text-indigo-400 px-4 text-center">Aplique prueba DSM-5 respectiva para graficar</span>
+                </div>
+              )}
+              {totalSessions < 2 ? (
+                <p className="text-[11px] text-slate-500 italic text-center py-8">{t('Requiere 2+ sesiones para curva.')}</p>
+              ) : (
+                <div className="relative w-full h-48 mt-2">
+                  <svg viewBox={`0 0 100 40`} className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                    <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" strokeWidth="0.2" />
+                    <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" strokeWidth="0.2" />
+                    <polyline fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40}`).join(' ')} />
+                    <polyline fill="none" stroke="#3b82f6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" points={chartData.map((d, i) => `${(i / Math.max(1, totalSessions - 1)) * 100},${40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40}`).join(' ')} />
+                    {chartData.map((d, i) => {
+                      const cx = (i / Math.max(1, totalSessions - 1)) * 100;
+                      return (
+                        <g key={i}>
+                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val1Key], val1Key) / maxLineVal) * 40} r="1.5" fill="#f59e0b" />
+                          <circle cx={cx} cy={40 - (normalizeScore((d as any)[val2Key], val2Key) / maxLineVal) * 40} r="1.5" fill="#3b82f6" />
+                          <text x={cx} y={45} fontSize="3" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              )}
+            </div>
             
-            {/* ZONA DE COMENTARIOS IA Y PROFESIONAL DENTRO DE ESPECIALIDAD */}
+            {/* NUEVA ZONA: INTEGRACIÓN DE IA Y COMENTARIOS DEL DOCTOR DENTRO DEL DASHBOARD DE ESPECIALIDAD */}
             {isSpecialty && (
               <div className="mt-8 border-t border-slate-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-indigo-500/30 flex flex-col h-64">
@@ -959,14 +1071,10 @@ export default function App() {
 
   const [activeCase, setActiveCase] = useState<ClinicalCase | null>(null);
   const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS_BASE' | 'ESPECIALIDADES' | 'FARMACOLOGIA' | 'PERSPECTIVAS' | 'EVOLUTIVA'>('HISTORIAL');
-  
   const [clinicalSearchQuery, setClinicalSearchQuery] = useState('');
   const [searchFeedback, setSearchFeedback] = useState('');
 
   const [showRegisterForm, setShowRegisterForm] = useState(false);
-  const [showEditPatientModal, setShowEditPatientModal] = useState(false);
-  const [editPatientData, setEditPatientData] = useState({ id: '', patientName: '', sexo: 'Femenino', edad: '', estudios: '', origenProcedencia: '', ocupacion: '', estadoCivil: 'Soltero(a)', religion: '', datosProgenitores: '', motivoConsultaTextual: '', antecedentes: '', telefono: '', fotoUrl: '', rawNotes: '' });
-
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState('');
@@ -1005,7 +1113,6 @@ export default function App() {
   const [loginError, setLoginError] = useState('');
 
   const [newPatientData, setNewPatientForm] = useState({ id: '', patientName: '', sexo: 'Femenino', edad: '', estudios: '', origenProcedencia: '', ocupacion: '', estadoCivil: 'Soltero(a)', religion: '', datosProgenitores: '', motivoConsultaTextual: '', antecedentes: '', telefono: '', fotoUrl: '', rawNotes: '' });
-  
   const [pharmaInput, setPharmaInput] = useState({ active: false, name: '', dose: '', effectiveness: 50, risk: 10 });
   const [newSessionData, setNewSessionData] = useState<any>({ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: '', audioPath: '', videoUrl: '', manualBatteryFile: '' });
   const [sessionAreas, setSessionAreas] = useState({ sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 });
@@ -1180,34 +1287,6 @@ export default function App() {
     }
   };
 
-  const handleUpdateActiveCase = (updatedCase: ClinicalCase) => {
-      setActiveCase(updatedCase);
-      setClinicalDatabase(prev => ({ ...prev, [updatedCase.id]: updatedCase }));
-  };
-
-  const handleOpenEditPatient = () => {
-      if (!activeCase) return;
-      setEditPatientData({
-          ...activeCase.generalData,
-          id: activeCase.id,
-          patientName: activeCase.patientName
-      } as any);
-      setShowEditPatientModal(true);
-  };
-
-  const handleSaveEditPatient = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!activeCase || !currentUser) return;
-      const updatedCase = {
-          ...activeCase,
-          patientName: editPatientData.patientName.trim(),
-          generalData: { ...editPatientData, id: activeCase.id } 
-      };
-      handleUpdateActiveCase(updatedCase);
-      setShowEditPatientModal(false);
-      alert("Expediente médico actualizado correctamente.");
-  };
-
   const handleAddNewSession = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeCase || !currentUser) return;
@@ -1222,7 +1301,7 @@ export default function App() {
 
     const updatedSessions = [...activeCase.sessions, sessionPayload];
     const updatedCase = { ...activeCase, sessions: updatedSessions };
-    handleUpdateActiveCase(updatedCase);
+    setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
     
     if (micStreamRef.current) {
       micStreamRef.current.getTracks().forEach(t => t.stop());
@@ -1235,6 +1314,11 @@ export default function App() {
     setNewSessionData({ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: '', audioPath: '', videoUrl: '', manualBatteryFile: '' });
     setSessionAreas({ sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 });
     setPharmaInput({ active: false, name: '', dose: '', effectiveness: 50, risk: 10 });
+  };
+
+  const handleUpdateActiveCase = (updatedCase: ClinicalCase) => {
+      setActiveCase(updatedCase);
+      setClinicalDatabase(prev => ({ ...prev, [updatedCase.id]: updatedCase }));
   };
 
   const handleProcessNotes = async () => {
@@ -1298,25 +1382,15 @@ export default function App() {
       activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
       
       const focusMap: any = {
-         'TRASTORNOS_NEURODESARROLLO': 'Trastornos del Neurodesarrollo (Autismo / TDAH)',
-         'ESPECTRO_ESQUIZOFRENIA_PSICOSIS': 'Espectro de la Esquizofrenia y Otros Trastornos Psicóticos',
-         'TRASTORNOS_BIPOLARES': 'Trastornos Bipolares y Trastornos Relacionados',
-         'TRASTORNOS_DEPRESIVOS': 'Trastornos Depresivos',
-         'TRASTORNOS_ANSIEDAD': 'Trastornos de Ansiedad',
-         'TOC_Y_RELACIONADOS': 'Trastorno Obsesivo-Compulsivo y Relacionados',
-         'TRAUMA_Y_ESTRES': 'Trastornos Relacionados con Traumas y Factores de Estrés',
-         'TRASTORNOS_DISOCIATIVOS': 'Trastornos Disociativos',
-         'SINTOMAS_SOMATICOS': 'Trastornos de Síntomas Somáticos',
-         'TCA_ALIMENTARIOS': 'Trastornos de la Conducta Alimentaria (TCA)',
-         'SUEÑO_VIGILIA': 'Trastornos del Sueño-Vigilia',
-         'DISFUNCIONES_SEXUALES': 'Disfunciones Sexuales y Parafilias',
-         'DISRUPTIVOS_IMPULSOS': 'Trastornos Disruptivos y Control de Impulsos',
-         'ADICCIONES_SUSTANCIAS': 'Trastornos Relacionados con Sustancias y Trastornos Adictivos',
-         'TRASTORNOS_NEUROCOGNITIVOS': 'Trastornos Neurocognitivos (Demencia, Alzheimer, Parkinson)',
-         'TRASTORNOS_PERSONALIDAD': 'Trastornos de la Personalidad'
+         'PSICOSIS_ESQUIZOFRENIA': 'Psicosis y Esquizofrenia',
+         'ESPECTRO_AUTISTA': 'Espectro Autista y Asperger',
+         'ADICCIONES_COMPORTAMENTALES_TCA': 'Adicciones (Sustancias, Digitales, Sexuales) y TCA',
+         'TDAH': 'TDAH (Déficit de Atención e Hiperactividad)',
+         'TLP': 'Trastorno Límite de la Personalidad (TLP)',
+         'NEURODEGENERATIVO': 'Enfermedades Neurodegenerativas (Alzheimer, Parkinson, Demencia)'
       };
       
-      const instruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un especialista estricto en ${focusMap[focus] || focus} según el manual DSM-5. Analiza este caso centrándote ÚNICAMENTE en esta familia de trastornos. Evalúa los síntomas presentados, el riesgo asociado y la evolución. Sé muy conciso, clínico y directo (máximo 2 párrafos).\n\n`;
+      const instruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un especialista estricto en ${focusMap[focus] || focus}. Analiza este caso centrándote ÚNICAMENTE en este trastorno o enfermedad. Evalúa los síntomas presentados, el riesgo asociado y la evolución. Sé muy conciso, clínico y directo (máximo 2 párrafos).\n\n`;
       
       const payloadWithInstruction = instruction + fullNotesPayload;
       const result = await processClinicalNotes(payloadWithInstruction, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
@@ -1345,23 +1419,18 @@ export default function App() {
     
     const formattedResult = `EVALUACIÓN PSICOMÉTRICA INTERNACIONAL\nInstrumento: ${selectedDsmTemplate.name}\nEvaluador: ${profTitle} ${currentUser.fullName}\n\nRESULTADOS:\n${Object.entries(dsmAnswers).map(([q, ans]) => `• ${q}: ${ans}`).join('\n')}\n\n-> PUNTUACIÓN AUTOMÁTICA: ${autoScoreStr}`;
     
+    const isAnxiety = ['BAI', 'HAM_A', 'GAD7', 'SPIN', 'YBOCS'].includes(selectedDsmTemplate.id);
+    const isDepression = ['BDI', 'HAM_D', 'PHQ9'].includes(selectedDsmTemplate.id);
+
     const updatedSessions = [...activeCase.sessions];
     if (updatedSessions.length > 0) {
       const lastIdx = updatedSessions.length - 1;
-      const currentSession = updatedSessions[lastIdx];
-      
-      const newTestScores = { ...((currentSession as any).testScores || {}) };
-      if (canAutoScore) {
-         newTestScores[selectedDsmTemplate.id] = numScore;
-      }
-
       updatedSessions[lastIdx] = { 
-        ...currentSession, 
-        testScores: newTestScores,
-        dsm5EvaluationName: currentSession.dsm5EvaluationName ? `${currentSession.dsm5EvaluationName} | ${selectedDsmTemplate.name}` : selectedDsmTemplate.name, 
-        dsm5EvaluationResult: currentSession.dsm5EvaluationResult ? `${currentSession.dsm5EvaluationResult}\n\n---\n\n${formattedResult}` : formattedResult, 
-        baiScore: ['BAI', 'HAM_A', 'GAD7', 'SPIN', 'YBOCS'].includes(selectedDsmTemplate.id) ? autoScoreStr : currentSession.baiScore, 
-        bdiScore: ['BDI', 'HAM_D', 'PHQ9'].includes(selectedDsmTemplate.id) ? autoScoreStr : currentSession.bdiScore 
+        ...updatedSessions[lastIdx], 
+        dsm5EvaluationName: selectedDsmTemplate.name, 
+        dsm5EvaluationResult: formattedResult, 
+        baiScore: isAnxiety ? autoScoreStr : updatedSessions[lastIdx].baiScore, 
+        bdiScore: isDepression ? autoScoreStr : updatedSessions[lastIdx].bdiScore 
       };
     }
     const updatedCase = { ...activeCase, sessions: updatedSessions };
@@ -1438,7 +1507,7 @@ export default function App() {
     let evaluacionesRealizadasHTML = '';
     c.sessions.forEach(s => { 
       if (s.dsm5EvaluationName && s.dsm5EvaluationResult) { 
-        evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Pruebas: ${s.dsm5EvaluationName} (${s.date})</p><div style="font-size: 9pt; white-space: pre-wrap;">${s.dsm5EvaluationResult}</div></div>`; 
+        evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Prueba: ${s.dsm5EvaluationName} (${s.date})</p><div style="font-size: 9pt; white-space: pre-wrap;">${s.dsm5EvaluationResult}</div></div>`; 
       } 
       if (s.manualBatteryFile) {
         evaluacionesRealizadasHTML += `<div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;"><p style="margin: 0 0 5px 0; font-weight: bold; font-size: 10pt;">Batería Manual Subida (${s.date})</p><p style="font-size: 9pt;">Se adjuntó archivo físico al expediente digital.</p></div>`; 
@@ -1448,6 +1517,7 @@ export default function App() {
       }
     });
     
+    // INTEGRACIÓN DE COMENTARIOS PERSONALES Y RESEÑAS DE IA EN EL INFORME FINAL
     let professionalOpinionHTML = '';
     if ((c as any).professionalOpinion) {
         professionalOpinionHTML += `<div style="margin-top: 20px;"><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; border-left: 4px solid #f59e0b;">COMENTARIOS Y OPINIÓN DEL PROFESIONAL</h2><div style="font-size: 10pt; white-space: pre-wrap; margin-top: 10px;">${(c as any).professionalOpinion}</div></div>`;
@@ -1458,7 +1528,7 @@ export default function App() {
     const spAi = (c as any).specialtyAiSummaries;
     
     if ((spComms && Object.keys(spComms).length > 0) || (spAi && Object.keys(spAi).length > 0)) {
-        extraSpecialtyCommentsHTML += `<div style="margin-top: 20px;"><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; border-left: 4px solid #6366f1;">MÓDULOS DE ESPECIALIDAD CLÍNICA (DSM-5)</h2>`;
+        extraSpecialtyCommentsHTML += `<div style="margin-top: 20px;"><h2 style="font-size: 11pt; font-weight: bold; background: #eee; padding: 4px 8px; border-left: 4px solid #6366f1;">MÓDULOS DE ESPECIALIDAD CLÍNICA</h2>`;
         
         const allKeys = new Set([...Object.keys(spComms || {}), ...Object.keys(spAi || {})]);
         allKeys.forEach(k => {
@@ -1560,16 +1630,19 @@ export default function App() {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-xl shrink-0">Ψ</div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight truncate">Asistente Clínica SaaS</h1>
+              <h1 className="text-xl font-bold tracking-tight truncate">{t('Asistente Clínica SaaS')}</h1>
               <p className={`text-xs ${th.textMuted} truncate`}>EHR & Inteligencia Artificial</p>
             </div>
           </div>
           <div className={`flex flex-wrap justify-center items-center gap-2 ${th.card} p-1 rounded-xl border ${th.border} w-full sm:w-auto`}>
+            <select value={lang} onChange={(e) => setLang(e.target.value as any)} className="bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg outline-none cursor-pointer shadow hover:bg-indigo-500">
+              <option value="ES">🌐 ES</option><option value="EN">🌐 EN</option>
+            </select>
             <button onClick={toggleTheme} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${th.border} ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'}`}>{isDarkMode ? '☀️' : '🌙'}</button>
             <div className="w-px h-6 bg-slate-500/30 mx-1"></div>
-            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white' : th.textMuted}`}>🩺 Clínico</button>
-            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white' : th.textMuted}`}>📅 Agenda</button>
-            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white' : th.textMuted}`}>⚙️ Admin</button>
+            <button onClick={() => setMode(AppMode.CLINICAL)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CLINICAL ? 'bg-indigo-600 text-white' : th.textMuted}`}>🩺 {t('Clínico')}</button>
+            <button onClick={() => setMode(AppMode.CALENDAR)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.CALENDAR ? 'bg-indigo-600 text-white' : th.textMuted}`}>📅 {t('Agenda')}</button>
+            <button onClick={() => setMode(AppMode.ADMIN)} className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === AppMode.ADMIN ? 'bg-amber-600 text-white' : th.textMuted}`}>⚙️ {t('Admin')}</button>
           </div>
         </div>
       </header>
@@ -1579,24 +1652,24 @@ export default function App() {
           <div className="max-w-4xl mx-auto space-y-8 w-full">
             {!isAdminAuthenticated ? (
               <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 max-w-md mx-auto`}>
-                <h2 className={`text-sm font-semibold ${th.text} text-center uppercase tracking-wider`}>Consola Maestra de Licencias</h2>
+                <h2 className={`text-sm font-semibold ${th.text} text-center uppercase tracking-wider`}>{t('Consola Maestra de Licencias')}</h2>
                 <form onSubmit={handleAdminAuth} className="space-y-3">
-                  <input type="password" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} placeholder="Clave de Administrador" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} outline-none`} />
-                  <button type="submit" className="w-full py-2.5 bg-amber-600 font-semibold text-white rounded-xl text-xs">Autenticar</button>
+                  <input type="password" value={adminInput} onChange={(e) => setAdminInput(e.target.value)} placeholder={t('Clave de Administrador')} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} outline-none`} />
+                  <button type="submit" className="w-full py-2.5 bg-amber-600 font-semibold text-white rounded-xl text-xs">{t('Autenticar')}</button>
                 </form>
               </div>
             ) : (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 lg:col-span-5`}>
-                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>Activar Nueva Licencia</h3>
+                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Activar Nueva Licencia')}</h3>
                     <form onSubmit={handleRegisterLicense} className="space-y-3">
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="text" required value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder="Usuario" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
-                        <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Contraseña" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                        <input type="text" required value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder={t('Usuario')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                        <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder={t('Contraseña')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                       </div>
-                      <input type="text" required value={regFullName} onChange={(e) => setRegFullName(e.target.value)} placeholder="Nombre Completo" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
-                      <input type="text" required value={regColegiado} onChange={(e) => setRegColegiado(e.target.value)} placeholder="Colegiado" className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                      <input type="text" required value={regFullName} onChange={(e) => setRegFullName(e.target.value)} placeholder={t('Nombre Completo')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
+                      <input type="text" required value={regColegiado} onChange={(e) => setRegColegiado(e.target.value)} placeholder={t('Colegiado')} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text}`} />
                       
                       <div className={`grid grid-cols-2 gap-2 border-t ${th.border} pt-3`}>
                         <select value={regProfessionType} onChange={(e) => setRegProfessionType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
@@ -1604,18 +1677,19 @@ export default function App() {
                           <option value="PSIQUIATRA">Médico Psiquiatra</option>
                         </select>
                         <select value={regLicenseType} onChange={(e) => setRegLicenseType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
-                          <option value="ESTANDAR">Licencia ESTÁNDAR</option>
-                          <option value="PREMIUM">Licencia PREMIUM</option>
+                          <option value="ESTANDAR">{t('Licencia ESTÁNDAR')}</option>
+                          <option value="PREMIUM">{t('Licencia PREMIUM')}</option>
                           <option value="DEMO">Licencia DEMO (15 Días)</option>
                         </select>
                       </div>
                       
-                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs mt-2">Activar Licencia</button>
+                      <button type="submit" className="w-full py-2 bg-amber-600 text-white font-semibold rounded text-xs mt-2">{t('Activar Licencia')}</button>
                     </form>
                   </div>
 
+                  {/* ADMIN: BOTONES PARA CAMBIAR FECHAS DE EXPIRACIÓN Y CONTRASEÑAS */}
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-6 lg:col-span-7`}>
-                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>Auditoría y Soporte</h3>
+                    <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Auditoría y Soporte')}</h3>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                       {Object.values(psychologists).filter(p => p && p.username).map((p) => {
                         const rem = getDaysRemaining(p.licenseExpiry);
@@ -1665,8 +1739,8 @@ export default function App() {
             ) : (
               <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 shadow-xl space-y-6`}>
                 <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center border-b ${th.border} pb-4 gap-4`}>
-                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 Agenda Médica</h2></div>
-                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ Agendar Cita</button>
+                  <div><h2 className={`text-lg font-bold ${th.text}`}>📅 {t('Agenda Médica')}</h2></div>
+                  <button onClick={() => setShowCalendarModal(true)} className="bg-indigo-600 text-white text-xs px-4 py-2 rounded-xl font-bold">➕ {t('Agendar Cita')}</button>
                 </div>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {myAppointments.map(app => (
@@ -1686,12 +1760,12 @@ export default function App() {
           <div className="space-y-6 flex-1 flex flex-col w-full">
             {!currentUser ? (
               <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-4 max-w-md mx-auto`}>
-                <h2 className={`text-lg font-semibold ${th.text} text-center`}>Acceso Profesional Clínico</h2>
+                <h2 className={`text-lg font-semibold ${th.text} text-center`}>{t('Acceso Profesional Clínico')}</h2>
                 <form onSubmit={handleLogin} className="space-y-3">
-                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder="Usuario" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
+                  <input type="text" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} placeholder={t('Usuario')} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   <input type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" className={`w-full p-2.5 ${th.input} border ${th.border} rounded-xl text-sm ${th.text} focus:outline-none`} />
                   {loginError && <p className="text-xs text-red-500">{loginError}</p>}
-                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">Iniciar Sesión</button>
+                  <button type="submit" className="w-full py-2.5 bg-indigo-600 font-semibold text-white rounded-xl text-xs">{t('Iniciar Sesión')}</button>
                 </form>
               </div>
             ) : (
@@ -1700,18 +1774,18 @@ export default function App() {
                 <div className={`bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4`}>
                   <div className="min-w-0">
                     <h2 className={`text-lg font-semibold ${th.text} truncate`}>🥼 {getProfPrefix(currentUser.professionType)} {currentUser.fullName}</h2>
-                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>Colegiado: {currentUser.colegiado} | Plan: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
+                    <p className={`text-xs ${th.textMuted} font-mono truncate`}>{t('Colegiado')}: {currentUser.colegiado} | {t('Plan')}: <span className="font-bold text-amber-500">{currentUser.licenseType}</span></p>
                   </div>
                   <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 Respaldo JSON</button>
-                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">Cerrar Sesión</button>
+                    <button onClick={handleExportBackup} className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-600/20 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/30">💾 {t('Respaldo JSON')}</button>
+                    <button onClick={() => { setCurrentUser(null); setActiveCase(null); }} className="text-xs bg-red-100 text-red-700 dark:bg-red-600/20 dark:text-red-400 px-3 py-1.5 rounded-xl border border-red-500/30">{t('Cerrar Sesión')}</button>
                   </div>
                 </div>
 
                 <div className={`flex flex-wrap sm:flex-nowrap gap-2 sm:gap-4 border-b ${th.border} pb-4`}>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 Búsqueda</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('BUSCAR'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'BUSCAR' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>🔍 {t('Búsqueda')}</button>
                   <button onClick={() => { setActiveCase(null); setClinicalTab('ALERTAS'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'ALERTAS' ? 'bg-amber-600 text-white' : `${th.card} ${th.textMuted}`}`}>🚨 Alertas {totalAlerts > 0 && <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] ml-1">{totalAlerts}</span>}</button>
-                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ Mi Perfil</button>
+                  <button onClick={() => { setActiveCase(null); setClinicalTab('PERFIL'); }} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold ${!activeCase && clinicalTab === 'PERFIL' ? 'bg-indigo-600 text-white' : `${th.card} ${th.textMuted}`}`}>⚙️ {t('Mi Perfil')}</button>
                 </div>
 
                 {!activeCase && clinicalTab === 'PERFIL' && (
@@ -1722,14 +1796,14 @@ export default function App() {
                           <h4 className="text-xs font-bold text-indigo-500 uppercase">✏️ Datos Profesionales & Alertas</h4>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Título</label>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Título')}</label>
                               <select value={editProfessionType} onChange={(e) => setEditProfessionType(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`}>
-                                <option value="PSICOLOGO">Psicólogo(a) Clínico</option>
-                                <option value="PSIQUIATRA">Médico Psiquiatra</option>
+                                <option value="PSICOLOGO">{t('Psicólogo(a) Clínico')}</option>
+                                <option value="PSIQUIATRA">{t('Médico Psiquiatra')}</option>
                               </select>
                             </div>
                             <div>
-                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Nombre Completo</label>
+                              <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Nombre Completo')}</label>
                               <input type="text" required value={editProfileName} onChange={(e) => setEditProfileName(e.target.value)} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} />
                             </div>
                           </div>
@@ -1744,7 +1818,7 @@ export default function App() {
                             </select>
                           </div>
                         </div>
-                        <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">Guardar Perfil</button>
+                        <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                       </form>
 
                       {/* COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
@@ -1752,7 +1826,7 @@ export default function App() {
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
                           <div>
-                            <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Usuario</label>
+                            <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Usuario')}</label>
                             <input type="text" disabled value={currentUser.username} className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.textMuted} cursor-not-allowed font-mono opacity-60`} />
                           </div>
                           <button type="button" onClick={() => setShowPasswordModal(true)} className={`px-5 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold w-full mt-4 transition-colors`}>
@@ -1769,7 +1843,7 @@ export default function App() {
                   <div className="w-full">
                     {totalAlerts === 0 ? (
                       <div className={`text-center py-10 ${th.card} rounded-2xl border ${th.border}`}>
-                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>Bandeja Limpia</p>
+                         <span className="text-3xl block opacity-50 mb-2">✅</span><p className={`${th.textMuted} text-xs font-bold uppercase`}>{t('Bandeja Limpia')}</p>
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
@@ -1807,16 +1881,16 @@ export default function App() {
 
                 {!activeCase && clinicalTab === 'BUSCAR' && (
                   <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full`}>
-                    <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 BÚSQUEDA DE EXPEDIENTES</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ Nuevo Expediente</button></div>
+                    <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 {t('BÚSQUEDA DE EXPEDIENTES')}</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ {t('Nuevo Expediente')}</button></div>
                     {showRegisterForm && (
                       <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5 shadow-inner`}>
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>1. Datos Personales Básicos</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <input type="text" required placeholder="ID Expediente (Ej. PAC-001)" value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" required placeholder="Nombre Completo" value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Teléfono" value={newPatientData.telefono} onChange={(e) => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder={t('ID Expediente (Ej. PAC-001)')} value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder={t('Nombre Completo')} value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Teléfono')} value={newPatientData.telefono} onChange={(e) => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Edad')} value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                             
                             <div className="sm:col-span-2 space-y-1">
                                <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
@@ -1827,40 +1901,40 @@ export default function App() {
                             </div>
                             
                             <select value={newPatientData.sexo} onChange={(e) => setNewPatientForm(p => ({ ...p, sexo: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Femenino">Femenino</option>
-                              <option value="Masculino">Masculino</option>
-                              <option value="Otro">Otro</option>
+                              <option value="Femenino">{t('Femenino')}</option>
+                              <option value="Masculino">{t('Masculino')}</option>
+                              <option value="Otro">{t('Otro')}</option>
                             </select>
                             <select value={newPatientData.estadoCivil} onChange={(e) => setNewPatientForm(p => ({ ...p, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                              <option value="Soltero(a)">Soltero(a)</option>
-                              <option value="Casado(a)">Casado(a)</option>
-                              <option value="Divorciado(a)">Divorciado(a)</option>
-                              <option value="Viudo(a)">Viudo(a)</option>
-                              <option value="Unión Libre">Unión Libre</option>
+                              <option value="Soltero(a)">{t('Soltero(a)')}</option>
+                              <option value="Casado(a)">{t('Casado(a)')}</option>
+                              <option value="Divorciado(a)">{t('Divorciado(a)')}</option>
+                              <option value="Viudo(a)">{t('Viudo(a)')}</option>
+                              <option value="Unión Libre">{t('Unión Libre')}</option>
                             </select>
-                            <input type="text" placeholder="Religión" value={newPatientData.religion} onChange={(e) => setNewPatientForm(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Religión')} value={newPatientData.religion} onChange={(e) => setNewPatientForm(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>2. Contexto Sociodemográfico</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <input type="text" placeholder="Ocupación" value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Grado de Estudios" value={newPatientData.estudios} onChange={(e) => setNewPatientForm(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Lugar de Origen / Procedencia" value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <input type="text" placeholder="Datos de Progenitores (Nombres, edades, estado...)" value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Ocupación')} value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Grado de Estudios')} value={newPatientData.estudios} onChange={(e) => setNewPatientForm(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
                         <div>
-                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>3. Anamnesis y Motivo de Consulta</h4>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta')}</h4>
                           <div className="space-y-3">
-                            <textarea rows={2} placeholder="Antecedentes Médicos / Psicológicos Previos..." value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                            <textarea required rows={3} placeholder="Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)..." value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
 
-                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 Guardar Expediente Clínico Completo</button>
+                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 {t('Guardar Expediente Clínico Completo')}</button>
                       </form>
                     )}
                     
@@ -1879,7 +1953,6 @@ export default function App() {
                       <div className="flex justify-between items-center bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-xl">
                         <button onClick={() => setActiveCase(null)} className="text-xs text-indigo-600 font-bold px-3 py-1">← Atrás</button>
                         <div className="flex gap-2">
-                           <button onClick={handleOpenEditPatient} className="text-xs bg-slate-600 hover:bg-slate-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">✏️ Editar</button>
                            <button onClick={() => handleOpenCertificateModal('ATTENDANCE')} className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">📄 Constancia</button>
                            <button onClick={() => handleOpenCertificateModal('REFERRAL')} className="text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow">🔁 Referencia</button>
                            {currentUser?.professionType === 'PSIQUIATRA' && (
@@ -1888,7 +1961,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* TABS PRINCIPALES */}
+                      {/* TABS CON NOMBRE CORREGIDO: "🧠 Trastornos" */}
                       <div className={`flex flex-wrap gap-2 ${th.card} p-2 rounded-2xl border ${th.border} w-full`}>
                         <button onClick={() => setActiveCaseTab('HISTORIAL')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'HISTORIAL' ? 'bg-indigo-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>📝 Historial</button>
                         <button onClick={() => setActiveCaseTab('ESTADISTICAS_BASE')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'ESTADISTICAS_BASE' ? 'bg-indigo-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>📈 KPIs Base</button>
@@ -2131,7 +2204,8 @@ export default function App() {
                                   value={(activeCase as any).professionalOpinion || ''} 
                                   onChange={(e) => {
                                       const updatedCase = { ...activeCase, professionalOpinion: e.target.value };
-                                      handleUpdateActiveCase(updatedCase);
+                                      setActiveCase(updatedCase);
+                                      setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
                                   }}
                                   rows={5} 
                                   placeholder="Escriba aquí su propio análisis global, diagnóstico diferencial o plan de acción. Este texto NO será modificado por la IA y aparecerá en sus reportes..." 
@@ -2266,13 +2340,13 @@ export default function App() {
                 </div>
               ))}
               <div className={`${th.input} p-4 rounded-xl border ${th.border} mt-4`}>
-                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>Firma Digital para Guardar</label>
-                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder="Su clave de psicólogo/psiquiatra..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
+                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>{t('Firma Digital para Guardar')}</label>
+                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder={t('Su clave de psicólogo/psiquiatra...')} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
               </div>
             </div>
             <div className={`p-3 border-t ${th.border} ${th.input} flex justify-end gap-2`}>
-              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>Cancelar</button>
-              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">Firmar y Guardar en Expediente</button>
+              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>{t('Cancelar')}</button>
+              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">{t('Firmar y Guardar en Expediente')}</button>
             </div>
           </div>
         </div>
@@ -2283,14 +2357,14 @@ export default function App() {
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
             <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-              <h3 className={`text-sm font-bold ${th.text}`}>➕ Agendar Nueva Cita</h3>
+              <h3 className={`text-sm font-bold ${th.text}`}>➕ {t('Agendar Nueva Cita')}</h3>
               <button onClick={() => setShowCalendarModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
             </div>
             <form onSubmit={handleCreateAppointment} className="space-y-4">
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente (Expediente Activo)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Paciente (Expediente Activo)')}</label>
                 <select required value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`}>
-                  <option value="" disabled>Seleccione un paciente...</option>
+                  <option value="" disabled>{t('Seleccione un paciente...')}</option>
                   {myPatients.map(p => (
                     <option key={p.id} value={p.id}>{p.patientName} (Exp: {p.id})</option>
                   ))}
@@ -2298,19 +2372,19 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Fecha</label>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Fecha')}</label>
                   <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
                 </div>
                 <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Hora</label>
+                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Hora')}</label>
                   <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
                 </div>
               </div>
               <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Duración (Minutos)</label>
+                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>{t('Duración (Minutos)')}</label>
                 <input type="number" required min="15" step="15" value={durationMinutes} onChange={(e) => setDurationMinutes(parseInt(e.target.value))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
               </div>
-              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 Guardar Cita</button>
+              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 {t('Guardar Cita')}</button>
             </form>
           </div>
         </div>
@@ -2318,7 +2392,7 @@ export default function App() {
 
       {/* FIRMA DE DESARROLLADOR Y FOOTER */}
       <footer className={`border-t ${th.border} ${th.bg} py-4 text-center text-xs ${th.textMuted} mt-auto w-full transition-colors duration-300`}>
-        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. Desarrollado por Harold.</p>
+        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. {t('Desarrollado por Harold.')}</p>
       </footer>
     </div>
   );
