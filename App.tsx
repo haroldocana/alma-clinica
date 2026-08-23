@@ -560,20 +560,6 @@ export default function App() {
     return {};
   });
 
-  // RESTAURADA SINCRONIZACION REMOTA DE EXPEDIENTES
-  useEffect(() => {
-    if (currentUser && Object.keys(clinicalDatabase).length > 0) {
-      const keyLocal = `clinical_cases_db_${currentUser.username}`;
-      const dataStr = JSON.stringify(clinicalDatabase);
-      localStorage.setItem(keyLocal, dataStr);
-      const lastSaved = sessionStorage.getItem(`last_saved_${currentUser.username}`);
-      if (lastSaved !== dataStr) {
-        saveClinicalCasesRemote(currentUser.username, clinicalDatabase);
-        sessionStorage.setItem(`last_saved_${currentUser.username}`, dataStr);
-      }
-    }
-  }, [clinicalDatabase, currentUser]);
-
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     let userKey = 'appointments_db';
     if (currentUser?.username) userKey = `appointments_db_${currentUser.username}`;
@@ -690,7 +676,9 @@ export default function App() {
   
   const [isDictatingVoice, setIsDictatingVoice] = useState(false);
   const [voiceInputText, setVoiceInputText] = useState('');
+  const [isMicConnected, setIsMicConnected] = useState(false);
   const [isRecordingLive, setIsRecordingLive] = useState(false);
+  const micStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -766,7 +754,6 @@ export default function App() {
     setClinicalDatabase(prev => ({ ...prev, [formattedId]: newCase })); setActiveCase(newCase); setActiveCaseTab('HISTORIAL'); setShowRegisterForm(false);
   };
 
-  // SOLUCIÓN AL PROBLEMA DE BÚSQUEDA: Función conectada correctamente al onSubmit del Form
   const handleClinicalSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -783,25 +770,34 @@ export default function App() {
     } else { setSearchFeedback(`Expediente no encontrado.`); setActiveCase(null); }
   };
 
-  const toggleRecording = async () => {
+  const connectMicrophone = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+      setIsMicConnected(true);
+    } catch (error) {
+      alert("No se pudo acceder al micrófono. Verifique permisos.");
+    }
+  };
+
+  const toggleRecording = () => {
     if (isRecordingLive) {
-      if (mediaRecorderRef.current) { mediaRecorderRef.current.stop(); mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop()); }
+      if (mediaRecorderRef.current) { mediaRecorderRef.current.stop(); }
       setIsRecordingLive(false);
     } else {
-      try {
-        audioChunksRef.current = [];
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const audioUrl = URL.createObjectURL(audioBlob); 
-          setNewSessionData((prev: any) => ({ ...prev, audioPath: audioUrl }));
-          alert("¡Audio grabado con éxito!");
-        };
-        mediaRecorder.start(); setIsRecordingLive(true);
-      } catch (error) { alert("Permiso de micrófono denegado."); }
+      if (!micStreamRef.current) { alert("Conecte el micrófono primero."); return; }
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(micStreamRef.current);
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob); 
+        setNewSessionData((prev: any) => ({ ...prev, audioPath: audioUrl }));
+        alert("¡Audio grabado con éxito!");
+      };
+      mediaRecorder.start(); 
+      setIsRecordingLive(true);
     }
   };
 
@@ -814,6 +810,14 @@ export default function App() {
     } as any];
     const updatedCase = { ...activeCase, sessions: updatedSessions };
     setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
+    
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+    }
+    setIsMicConnected(false);
+    setIsRecordingLive(false);
+
     setShowNewSessionForm(false);
     setNewSessionData({ sessionNumber: 1, date: new Date().toISOString().split('T')[0], rawNotes: '', audioPath: '', videoUrl: '', manualBatteryFile: '' });
     setSessionAreas({ sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 });
@@ -851,6 +855,15 @@ export default function App() {
     const updatedCase = { ...activeCase, sessions: updatedSessions };
     setActiveCase(updatedCase); setClinicalDatabase(prev => ({ ...prev, [activeCase.id]: updatedCase }));
     setShowDsmModal(false); setSelectedDsmTemplate(null); setDsmAnswers({}); setVerificationPassword(''); alert(`Evaluación guardada.`);
+  };
+
+  const handleAiDictationAssist = async () => {
+    if (!voiceInputText.trim() || !currentUser) return;
+    setIsDictatingVoice(true);
+    try {
+      const refinedNotes = await processVoiceNotesToEvolution(voiceInputText, currentUser.fullName, currentUser.colegiado);
+      setNewSessionData((prev:any) => ({ ...prev, rawNotes: refinedNotes })); setVoiceInputText('');
+    } catch (e: any) { alert("Error detallado: " + e.message); console.error(e); } finally { setIsDictatingVoice(false); }
   };
 
   const handleOpenCertificateModal = (type: 'ATTENDANCE' | 'REFERRAL') => {
@@ -1056,7 +1069,9 @@ export default function App() {
                               <span className={`font-bold ${th.text}`}>{p.fullName}</span>
                               <span className={`block text-[10px] ${th.textMuted}`}>User: {p.username} | Exp: {p.licenseExpiry} ({rem} días)</span>
                             </div>
-                            <button onClick={() => handleToggleVoiceModule(p.username)} className={`px-2 py-1 rounded text-[9px] font-bold ${p.hasVoiceModule ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400'}`}>Voz {p.hasVoiceModule ? 'ON' : 'OFF'}</button>
+                            <button onClick={() => handleToggleVoiceModule(p.username)} className={`px-2 py-1 rounded text-[9px] font-bold ${p.hasVoiceModule ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400'}`}>
+                              Permiso Voz: {p.hasVoiceModule ? 'ON' : 'OFF'}
+                            </button>
                           </div>
                         );
                       })}
@@ -1193,7 +1208,6 @@ export default function App() {
                       </form>
                     )}
                     
-                    {/* SOLUCIÓN AL BUG DE BÚSQUEDA APLICADA AQUÍ */}
                     <form onSubmit={handleClinicalSearch} className="flex flex-col sm:flex-row gap-2 w-full">
                       <input type="text" value={clinicalSearchQuery} onChange={(e) => setClinicalSearchQuery(e.target.value)} placeholder="Busque por nombre o ID..." className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-xl text-xs ${th.text} focus:outline-none`} />
                       <button type="submit" className="w-full sm:w-auto py-2.5 px-6 bg-indigo-600 text-white rounded-xl text-xs text-center font-bold">Buscar</button>
@@ -1234,25 +1248,66 @@ export default function App() {
                               
                               <input type="date" value={newSessionData.date} onChange={(e) => setNewSessionData((p:any) => ({ ...p, date: e.target.value }))} className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
                               
+                              {/* RESTAURADO: SLIDERS MULTIAXIALES (SUEÑO, APETITO, ENERGIA, ETC) */}
+                              <div className={`${th.card} p-3 rounded-xl border border-indigo-500/30 space-y-3`}>
+                                <label className="text-[10px] font-bold text-indigo-500 uppercase block">🕸️ {t('Evaluación Multiaxial (1 al 10)')}</label>
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Sueño')}</span>
+                                    <input type="range" min="1" max="10" value={sessionAreas.sleep} onChange={e=>setSessionAreas(prev=>({...prev, sleep: parseInt(e.target.value)}))} className="flex-1 accent-indigo-500" />
+                                    <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.sleep}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Apetito')}</span>
+                                    <input type="range" min="1" max="10" value={sessionAreas.appetite} onChange={e=>setSessionAreas(prev=>({...prev, appetite: parseInt(e.target.value)}))} className="flex-1" />
+                                    <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.appetite}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Energía')}</span>
+                                    <input type="range" min="1" max="10" value={sessionAreas.energy} onChange={e=>setSessionAreas(prev=>({...prev, energy: parseInt(e.target.value)}))} className="flex-1" />
+                                    <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.energy}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Social')}</span>
+                                    <input type="range" min="1" max="10" value={sessionAreas.social} onChange={e=>setSessionAreas(prev=>({...prev, social: parseInt(e.target.value)}))} className="flex-1" />
+                                    <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.social}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`w-16 text-[9px] ${th.textMuted}`}>{t('Atención')}</span>
+                                    <input type="range" min="1" max="10" value={sessionAreas.concentration} onChange={e=>setSessionAreas(prev=>({...prev, concentration: parseInt(e.target.value)}))} className="flex-1" />
+                                    <span className="w-4 text-[9px] font-bold text-indigo-500 text-right">{sessionAreas.concentration}</span>
+                                  </div>
+                                </div>
+                              </div>
+
                               {currentUser?.hasVoiceModule ? (
                                 <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
-                                  <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-slate-700 hover:bg-slate-600'}`}>
-                                      {isRecordingLive ? '🔴 Grabando (Clic para Detener)' : '🎤 Clic para Empezar a Grabar'}
-                                  </button>
-                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all">✓ Audio vinculado: {newSessionData.audioPath}</p>}
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora de Sesión</label>
+                                  
+                                  {/* DOS PASOS: CONECTAR MICRÓFONO -> LUEGO GRABAR */}
+                                  {!isMicConnected ? (
+                                    <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
+                                      🔌 Conectar Micrófono del Dispositivo
+                                    </button>
+                                  ) : (
+                                    <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                                      {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
+                                    </button>
+                                  )}
+
+                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
+                                  
                                   <div className="flex gap-2 mt-2">
                                     <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                     <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
                                   </div>
-                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o Video Local</label>
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o Video Externo</label>
                                   <input type="file" accept="audio/*, video/*" onChange={(e) => {
                                     if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
                                   }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                                  <input type="url" placeholder="O Pegar URL de Zoom/Meet" value={newSessionData.videoUrl || ''} onChange={(e) => setNewSessionData((p:any) => ({ ...p, videoUrl: e.target.value }))} className={`w-full p-2 mt-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                 </div>
                               ) : (
-                                <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Módulo de Voz Inactivo</p></div>
+                                <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Permiso de Voz Inactivo</p></div>
                               )}
 
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
@@ -1262,14 +1317,18 @@ export default function App() {
                                  }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                  {newSessionData.manualBatteryFile && (
                                    <div className="flex gap-2 items-center mt-2">
-                                     <span className="text-[9px] text-emerald-500">✓ Archivo listo</span>
-                                     <button type="button" onClick={() => alert("Simulación: Analizando batería subida con IA... Se agregarán los resultados a las notas.")} className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded">Analizar con IA</button>
+                                     <span className="text-[9px] text-emerald-500 font-bold">✓ Archivo listo</span>
+                                     <button type="button" onClick={() => alert("Simulación: Analizando batería subida con IA... Se agregarán los resultados.")} className="bg-indigo-600 text-white text-[9px] px-2 py-1 rounded">Analizar con IA</button>
                                    </div>
                                  )}
                               </div>
 
-                              <textarea required rows={4} value={newSessionData.rawNotes} onChange={(e) => setNewSessionData((p:any) => ({ ...p, rawNotes: e.target.value }))} placeholder="Notas de evolución..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text}`} />
-                              <button type="submit" className="w-full py-2 bg-indigo-600 text-white font-bold rounded">Guardar Sesión</button>
+                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
+                                <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📝 Alimentación Escrita (Notas Manuales)</label>
+                                <textarea required rows={4} value={newSessionData.rawNotes} onChange={(e) => setNewSessionData((p:any) => ({ ...p, rawNotes: e.target.value }))} placeholder="Escriba aquí los detalles y observaciones de la sesión..." className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} font-mono`} />
+                              </div>
+
+                              <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded shadow-md">Guardar Sesión</button>
                             </form>
                           )}
 
@@ -1278,7 +1337,7 @@ export default function App() {
                               <div key={s.sessionNumber} className={`${th.input} p-3 rounded-xl border ${th.border} text-xs`}>
                                 <div className="flex justify-between font-bold text-indigo-500"><span>S{s.sessionNumber}</span><span>{s.date}</span></div>
                                 <p className="italic mt-1">"{s.rawNotes}"</p>
-                                {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1">📎 Batería Manual Adjunta</p>}
+                                {s.manualBatteryFile && <p className="text-[10px] text-emerald-500 mt-1 font-bold">📎 Batería Manual Adjunta</p>}
                                 {s.audioPath && <audio controls src={s.audioPath} className="h-8 w-full max-w-[200px] mt-2"></audio>}
                               </div>
                             ))}
@@ -1296,7 +1355,7 @@ export default function App() {
                             </div>
                           </div>
 
-                          <button onClick={handleProcessNotes} disabled={isProcessingNotes} className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs">
+                          <button onClick={handleProcessNotes} disabled={isProcessingNotes} className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl text-xs shadow-md">
                             {isProcessingNotes ? '⏳ Procesando...' : 'Generar Dictamen IA'}
                           </button>
                         </div>
