@@ -581,26 +581,6 @@ export default function App() {
   const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
   const [passMessage, setPassMessage] = useState({ text: '', type: '' });
 
-  const handleUserChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (passForm.oldPass !== currentUser.passwordHash) { setPassMessage({ text: 'Contraseña actual incorrecta.', type: 'error' }); return; }
-    if (passForm.newPass !== passForm.confirmPass) { setPassMessage({ text: 'Las contraseñas no coinciden.', type: 'error' }); return; }
-    if (passForm.newPass.length < 6) { setPassMessage({ text: 'Debe tener al menos 6 caracteres.', type: 'error' }); return; }
-
-    const updatedUser = { ...currentUser, passwordHash: passForm.newPass };
-    const updatedDb = { ...psychologists, [currentUser.username]: updatedUser };
-    setPsychologists(updatedDb); setCurrentUser(updatedUser);
-    localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
-    localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
-    
-    try {
-      await savePsychologistsRemote(updatedDb);
-      setPassMessage({ text: '¡Contraseña actualizada!', type: 'success' });
-      setTimeout(() => { setShowPasswordModal(false); setPassForm({ oldPass: '', newPass: '', confirmPass: '' }); setPassMessage({ text: '', type: '' }); }, 2000);
-    } catch (error) { setPassMessage({ text: 'Error de red.', type: 'error' }); }
-  };
-
   const [editProfileName, setEditProfileName] = useState('');
   const [editProfessionType, setEditProfessionType] = useState('PSICOLOGO');
   const [editSpecialty, setEditSpecialty] = useState('');
@@ -628,6 +608,26 @@ export default function App() {
     localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
     localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
     try { await savePsychologistsRemote(updatedDb); alert('¡Perfil y configuraciones actualizados con éxito!'); } catch (error) {}
+  };
+
+  const handleUserChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    if (passForm.oldPass !== currentUser.passwordHash) { setPassMessage({ text: 'Contraseña actual incorrecta.', type: 'error' }); return; }
+    if (passForm.newPass !== passForm.confirmPass) { setPassMessage({ text: 'Las contraseñas no coinciden.', type: 'error' }); return; }
+    if (passForm.newPass.length < 6) { setPassMessage({ text: 'Debe tener al menos 6 caracteres.', type: 'error' }); return; }
+
+    const updatedUser = { ...currentUser, passwordHash: passForm.newPass };
+    const updatedDb = { ...psychologists, [currentUser.username]: updatedUser };
+    setPsychologists(updatedDb); setCurrentUser(updatedUser);
+    localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
+    localStorage.setItem('current_logged_psychologist', JSON.stringify(updatedUser));
+    
+    try {
+      await savePsychologistsRemote(updatedDb);
+      setPassMessage({ text: '¡Contraseña actualizada!', type: 'success' });
+      setTimeout(() => { setShowPasswordModal(false); setPassForm({ oldPass: '', newPass: '', confirmPass: '' }); setPassMessage({ text: '', type: '' }); }, 2000);
+    } catch (error) { setPassMessage({ text: 'Error de red.', type: 'error' }); }
   };
 
   const [emergencyAlerts, setEmergencyAlerts] = useState<any[]>([]);
@@ -1231,22 +1231,62 @@ export default function App() {
                   <div className={`${th.card} border ${th.border} rounded-2xl p-4 sm:p-6 space-y-4 w-full`}>
                     <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 {t('BÚSQUEDA DE EXPEDIENTES')}</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ {t('Nuevo Expediente')}</button></div>
                     {showRegisterForm && (
-                      <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5`}>
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                          <input type="text" required placeholder="ID (Ej. PAC-001)" value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                          <input type="text" required placeholder="Nombre Completo" value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2`} />
-                          <input type="text" placeholder="Edad" value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                          
-                          <div className="sm:col-span-2 space-y-1">
-                             <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
-                             <div className="flex gap-2">
-                                <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setNewPatientForm(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.card} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
-                                <input type="url" placeholder="O pegue una URL..." value={newPatientData.fotoUrl} onChange={(e) => setNewPatientForm(p => ({ ...p, fotoUrl: e.target.value }))} className={`flex-1 p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                             </div>
+                      <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5 shadow-inner`}>
+                        
+                        {/* RESTAURADO: DATOS BÁSICOS COMPLETOS */}
+                        <div>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                            <input type="text" required placeholder={t('ID Expediente (Ej. PAC-001)')} value={newPatientData.id} onChange={(e) => setNewPatientForm(p => ({ ...p, id: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" required placeholder={t('Nombre Completo')} value={newPatientData.patientName} onChange={(e) => setNewPatientForm(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-2 focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Teléfono')} value={newPatientData.telefono} onChange={(e) => setNewPatientForm(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Edad')} value={newPatientData.edad} onChange={(e) => setNewPatientForm(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            
+                            <div className="sm:col-span-2 space-y-1">
+                               <label className={`text-[10px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
+                               <div className="flex gap-2">
+                                  <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setNewPatientForm(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.card} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
+                                  <input type="url" placeholder="O pegue una URL..." value={newPatientData.fotoUrl} onChange={(e) => setNewPatientForm(p => ({ ...p, fotoUrl: e.target.value }))} className={`flex-1 p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
+                               </div>
+                            </div>
+                            
+                            <select value={newPatientData.sexo} onChange={(e) => setNewPatientForm(p => ({ ...p, sexo: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
+                              <option value="Femenino">{t('Femenino')}</option>
+                              <option value="Masculino">{t('Masculino')}</option>
+                              <option value="Otro">{t('Otro')}</option>
+                            </select>
+                            <select value={newPatientData.estadoCivil} onChange={(e) => setNewPatientForm(p => ({ ...p, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
+                              <option value="Soltero(a)">{t('Soltero(a)')}</option>
+                              <option value="Casado(a)">{t('Casado(a)')}</option>
+                              <option value="Divorciado(a)">{t('Divorciado(a)')}</option>
+                              <option value="Viudo(a)">{t('Viudo(a)')}</option>
+                              <option value="Unión Libre">{t('Unión Libre')}</option>
+                            </select>
+                            <input type="text" placeholder={t('Religión')} value={newPatientData.religion} onChange={(e) => setNewPatientForm(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
                           </div>
                         </div>
-                        <textarea required rows={3} placeholder="Motivo de Consulta (Textual)..." value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                        <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold">💾 Guardar Expediente</button>
+
+                        {/* RESTAURADO: CONTEXTO SOCIODEMOGRÁFICO */}
+                        <div>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <input type="text" placeholder={t('Ocupación')} value={newPatientData.ocupacion} onChange={(e) => setNewPatientForm(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Grado de Estudios')} value={newPatientData.estudios} onChange={(e) => setNewPatientForm(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={newPatientData.origenProcedencia} onChange={(e) => setNewPatientForm(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={newPatientData.datosProgenitores} onChange={(e) => setNewPatientForm(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
+                          </div>
+                        </div>
+
+                        {/* RESTAURADO: ANAMNESIS Y MOTIVO */}
+                        <div>
+                          <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta')}</h4>
+                          <div className="space-y-3">
+                            <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={newPatientData.antecedentes} onChange={(e) => setNewPatientForm(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                            <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={newPatientData.motivoConsultaTextual} onChange={(e) => setNewPatientForm(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.card} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
+                          </div>
+                        </div>
+
+                        <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl text-xs transition-colors shadow-lg">💾 {t('Guardar Expediente Clínico Completo')}</button>
                       </form>
                     )}
                     
@@ -1321,30 +1361,34 @@ export default function App() {
                                 </div>
                               </div>
 
-                              <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
-                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
-                                
-                                {!isMicConnected ? (
-                                  <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
-                                    🔌 Conectar Micrófono del Dispositivo
-                                  </button>
-                                ) : (
-                                  <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                                    {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
-                                  </button>
-                                )}
+                              {currentUser?.hasVoiceModule ? (
+                                <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora de Sesión</label>
+                                  
+                                  {!isMicConnected ? (
+                                    <button type="button" onClick={connectMicrophone} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
+                                      🔌 Conectar Micrófono del Dispositivo
+                                    </button>
+                                  ) : (
+                                    <button type="button" onClick={toggleRecording} className={`w-full py-2.5 rounded-lg font-bold text-white transition-colors text-xs shadow-md ${isRecordingLive ? 'bg-red-600 animate-pulse' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                                      {isRecordingLive ? '🔴 Grabando... (Clic para Detener)' : '🎤 Iniciar Grabación'}
+                                    </button>
+                                  )}
 
-                                {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
-                                
-                                <div className="flex gap-2 mt-2">
-                                  <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                                  <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
+                                  {newSessionData.audioPath && <p className="text-[9px] text-emerald-500 break-all font-bold">✓ Audio vinculado al expediente: {newSessionData.audioPath}</p>}
+                                  
+                                  <div className="flex gap-2 mt-2">
+                                    <input type="text" placeholder="Dictado rápido para IA..." value={voiceInputText} onChange={(e) => setVoiceInputText(e.target.value)} className={`flex-1 p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
+                                    <button type="button" onClick={handleAiDictationAssist} disabled={isDictatingVoice} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-white font-bold text-[11px] disabled:opacity-50">✨ IA</button>
+                                  </div>
+                                  <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
+                                  <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
+                                    if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
+                                  }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
                                 </div>
-                                <label className={`text-[10px] font-bold ${th.textMuted} uppercase block mt-3`}>📎 Subir Audio o MP3 Externo</label>
-                                <input type="file" accept="audio/*, .mp3, .wav" onChange={(e) => {
-                                  if(e.target.files?.[0]) setNewSessionData((p:any) => ({...p, audioPath: URL.createObjectURL(e.target.files![0])}));
-                                }} className={`w-full p-2 ${th.input} border ${th.border} rounded ${th.text} text-[11px]`} />
-                              </div>
+                              ) : (
+                                <div className={`${th.card} p-3 rounded-xl border border-red-500/30 text-center`}><p className="text-[10px] text-red-500 font-bold uppercase">🎙️ Permiso de Voz Inactivo</p></div>
+                              )}
 
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-2`}>
                                  <label className={`text-[10px] font-bold text-indigo-500 uppercase block`}>📎 Subir Batería Resuelta Manualmente</label>
