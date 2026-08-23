@@ -128,7 +128,7 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
   ? [...NUEVAS_EVALUACIONES, ...DSM5_EVALUATIONS.filter(e => !NUEVAS_EVALUACIONES.find(n => n.id === e.id))]
   : NUEVAS_EVALUACIONES;
 
-// CORRECCIÓN APLICADA: Extracción precisa de números para la Curva de Tendencia
+// Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
   
@@ -317,7 +317,8 @@ export default function App() {
       'Evaluador:': { ES: 'Evaluador:', EN: 'Evaluator:' },
       'RESULTADOS Y PUNTUAJES:': { ES: 'RESULTADOS Y PUNTUAJES:', EN: 'RESULTS AND SCORES:' },
       'PUNTUACIÓN AUTOMÁTICA:': { ES: 'PUNTUACIÓN AUTOMÁTICA:', EN: 'AUTOMATIC SCORE:' },
-      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.' }
+      'Desarrollado por Harold.': { ES: 'Desarrollado por Harold.', EN: 'Developed by Harold.' },
+      'Bandeja Limpia': { ES: 'Bandeja Limpia', EN: 'Clean Inbox' }
     };
     return dict[key]?.[activeLang] || key;
   };
@@ -966,6 +967,9 @@ export default function App() {
         <table style="width: 100%; font-size: 10pt; border-collapse: collapse; margin-bottom: 10px;">
           <tr><td style="padding: 3px 0; width: 50%;"><strong>Nombre:</strong> ${c.patientName}</td><td style="padding: 3px 0; width: 50%;"><strong>Expediente ID:</strong> ${c.id}</td></tr>
           <tr><td style="padding: 3px 0;"><strong>Teléfono:</strong> ${gd.telefono || 'N/R'}</td><td style="padding: 3px 0;"><strong>Sexo/Edad:</strong> ${gd.sexo} / ${gd.edad || 'N/R'}</td></tr>
+          <tr><td style="padding: 3px 0;"><strong>Ocupación:</strong> ${gd.ocupacion || 'N/R'}</td><td style="padding: 3px 0;"><strong>Estado Civil:</strong> ${gd.estadoCivil || 'N/R'}</td></tr>
+          <tr><td style="padding: 3px 0;" colspan="2"><strong>Origen / Procedencia:</strong> ${gd.origenProcedencia || 'N/R'} | <strong>Religión:</strong> ${gd.religion || 'N/R'}</td></tr>
+          <tr><td style="padding: 3px 0;" colspan="2"><strong>Datos de Progenitores:</strong> ${gd.datosProgenitores || 'N/R'}</td></tr>
         </table>
       </div>
       <div>
@@ -1184,7 +1188,6 @@ export default function App() {
                         <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                       </form>
 
-                      {/* RESTAURADO: COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
                       <div className="space-y-6">
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
@@ -1211,15 +1214,28 @@ export default function App() {
                     ) : (
                       <div className="space-y-4 w-full">
                         {emergencyAlerts.map((alert: any) => (
-                          <div key={alert?.id || Math.random()} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex justify-between border">
-                            <div><h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia Registrada</h3><p className="text-xs text-red-800 dark:text-red-200">Paciente: {alert?.patientName}</p></div>
-                            <button onClick={() => handleViewEmergency(alert.patientId)} className="px-5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl h-10">Analizar</button>
+                          <div key={alert?.id || Math.random()} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-red-500 animate-pulse"></div>
+                            <div className="pl-3">
+                              <h3 className="text-sm font-bold text-red-600 dark:text-red-400">🚨 Llamada de Emergencia (Vapi / ALMA)</h3>
+                              <p className="text-xs text-red-800 dark:text-red-200 mb-2">Paciente: {alert?.patientName}</p>
+                              {alert?.audioUrl && (
+                                <div className="mt-2 flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold text-red-700 dark:text-red-300 uppercase">Audio de la intervención en crisis:</span>
+                                  <audio controls src={alert.audioUrl} className="h-8 w-full max-w-[250px]"></audio>
+                                </div>
+                              )}
+                            </div>
+                            <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-4 sm:mt-0 px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl h-10 self-start sm:self-center shadow-md transition-colors">Analizar</button>
                           </div>
                         ))}
                         {abandonmentAlerts.map((alert: any) => (
-                          <div key={alert?.id || Math.random()} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex justify-between border">
-                            <div><h3 className="text-sm font-bold text-amber-600 dark:text-amber-400">⚠️ Riesgo de Abandono de Tratamiento</h3><p className="text-xs text-amber-800 dark:text-amber-200">Paciente: {alert?.patientName} | {alert?.days} días sin asistir.</p></div>
-                            <button onClick={() => handleViewEmergency(alert.patientId)} className="px-5 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl h-10">Ver Expediente</button>
+                          <div key={alert?.id || Math.random()} className="bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border">
+                            <div>
+                              <h3 className="text-sm font-bold text-amber-600 dark:text-amber-400">⚠️ Riesgo de Abandono</h3>
+                              <p className="text-xs text-amber-800 dark:text-amber-200 mt-1">Paciente: {alert?.patientName} | <span className="font-bold">{alert?.days} días</span> sin asistir.</p>
+                            </div>
+                            <button onClick={() => handleViewEmergency(alert.patientId)} className="mt-3 sm:mt-0 px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl h-10 self-start sm:self-center shadow-md transition-colors">Ver Expediente</button>
                           </div>
                         ))}
                       </div>
@@ -1232,8 +1248,6 @@ export default function App() {
                     <div className="flex justify-between items-center"><h3 className={`text-sm font-semibold ${th.text} uppercase font-mono`}>🔍 {t('BÚSQUEDA DE EXPEDIENTES')}</h3><button onClick={() => setShowRegisterForm(!showRegisterForm)} className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-600/20 dark:text-indigo-400 px-3 py-1.5 rounded-xl border border-indigo-500/30">➕ {t('Nuevo Expediente')}</button></div>
                     {showRegisterForm && (
                       <form onSubmit={handleRegisterPatient} className={`${th.input} p-5 rounded-xl border ${th.border} space-y-5 shadow-inner`}>
-                        
-                        {/* RESTAURADO: DATOS BÁSICOS COMPLETOS */}
                         <div>
                           <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('1. Datos Personales Básicos')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -1266,7 +1280,6 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* RESTAURADO: CONTEXTO SOCIODEMOGRÁFICO */}
                         <div>
                           <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1277,7 +1290,6 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* RESTAURADO: ANAMNESIS Y MOTIVO */}
                         <div>
                           <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta')}</h4>
                           <div className="space-y-3">
@@ -1469,7 +1481,7 @@ export default function App() {
         )}
       </main>
 
-      {/* RESTAURADO: MODAL PARA CAMBIAR CONTRASEÑA */}
+      {/* MODAL PARA CAMBIAR CONTRASEÑA */}
       {showPasswordModal && (
         <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
           <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
