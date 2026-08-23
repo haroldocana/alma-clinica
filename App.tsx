@@ -13,6 +13,22 @@ import {
 } from './services/geminiService';
 
 // ============================================================================
+// FUNCIÓN FALTANTE AÑADIDA PARA CALCULAR DÍAS RESTANTES DE LICENCIA
+// ============================================================================
+const getDaysRemaining = (expiryDateStr: string | undefined): number => {
+  if (!expiryDateStr) return -1;
+  const today = new Date();
+  const expiry = new Date(expiryDateStr);
+  
+  // Normalizar las fechas para ignorar la hora y comparar solo días
+  today.setHours(0, 0, 0, 0);
+  expiry.setHours(0, 0, 0, 0);
+  
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+// ============================================================================
 // BATERÍA COMPLETA INTERNACIONAL (PSICOLOGÍA Y PSIQUIATRÍA DE GRADO MÉDICO)
 // ============================================================================
 const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
@@ -30,7 +46,7 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfacción con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
   { id: 'SPIN', name: 'SPIN (Inventario de Fobia Social)', questions: ['Tengo miedo a las personas con autoridad', 'Me molesta ruborizarme delante de la gente', 'Las fiestas y eventos me dan temor', 'Evito hablar con gente que no conozco', 'El temor a la crítica me paraliza'], options: ['Nada (0)', 'Un poco (1)', 'Moderado (2)', 'Mucho (3)', 'Extremadamente (4)'] },
   { id: 'EAT26', name: 'EAT-26 (Trastornos Conducta Alimentaria)', questions: ['Me aterroriza tener sobrepeso.', 'Evito comer cuando tengo hambre.', 'Me preocupo mucho por la comida.', 'Siento que los demás preferirían que yo comiese más.', 'Vomito después de haber comido.', 'Siento que la comida controla mi vida.'], options: ['Nunca (0)', 'A veces (1)', 'Siempre (2)'] },
-  { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su manera de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
+  { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su maneira de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'AUDIT', name: 'AUDIT (Trastornos por Alcohol - OMS)', questions: ['¿Frecuencia con que consume bebidas alcohólicas?', '¿Consumiciones habituales en un día ordinario de consumo?', '¿Frecuencia de toma de 5 o más bebidas en un solo día?', '¿Incapaz de parar de beber una vez que había empezado?', '¿Incapacidad para recordar lo sucedido debido al alcohol?', '¿Usted u otra persona resultó herida debido a su consumo?'], options: ['Nunca (0)', 'Raramente (1)', 'Mensualmente (2)', 'Semanalmente (3)', 'Diariamente (4)'] },
   { id: 'ASRS', name: 'ASRS-v1.1 (TDAH en Adultos)', questions: ['¿Dificultad para concentrarse en detalles?', '¿Dificultad para mantener atención en trabajo aburrido?', '¿Dificultad para recordar citas u obligaciones?', '¿Retrasa tareas que requieren mucha reflexión?', '¿Inquietud motora en manos o pies?'], options: ['Nunca (0)', 'Raramente (1)', 'A veces (2)', 'A menudo (3)', 'Muy frecuentemente (4)'] },
   { id: 'PCL5', name: 'PCL-5 (Trauma y TEPT)', questions: ['Recuerdos repetitivos e inquietantes de la experiencia estresante', 'Pesadillas de la experiencia', 'Evitar situaciones o lugares que le recuerden el evento', 'Creencias negativas fuertes sobre sí mismo', 'Estar muy alerta o vigilante'], options: ['Nada (0)', 'Un poco (1)', 'Moderadamente (2)', 'Bastante (3)', 'Extremadamente (4)'] }
@@ -303,7 +319,7 @@ export default function App() {
             <p className="text-[11px] text-slate-400">{t('Medición de adherencia, evolución de síntomas y áreas funcionales.')}</p>
           </div>
           <div className="px-3 py-1 bg-indigo-950 border border-indigo-500/40 rounded-xl text-[10px] font-bold text-indigo-300 font-mono">
-             GAF / EEAG: {gafScore}/100
+              GAF / EEAG: {gafScore}/100
           </div>
         </div>
 
@@ -472,12 +488,27 @@ export default function App() {
 
   const getProfPrefix = (profType?: string) => profType === 'PSIQUIATRA' ? t('Médico Psiquiatra') : t('Psicólogo(a) Clínico');
 
+  // ============================================================================
+  // TRY/CATCH DE SEGURIDAD AÑADIDO AQUI PARA APPOINTMENTS
+  // ============================================================================
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
     const savedUser = localStorage.getItem('current_logged_psychologist');
     let userKey = 'appointments_db';
-    if (savedUser) { try { const u = JSON.parse(savedUser); if (u?.username) userKey = `appointments_db_${u.username}`; } catch (e) {} }
+    if (savedUser) { 
+      try { 
+        const u = JSON.parse(savedUser); 
+        if (u?.username) userKey = `appointments_db_${u.username}`; 
+      } catch (e) {} 
+    }
     const saved = localStorage.getItem(userKey);
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        return [];
+      }
+    }
+    return [];
   });
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
