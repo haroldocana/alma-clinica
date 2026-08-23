@@ -1035,10 +1035,31 @@ export default function App() {
     } else { setSearchFeedback(`Expediente no encontrado.`); }
   };
 
+// 1. DESCARGAR expedientes de la nube al iniciar sesión
+  useEffect(() => {
+    async function descargarExpedientesNube() {
+      if (!currentUser) return;
+      try {
+        const expedientesRemotos = await loadClinicalCasesRemote(currentUser.username);
+        if (expedientesRemotos && Object.keys(expedientesRemotos).length > 0) {
+          setClinicalDatabase(prev => {
+            const fusion = { ...expedientesRemotos, ...prev };
+            localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(fusion));
+            return fusion;
+          });
+        }
+      } catch(e) {}
+    }
+    descargarExpedientesNube();
+  }, [currentUser]);
+
+  // 2. SUBIR expedientes a la nube cada vez que haya un cambio o nueva sesión
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem(`clinical_cases_db_${currentUser.username}`, JSON.stringify(clinicalDatabase));
       localStorage.setItem(`appointments_db_${currentUser.username}`, JSON.stringify(appointments));
+      // Esta línea dispara el guardado al servidor de Google de fondo
+      saveClinicalCasesRemote(currentUser.username, clinicalDatabase).catch(()=>{});
     }
   }, [clinicalDatabase, appointments, currentUser]);
 
