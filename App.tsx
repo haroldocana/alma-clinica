@@ -115,7 +115,7 @@ const NUEVAS_EVALUACIONES: Dsm5EvaluationTemplate[] = [
   { id: 'MSIBPD', name: 'MSI-BPD (Trastorno Límite de Personalidad - TLP)', questions: ['¿Relaciones interpersonales muy intensas pero inestables?', '¿Actos impulsivos de riesgo (gastos, sexo, sustancias)?', '¿Conductas o amenazas suicidas / autolesiones deliberadas?', '¿Cambios de humor repentinos y extremos?', '¿Sensación persistente de vacío interior?', '¿Miedo intenso e irrazonable al rechazo o abandono?', '¿Episodios de ira intensa fuera de control?', '¿Cambio dramático sobre opinión propia o valores?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'MDQ', name: 'MDQ (Detección de Trastorno Bipolar)', questions: ['¿Se sintió tan feliz o lleno de energía que otros notaron cambios?', '¿Se sintió tan irritable que le gritaba a la gente o peleaba?', '¿Se sentía mucho más seguro de sí mismo que de costumbre?', '¿Dormía mucho menos de lo habitual y no extrañaba el sueño?', '¿Hablaba mucho más o más rápido de lo habitual?', '¿Los pensamientos iban a toda velocidad por su cabeza?'], options: ['No (0)', 'Sí (1)'] },
   { id: 'MMSE', name: 'MMSE (Mini-Mental State - Evaluación Cognitiva)', questions: ['Orientación Temporal (Año, estación, fecha, día, mes)', 'Orientación Espacial (Lugar, hospital, ciudad, país)', 'Fijación y Registro (Repetición de 3 palabras clave)', 'Atención y Cálculo (Sustracción de 7 en 7 o deletreo inverso)', 'Memoria de Evocación (Recordar las 3 palabras fijadas)'], options: ['Incorrecto (0)', 'Correcto (1)'] },
-  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfaction con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
+  { id: 'ISI', name: 'ISI (Índice de Severidad de Insomnio)', questions: ['Dificultad para conciliar el sueño', 'Dificultad para mantener el sueño', 'Problemas para despertar demasiado temprano', 'Grado de satisfacción con el patrón de sueño actual', 'Interferencia del problema de sueño en el funcionamiento diario'], options: ['Ninguno (0)', 'Leve (1)', 'Moderado (2)', 'Grave (3)', 'Muy grave (4)'] },
   { id: 'SPIN', name: 'SPIN (Inventario de Fobia Social)', questions: ['Tengo miedo a las personas con autoridad', 'Me molesta ruborizarme delante de la gente', 'Las fiestas y eventos me dan temor', 'Evito hablar con gente que no conozco', 'El temor a la crítica me paraliza'], options: ['Nada (0)', 'Un poco (1)', 'Moderado (2)', 'Mucho (3)', 'Extremadamente (4)'] },
   { id: 'EAT26', name: 'EAT-26 (Trastornos Conducta Alimentaria)', questions: ['Me aterroriza tener sobrepeso.', 'Evito comer cuando tengo hambre.', 'Me preocupo mucho por la comida.', 'Siento que los demás preferirían que yo comiese más.', 'Vomito después de haber comido.', 'Siento que la comida controla mi vida.'], options: ['Nunca (0)', 'A veces (1)', 'Siempre (2)'] },
   { id: 'DAST10', name: 'DAST-10 (Adicciones y Sustancias - NIDA / OMS)', questions: ['¿Ha consumido drogas no recetadas fuera de indicación médica?', '¿Ha abusado de más de una sustancia a la vez?', '¿Dificultad para dejar de consumir cuando lo desea?', '¿Lagunas de memoria o desmayos por consumo?', '¿Siente culpa o vergüenza por su maneira de consumir?', '¿Ha desatendido responsabilidades familiares o laborales?', '¿Síntomas de abstinencia al suspender el consumo?'], options: ['No (0)', 'Sí (1)'] },
@@ -131,10 +131,8 @@ const CLINICAL_EVALUATIONS = Array.isArray(DSM5_EVALUATIONS) && DSM5_EVALUATIONS
 // Extracción precisa de números para la Curva de Tendencia
 const extractNumericScore = (scoreStr: string | undefined): number => {
   if (!scoreStr || scoreStr === 'Pendiente' || scoreStr === 'Pending') return 0;
-  // Buscar explícitamente "Score: X" para obtener el punteo real generado por la IA
   const scoreMatch = scoreStr.match(/Score:\s*(\d+)/i);
   if (scoreMatch) return parseInt(scoreMatch[1], 10);
-  // Si no encuentra la palabra "Score:", busca el último número aislado del string
   const lastNumberMatch = scoreStr.match(/(\d+)(?!.*\d)/);
   return lastNumberMatch ? parseInt(lastNumberMatch[1], 10) : 0;
 };
@@ -1093,7 +1091,9 @@ export default function App() {
                       
                       <div className={`grid grid-cols-2 gap-2 border-t ${th.border} pt-3`}>
                         <select value={regLicenseType} onChange={(e) => setRegLicenseType(e.target.value as any)} className={`w-full p-2 ${th.input} border ${th.border} rounded text-xs ${th.text} mt-1`}>
-                          <option value="ESTANDAR">{t('Licencia ESTÁNDAR')}</option><option value="PREMIUM">{t('Licencia PREMIUM')}</option>
+                          <option value="ESTANDAR">{t('Licencia ESTÁNDAR')}</option>
+                          <option value="PREMIUM">{t('Licencia PREMIUM')}</option>
+                          <option value="DEMO">Licencia DEMO (15 Días)</option>
                         </select>
                       </div>
                       
@@ -1101,21 +1101,23 @@ export default function App() {
                     </form>
                   </div>
 
+                  {/* RESTAURADO EN AUDITORÍA: BOTONES PARA CAMBIAR FECHAS DE EXPIRACIÓN Y CONTRASEÑAS */}
                   <div className={`${th.card} border ${th.border} rounded-2xl p-6 space-y-6 lg:col-span-7`}>
                     <h3 className={`text-sm font-bold ${th.text} uppercase border-b ${th.border} pb-2`}>{t('Auditoría y Soporte')}</h3>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                       {Object.values(psychologists).filter(p => p && p.username).map((p) => {
                         const rem = getDaysRemaining(p.licenseExpiry);
+                        const isExpired = rem < 0;
                         return (
                           <div key={p.username} className={`p-3 ${th.input} rounded-xl border ${th.border} text-xs flex flex-col gap-2`}>
                             <div className="flex justify-between items-start gap-2">
                               <div className="min-w-0 flex-1">
                                 <span className={`font-bold ${th.text}`}>{p.fullName}</span>
-                                <span className={`block text-[10px] ${th.textMuted}`}>User: {p.username} | Exp: {p.licenseExpiry} ({rem} días)</span>
+                                <span className={`block text-[10px] ${th.textMuted}`}>User: {p.username} | Exp: {p.licenseExpiry} ({isExpired ? 'Vencida' : `${rem} días`})</span>
                               </div>
                               <div className="flex gap-1">
-                                <button onClick={() => { setEditingExpiryUsername(editingExpiryUsername === p.username ? null : p.username); setEditExpiryInput(p.licenseExpiry); setEditingUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Renovar/Cambiar Fecha">📅</button>
-                                <button onClick={() => { setEditingUsername(editingUsername === p.username ? null : p.username); setEditPasswordInput(''); setEditingExpiryUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Cambiar Clave">🔑</button>
+                                <button onClick={() => { setEditingExpiryUsername(editingExpiryUsername === p.username ? null : p.username); setEditExpiryInput(p.licenseExpiry); setEditingUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Renovar/Cambiar Fecha">📅 Renovar Fecha</button>
+                                <button onClick={() => { setEditingUsername(editingUsername === p.username ? null : p.username); setEditPasswordInput(''); setEditingExpiryUsername(null); }} className="px-2 py-1 rounded text-[10px] bg-slate-300 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow" title="Cambiar Clave">🔑 Clave</button>
                               </div>
                             </div>
                             
@@ -1130,7 +1132,7 @@ export default function App() {
                               <div className={`mt-1 pt-2 border-t ${th.border} flex gap-2 items-center`}>
                                 <span className={`text-[9px] ${th.textMuted}`}>Fecha:</span>
                                 <input type="date" value={editExpiryInput} onChange={(e) => setEditExpiryInput(e.target.value)} className={`flex-1 p-1.5 ${th.card} border ${th.border} rounded text-[11px] ${th.text} min-w-0`} />
-                                <button onClick={() => handleUpdateUserExpiryAdmin(p.username)} className="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded text-[10px] shrink-0">Renovar</button>
+                                <button onClick={() => handleUpdateUserExpiryAdmin(p.username)} className="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded text-[10px] shrink-0">Actualizar</button>
                               </div>
                             )}
                           </div>
@@ -1218,6 +1220,7 @@ export default function App() {
                         <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">{t('Guardar Perfil')}</button>
                       </form>
 
+                      {/* COLUMNA DE SEGURIDAD Y CAMBIO DE CONTRASEÑA */}
                       <div className="space-y-6">
                         <div className={`${th.input} p-5 rounded-xl border ${th.border} space-y-4`}>
                           <h4 className={`text-xs font-bold ${th.textMuted} uppercase border-b ${th.border} pb-2`}>🔒 Seguridad y Licencia</h4>
@@ -1243,6 +1246,7 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
+                        {/* ALERTAS CRÍTICAS DE VOZ (VAPI / ALMA) */}
                         {emergencyAlerts.map((alert: any) => (
                           <div key={alert?.id || Math.random()} className="bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-500/60 rounded-2xl p-4 flex flex-col sm:flex-row justify-between border relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-red-500 animate-pulse"></div>
@@ -1403,6 +1407,7 @@ export default function App() {
                                 </div>
                               </div>
 
+                              {/* GRABADORA SIEMPRE ACTIVA */}
                               <div className={`${th.card} p-3 rounded-xl border ${th.border} space-y-3`}>
                                 <label className={`text-[10px] font-bold ${th.textMuted} uppercase block`}>🎙️ Grabadora, Dictado IA y Audios</label>
                                 
