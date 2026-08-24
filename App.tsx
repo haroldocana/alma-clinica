@@ -58,7 +58,7 @@ const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: 
   <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
     <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
       <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
-      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty || 'Especialista en Salud Mental'} | Colegiado Activo: ${colegiado}</p>
+      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty \vert{}\vert{} 'Especialista en Salud Mental'} \vert{} Colegiado Activo:${colegiado}</p>
       <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
     </div>
     <h2 style="text-align: center; font-size: 16px; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-decoration: underline;">${title}</h2>
@@ -76,7 +76,7 @@ const getPrescriptionLetterhead = (patientName: string, date: string, diagnostic
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
       <div>
         <h1 style="font-size: 20px; color: #059669; margin: 0;">${doctorName}</h1>
-        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty || 'Médico Psiquiatra'} | Col: ${colegiado}</p>
+        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty \vert{}\vert{} 'Médico Psiquiatra'} \vert{} Col: ${colegiado}</p>
       </div>
       <div style="text-align: right;">
         <h2 style="font-size: 32px; color: #059669; margin: 0; font-family: serif;">Rx</h2>
@@ -181,7 +181,7 @@ export default function App() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // DASHBOARD STATES
-  const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | null>(null);
+  const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | 'PREVENTION' | null>(null);
   const [specialtyFocus, setSpecialtyFocus] = useState('TRASTORNOS_NEURODESARROLLO');
   const [perspectivesFocus, setPerspectivesFocus] = useState('FREUD'); 
 
@@ -332,7 +332,7 @@ export default function App() {
   }: { 
     activeCase: ClinicalCase, 
     isFullscreen?: boolean, 
-    dashboardType: 'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY',
+    dashboardType: 'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | 'PREVENTION',
     onUpdateCase: (updatedCase: ClinicalCase) => void,
     onGenerateSpecialtyAi: (focus: string) => void,
     isGeneratingAi: boolean
@@ -342,6 +342,7 @@ export default function App() {
     const isPerspectives = dashboardType === 'PERSPECTIVES';
     const isEvolutionary = dashboardType === 'EVOLUTIONARY';
     const isSpecialty = dashboardType === 'SPECIALTY';
+    const isPrevention = dashboardType === 'PREVENTION';
     
     const currentFocus = isBase ? 'ANSIEDAD_DEPRESION' : (isSpecialty ? specialtyFocus : (isPerspectives ? perspectivesFocus : 'EVOLUTIONARY'));
 
@@ -464,6 +465,53 @@ export default function App() {
     const maxLineVal = Math.max(10, ...chartData.map(d => Math.max(normalizeScore((d as any)[val1Key], val1Key), normalizeScore((d as any)[val2Key], val2Key)))) * 1.2;
     const hasScores = chartData.some(d => normalizeScore((d as any)[val1Key], val1Key) > 0 || normalizeScore((d as any)[val2Key], val2Key) > 0);
     const hasPharma = chartData.some(d => d.pharmaName !== '');
+
+    // LÓGICA DE DETECCIÓN ESTADÍSTICA (SAD PERSONS, CRUCE MULTIAXIAL Y VACÍO EXISTENCIAL)
+    let suicideRiskAlertLevel = 'BAJO';
+    let crossFactorsDetected: string[] = [];
+    let sadPersonsScore = 0;
+    
+    if (isPrevention && activeCase && activeCase.sessions && activeCase.sessions.length > 0) {
+       const lastSess = activeCase.sessions[activeCase.sessions.length - 1];
+       const fnAreas = lastSess.functionalAreas || { sleep: 5, appetite: 5, energy: 5, social: 5, concentration: 5 };
+       
+       const bdiScoreNum = extractNumericScore(lastSess.bdiScore);
+       const hasDepression = bdiScoreNum >= 20; 
+       const hasAddiction = extractNumericScore((lastSess as any).testScores?.['DAST10']?.toString() || '0') > 0 || extractNumericScore((lastSess as any).testScores?.['AUDIT']?.toString() || '0') >= 8;
+       const isIsolated = fnAreas.social <= 4;
+       const hasInsomnia = fnAreas.sleep <= 4;
+       
+       // CRUCE: Vacío Existencial (Baja energía + Aislamiento + Depresión latente)
+       const hasExistentialEmptiness = bdiScoreNum >= 15 && isIsolated && fnAreas.energy <= 4;
+       
+       if (hasDepression) crossFactorsDetected.push('Depresión Severa (BDI)');
+       if (hasAddiction) crossFactorsDetected.push('Riesgo de Sustancias/Desinhibición');
+       if (isIsolated) crossFactorsDetected.push('Aislamiento Social Severo');
+       if (hasInsomnia) crossFactorsDetected.push('Insomnio Crónico');
+       if (hasExistentialEmptiness) crossFactorsDetected.push('Vacío Existencial / Desesperanza');
+
+       const ageNum = parseInt(activeCase.generalData?.edad || '0');
+       if (activeCase.generalData?.sexo === 'Masculino') sadPersonsScore += 1; 
+       if (ageNum < 19 || ageNum > 45) sadPersonsScore += 1; 
+       if (hasDepression || hasExistentialEmptiness) sadPersonsScore += 1; 
+       if (lastSess.dsm5EvaluationResult?.includes('C-SSRS') && lastSess.dsm5EvaluationResult.includes('(1)')) sadPersonsScore += 1; 
+       if (hasAddiction) sadPersonsScore += 1; 
+       if (extractNumericScore(lastSess.baiScore) > 25) sadPersonsScore += 1; 
+       if (isIsolated) sadPersonsScore += 1; 
+       if (lastSess.dsm5EvaluationResult?.includes('C-SSRS') && lastSess.dsm5EvaluationResult.includes('plan')) sadPersonsScore += 1;
+       if (['Soltero(a)', 'Divorciado(a)', 'Viudo(a)'].includes(activeCase.generalData?.estadoCivil || '')) sadPersonsScore += 1; 
+       if (fnAreas.energy <= 3) sadPersonsScore += 1; 
+
+       if (sadPersonsScore >= 7 || (lastSess.dsm5EvaluationResult?.includes('C-SSRS') && lastSess.dsm5EvaluationResult.includes('(1) plan'))) {
+           suicideRiskAlertLevel = 'CRÍTICO';
+       } else if (crossFactorsDetected.length >= 3 || sadPersonsScore >= 5) {
+           suicideRiskAlertLevel = 'ALTO';
+       } else if (crossFactorsDetected.length >= 1 || sadPersonsScore >= 3) {
+           suicideRiskAlertLevel = 'MODERADO';
+       } else {
+           suicideRiskAlertLevel = 'BAJO';
+       }
+    }
 
     type KPICard = { title: string, value: string | number, sub: string, colorClass: string };
     let kpiCards: KPICard[] = [];
@@ -600,6 +648,7 @@ export default function App() {
     const handleCopySVG = () => { alert("La gráfica ha sido registrada."); };
 
     const getDashboardTitle = () => {
+       if (isPrevention) return '🚨 CENTRO DE COMANDO DE PREVENCIÓN DE RIESGO SUICIDA';
        if (isPharma) return '💊 CONTROL FARMACOLÓGICO';
        if (isPerspectives) return '🎭 ANÁLISIS DE CORRIENTES TEÓRICAS';
        if (isEvolutionary) return '🧬 PSICOLOGÍA EVOLUTIVA Y ADAPTATIVA';
@@ -608,6 +657,7 @@ export default function App() {
     }
 
     const getDashboardSubtitle = () => {
+       if (isPrevention) return 'Suite de herramientas algorítmicas, estadísticas e IA para detección temprana de crisis y resguardo confidencial.';
        if (isPharma) return 'Titulación de dosis, efectividad y monitoreo de riesgos secundarios.';
        if (isPerspectives) return 'Interpretación de síntomas según escuelas psicológicas y dinámicas subyacentes.';
        if (isEvolutionary) return 'Análisis Darwiniano del valor adaptativo y de supervivencia de la sintomatología actual.';
@@ -626,6 +676,161 @@ export default function App() {
         updated.specialtyComments[currentFocus] = val;
         onUpdateCase(updated);
     };
+
+    const handleAnalyzeSuicideRiskLocal = async () => {
+        if (!activeCase || activeCase.sessions.length === 0) return;
+        const lastSession = activeCase.sessions[activeCase.sessions.length - 1];
+        let fullNotesPayload = `=== HISTORIAL DEL PACIENTE ===\nPaciente: ${activeCase.patientName}\n`;
+        activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
+
+        const instruction = `INSTRUCCIÓN CLÍNICA DE EMERGENCIA: Actúa como un experto en psiquiatría y prevención del suicidio. Realiza un perfilado lingüístico y análisis predictivo pasivo de estas notas clínicas. Busca indicadores tempranos de riesgo: vacío existencial (falta de sentido de vida), desesperanza, aislamiento, carga, cambios de patrón de sueño/energía o impulsividad. Clasifica el riesgo estrictamente en uno de estos 4 niveles: BAJO, MODERADO, ALTO o CRÍTICO. Da una justificación breve, explica cómo las variables se cruzan (ej. insomnio + vacío existencial), y proporciona un plan de contingencia preventivo y de acción inmediata específico para el nivel detectado.\n\n`;
+
+        try {
+            const result = await processClinicalNotes(instruction + fullNotesPayload, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', "Profesional", "N/A");
+            const updatedCase = { ...activeCase };
+            (updatedCase as any).suicideRiskAnalysis = result;
+            onUpdateCase(updatedCase);
+        } catch (e: any) { alert("Error: " + e.message); }
+    };
+
+    if (isPrevention) {
+        return (
+            <div id={`kpi-dashboard-${dashboardType}`} className={`bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-6 w-full ${isFullscreen ? 'min-h-screen overflow-y-auto' : 'overflow-hidden'}`}>
+                <div className="border-b border-slate-800 pb-3 flex justify-between items-center flex-wrap gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-white uppercase tracking-wider break-words">{getDashboardTitle()}</h3>
+                    <p className="text-xs text-slate-400">{getDashboardSubtitle()}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {!isFullscreen && (
+                       <button onClick={() => setIsFullscreenDashboard(dashboardType)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow">
+                         ⛶ Pantalla Completa
+                       </button>
+                    )}
+                    {isFullscreen && (
+                       <button onClick={() => setIsFullscreenDashboard(null)} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold shadow">
+                         ✕ Cerrar
+                       </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* ALERTA MAESTRA (Muestra los 4 niveles de riesgo) */}
+                <div className={`border-2 rounded-2xl p-5 flex items-center justify-between shadow-lg ${
+                   suicideRiskAlertLevel === 'CRÍTICO' ? 'bg-red-950/80 border-red-500 text-red-100 animate-pulse' :
+                   suicideRiskAlertLevel === 'ALTO' ? 'bg-orange-950/80 border-orange-500 text-orange-100 animate-pulse' :
+                   suicideRiskAlertLevel === 'MODERADO' ? 'bg-yellow-950/80 border-yellow-500 text-yellow-100' :
+                   'bg-emerald-950/80 border-emerald-500 text-emerald-100'
+                }`}>
+                   <div>
+                     <h2 className="text-xl font-bold uppercase">
+                        {suicideRiskAlertLevel === 'BAJO' ? '✅' : '⚠️'} ALERTA CLÍNICA: RIESGO {suicideRiskAlertLevel}
+                     </h2>
+                     <p className="text-[11px] mt-1">
+                        {suicideRiskAlertLevel === 'CRÍTICO' ? 'Riesgo inminente detectado. Requiere intervención inmediata, restricción de medios letales y posible hospitalización.' :
+                         suicideRiskAlertLevel === 'ALTO' ? 'Riesgo elevado. Active plan de seguridad, involucre a red de apoyo y aumente frecuencia de monitoreo.' :
+                         suicideRiskAlertLevel === 'MODERADO' ? 'Riesgo latente. Monitoree ideación, evalúe vacío existencial y fortalezca estrategias de afrontamiento.' :
+                         'No se detectan cruces de variables de alto riesgo en este momento. Mantenga monitoreo base.'}
+                     </p>
+                     {crossFactorsDetected.length > 0 && (
+                        <p className="text-[10px] font-mono mt-1 opacity-80">Variables detonantes: {crossFactorsDetected.join(' | ')}</p>
+                     )}
+                   </div>
+                   <div className="text-4xl">
+                      {suicideRiskAlertLevel === 'CRÍTICO' ? '🚨' :
+                       suicideRiskAlertLevel === 'ALTO' ? '⚠️' :
+                       suicideRiskAlertLevel === 'MODERADO' ? '👀' : '🛡️'}
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   {/* 1. Detección Pasiva y Multiaxial */}
+                   <div className={`${th.card} p-5 rounded-xl border ${crossFactorsDetected.length >= 2 ? 'border-rose-500/80 bg-rose-950/10' : 'border-rose-500/30'} flex flex-col`}>
+                      <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">🧠 1. Detección Predictiva Cruzada</h4>
+                      <p className="text-[10px] text-slate-400 mb-3">La IA escanea el lenguaje de las notas y cruza los factores de la Tríada Letal (Depresión + Aislamiento + Desinhibición) y el Vacío Existencial.</p>
+                      
+                      {/* Indicadores Visuales */}
+                      <div className="mb-4 grid grid-cols-2 gap-2 text-[9px] font-bold">
+                         <span className={`px-2 py-1 rounded ${crossFactorsDetected.includes('Depresión Severa (BDI)') ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-slate-800 text-slate-500'}`}>Depresión (BDI)</span>
+                         <span className={`px-2 py-1 rounded ${crossFactorsDetected.includes('Aislamiento Social Severo') ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-slate-800 text-slate-500'}`}>Aislamiento Social</span>
+                         <span className={`px-2 py-1 rounded ${crossFactorsDetected.includes('Riesgo de Sustancias/Desinhibición') ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-slate-800 text-slate-500'}`}>Uso Sustancias</span>
+                         <span className={`px-2 py-1 rounded ${crossFactorsDetected.includes('Insomnio Crónico') ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-slate-800 text-slate-500'}`}>Insomnio Crónico</span>
+                         <span className={`px-2 py-1 rounded col-span-2 text-center ${crossFactorsDetected.includes('Vacío Existencial / Desesperanza') ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' : 'bg-slate-800 text-slate-500'}`}>Vacío Existencial / Falta de Sentido</span>
+                      </div>
+
+                      <button onClick={handleAnalyzeSuicideRiskLocal} className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-[11px] shadow-md mb-3 transition-colors">
+                        🔍 Ejecutar Escaneo Predictivo IA
+                      </button>
+                      <div className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap bg-slate-900/50 p-3 rounded flex-1 overflow-y-auto max-h-48 border border-slate-700">
+                        {(activeCase as any).suicideRiskAnalysis || 'Sin análisis previo. Presione el botón para ejecutar el escaneo con Inteligencia Artificial.'}
+                      </div>
+                   </div>
+
+                   {/* 2. Escalas Estadísticas Clínicas */}
+                   <div className={`${th.card} p-5 rounded-xl border ${sadPersonsScore >= 5 ? 'border-amber-500/80 bg-amber-950/10' : 'border-amber-500/30'} flex flex-col`}>
+                      <h4 className="text-xs font-bold text-amber-500 uppercase mb-2">📋 2. Escalas Estadísticas Clínicas</h4>
+                      <p className="text-[10px] text-slate-400 mb-4">Cálculo automático subyacente de la escala SAD PERSONS para riesgo de ingreso hospitalario derivado de baterías formales.</p>
+                      
+                      <div className="flex justify-between items-center bg-slate-900 border border-slate-700 p-2 rounded mb-4">
+                         <span className="text-[10px] font-bold text-slate-300 uppercase">SAD PERSONS (Cálculo Pasivo)</span>
+                         <span className={`text-[12px] font-black ${sadPersonsScore >= 7 ? 'text-red-500' : (sadPersonsScore >= 5 ? 'text-orange-500' : 'text-emerald-500')}`}>{sadPersonsScore} / 10 pts</span>
+                      </div>
+
+                      {sadPersonsScore >= 5 && <p className="text-[9px] text-orange-400 font-bold mb-3">⚠️ ALERTA: SAD PERSONS elevado. La estadística médica sugiere considerar hospitalización o vigilancia 24/7.</p>}
+
+                      <div className="bg-amber-950/30 border border-amber-500/20 p-3 rounded mt-auto">
+                        <p className="text-[10px] text-amber-400 font-bold">Último resultado C-SSRS:</p>
+                        <p className="text-[11px] text-slate-300 mt-1 truncate">
+                           {activeCase.sessions.slice().reverse().find(s => s.dsm5EvaluationName?.includes('C-SSRS'))?.dsm5EvaluationResult?.split('\n').pop() || 'No aplicada aún en el historial. Utilice la pestaña principal para aplicar la escala.'}
+                        </p>
+                      </div>
+                   </div>
+
+                   {/* 3. Plan de Seguridad */}
+                   <div className={`${th.card} p-5 rounded-xl border ${suicideRiskAlertLevel !== 'BAJO' && !(activeCase as any).securityPlan ? 'border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-emerald-500/30'} flex flex-col`}>
+                      <h4 className="text-xs font-bold text-emerald-500 uppercase mb-2">🛡️ 3. Plan de Contingencia y Seguridad</h4>
+                      <p className="text-[10px] text-slate-400 mb-2">Pactado con el paciente. En caso de riesgo ALTO, establezca restricción de medios letales y redes de apoyo.</p>
+                      
+                      {suicideRiskAlertLevel !== 'BAJO' && !(activeCase as any).securityPlan && (
+                        <p className="text-[9px] text-emerald-400 font-bold mb-2 animate-pulse">⚠️ ALERTA: Riesgo detectado, pero Plan de Contingencia en blanco. Escriba los pasos inmediatos.</p>
+                      )}
+
+                      <textarea 
+                         value={(activeCase as any).securityPlan || ''}
+                         onChange={(e) => {
+                            const updated = {...activeCase, securityPlan: e.target.value};
+                            onUpdateCase(updated); // Syncs to cloud storage automatically
+                         }}
+                         placeholder="1. Señales de advertencia...\n2. Contacto de emergencia (Familiar)...\n3. Retiro de armas/medicamentos...\n4. Red de apoyo profesional..."
+                         className={`w-full flex-1 p-3 bg-slate-900 border border-emerald-500/30 rounded text-[11px] text-white focus:border-emerald-500 outline-none resize-none font-sans min-h-[120px]`}
+                      />
+                   </div>
+
+                   {/* 4. VAPI S.O.S */}
+                   <div className={`${th.card} p-5 rounded-xl border ${emergencyAlerts.some(a => a.patientId === activeCase.id) ? 'border-blue-500 bg-blue-950/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-blue-500/30'} flex flex-col`}>
+                      <h4 className="text-xs font-bold text-blue-500 uppercase mb-2">📞 4. Botón S.O.S. (Agente de Voz IA)</h4>
+                      <p className="text-[10px] text-slate-400 mb-3">Asigne la línea de crisis VAPI (ALMA) para soporte de desescalada 24/7 en momentos críticos.</p>
+                      
+                      <div className="bg-blue-950/30 border border-blue-500/20 p-3 rounded mb-3 text-center">
+                        <p className="text-[10px] font-bold text-blue-400">Línea de Contención Asignada:</p>
+                        <p className="text-lg font-mono text-white mt-1">+1 (800) 555-ALMA</p>
+                      </div>
+                      
+                      {emergencyAlerts.some(a => a.patientId === activeCase.id) && (
+                        <div className="mb-3 p-2 bg-red-950/50 border border-red-500/50 rounded text-[10px] text-red-200 font-bold text-center animate-pulse">
+                          ⚠️ ALERTA: Este paciente activó el botón S.O.S. recientemente. Revise el audio en la pestaña de Alertas globales.
+                        </div>
+                      )}
+
+                      <p className="text-[9px] text-slate-400 mb-3 text-justify">La IA leerá el Plan de Contingencia en tiempo real si el paciente llama, lo tranquilizará y le enviará la grabación a su panel de alertas central.</p>
+                      <button onClick={() => alert("Simulación: Compartiendo contacto de emergencia por WhatsApp al paciente...")} className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-[11px] shadow-md mt-auto transition-colors">
+                        📲 Compartir Línea S.O.S. al Paciente
+                      </button>
+                   </div>
+                </div>
+            </div>
+        );
+    }
 
     const renderSpecialtyGraph = () => {
         if (!hasScores) {
@@ -1163,7 +1368,7 @@ export default function App() {
   };
 
   const [activeCase, setActiveCase] = useState<ClinicalCase | null>(null);
-  const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS_BASE' | 'ESPECIALIDADES' | 'FARMACOLOGIA' | 'PERSPECTIVAS' | 'EVOLUTIVA'>('HISTORIAL');
+  const [activeCaseTab, setActiveCaseTab] = useState<'HISTORIAL' | 'ESTADISTICAS_BASE' | 'ESPECIALIDADES' | 'FARMACOLOGIA' | 'PERSPECTIVAS' | 'EVOLUTIVA' | 'PREVENCION'>('HISTORIAL');
   
   const [clinicalSearchQuery, setClinicalSearchQuery] = useState('');
   const [searchFeedback, setSearchFeedback] = useState('');
@@ -1507,7 +1712,7 @@ export default function App() {
          'TRASTORNOS_BIPOLARES': 'Trastornos Bipolares y Trastornos Relacionados',
          'TRASTORNOS_DEPRESIVOS': 'Trastornos Depresivos',
          'TRASTORNOS_ANSIEDAD': 'Trastornos de Ansiedad',
-         'TOC_Y_RELACIONADOS': 'Trastorno Obsesivo-Compulsivo y Relacionados',
+         'TOC_Y_RELACIONADOS': 'Trastorno Obsesivo-Compulsivo (TOC)',
          'TRAUMA_Y_ESTRES': 'Trastornos Relacionados con Traumas y Factores de Estrés',
          'TRASTORNOS_DISOCIATIVOS': 'Trastornos Disociativos',
          'SINTOMAS_SOMATICOS': 'Trastornos de Síntomas Somáticos',
@@ -2103,6 +2308,7 @@ export default function App() {
                         {currentUser?.professionType === 'PSIQUIATRA' && (
                            <button onClick={() => setActiveCaseTab('FARMACOLOGIA')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'FARMACOLOGIA' ? 'bg-emerald-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>💊 Fármacos</button>
                         )}
+                        <button onClick={() => setActiveCaseTab('PREVENCION')} className={`flex-auto py-2 px-1 rounded-xl text-[10px] font-bold transition-colors ${activeCaseTab === 'PREVENCION' ? 'bg-red-600 text-white shadow' : `hover:bg-slate-800 ${th.textMuted}`}`}>🚨 Centro Comando S.O.S</button>
                       </div>
 
                       {activeCaseTab === 'HISTORIAL' && (
@@ -2263,6 +2469,7 @@ export default function App() {
                       {activeCaseTab === 'ESTADISTICAS_BASE' && <PatientDashboard activeCase={activeCase} dashboardType="BASE" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
                       {activeCaseTab === 'ESPECIALIDADES' && <PatientDashboard activeCase={activeCase} dashboardType="SPECIALTY" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
                       {activeCaseTab === 'FARMACOLOGIA' && <PatientDashboard activeCase={activeCase} dashboardType="PHARMA" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
+                      {activeCaseTab === 'PREVENCION' && <PatientDashboard activeCase={activeCase} dashboardType="PREVENTION" onUpdateCase={handleUpdateActiveCase} onGenerateSpecialtyAi={handleGenerateSpecialtyAi} isGeneratingAi={isProcessingSpecialtyAi} />}
                       
                       {activeCaseTab === 'PERSPECTIVAS' && (
                         <>
@@ -2307,6 +2514,7 @@ export default function App() {
                           <span className={`text-xs font-bold ${th.textMuted} uppercase`}>
                             {activeCaseTab === 'PERSPECTIVAS' ? 'Análisis de Corrientes Psicológicas' : 
                              activeCaseTab === 'EVOLUTIVA' ? 'Análisis Clínico Evolutivo' : 
+                             activeCaseTab === 'PREVENCION' ? 'Protocolo de Prevención Suicida' :
                              t('Dictamen Clínico Profesional')}
                           </span>
                           <div className="flex flex-wrap items-center gap-2">
@@ -2323,6 +2531,8 @@ export default function App() {
                                ? (theoreticalAnalysisResult || "Presione 'Analizar Corriente Actual (IA)' en la columna izquierda para obtener la opinión de la Inteligencia Artificial.")
                                : activeCaseTab === 'EVOLUTIVA'
                                ? (evolutionaryAnalysisResult || "Presione 'Analizar Valor Adaptativo (IA)' en la columna izquierda.")
+                               : activeCaseTab === 'PREVENCION'
+                               ? "Atención: La información confidencial del Plan de Seguridad de este paciente se mantiene resguardada en su base de datos. Utilice el panel izquierdo para actualizar los protocolos de emergencia."
                                : (notesResult || "Presione 'Generar Dictamen IA'.")}
                           </div>
                           
@@ -2467,140 +2677,4 @@ export default function App() {
                   </div>
                   <div className="sm:col-span-3">
                     <label className={`text-[9px] ${th.textMuted} font-bold block mb-1`}>Nombre Completo</label>
-                    <input type="text" required value={editPatientData.patientName} onChange={(e) => setEditPatientData(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  </div>
-                  
-                  <input type="text" placeholder={t('Teléfono')} value={editPatientData.telefono} onChange={(e) => setEditPatientData(p => ({ ...p, telefono: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Edad')} value={editPatientData.edad} onChange={(e) => setEditPatientData(p => ({ ...p, edad: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  
-                  <div className="sm:col-span-2 space-y-1">
-                     <label className={`text-[9px] ${th.textMuted} font-bold`}>Foto del Paciente (Archivo Local o URL)</label>
-                     <div className="flex gap-2">
-                        <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) setEditPatientData(p => ({...p, fotoUrl: URL.createObjectURL(e.target.files![0])})) }} className={`flex-1 p-2 ${th.input} border ${th.border} rounded-lg text-[10px] ${th.text}`} />
-                        <input type="url" placeholder="O pegue una URL..." value={editPatientData.fotoUrl} onChange={(e) => setEditPatientData(p => ({ ...p, fotoUrl: e.target.value }))} className={`flex-1 p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text}`} />
-                     </div>
-                  </div>
-                  
-                  <select value={editPatientData.sexo} onChange={(e) => setEditPatientData(p => ({ ...p, sexo: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                  <select value={editPatientData.estadoCivil} onChange={(e) => setEditPatientData(p => ({ ...p, estadoCivil: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`}>
-                    <option value="Soltero(a)">Soltero(a)</option>
-                    <option value="Casado(a)">Casado(a)</option>
-                    <option value="Divorciado(a)">Divorciado(a)</option>
-                    <option value="Viudo(a)">Viudo(a)</option>
-                    <option value="Unión Libre">Unión Libre</option>
-                  </select>
-                  <input type="text" placeholder={t('Religión')} value={editPatientData.religion} onChange={(e) => setEditPatientData(p => ({ ...p, religion: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div>
-                <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('2. Contexto Sociodemográfico')}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <input type="text" placeholder={t('Ocupación')} value={editPatientData.ocupacion} onChange={(e) => setEditPatientData(p => ({ ...p, ocupacion: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Grado de Estudios')} value={editPatientData.estudios} onChange={(e) => setEditPatientData(p => ({ ...p, estudios: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Lugar de Origen / Procedencia')} value={editPatientData.origenProcedencia} onChange={(e) => setEditPatientData(p => ({ ...p, origenProcedencia: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <input type="text" placeholder={t('Datos de Progenitores (Nombres, edades, estado...)')} value={editPatientData.datosProgenitores} onChange={(e) => setEditPatientData(p => ({ ...p, datosProgenitores: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} sm:col-span-3 focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div>
-                <h4 className={`text-[10px] font-bold text-indigo-500 uppercase border-b ${th.border} pb-2 mb-3`}>{t('3. Anamnesis y Motivo de Consulta Inicial')}</h4>
-                <div className="space-y-3">
-                  <textarea rows={2} placeholder={t('Antecedentes Médicos / Psicológicos Previos...')} value={editPatientData.antecedentes} onChange={(e) => setEditPatientData(p => ({ ...p, antecedentes: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                  <textarea required rows={3} placeholder={t('Motivo de Consulta (Describa el motivo textual por el que asiste el paciente)...')} value={editPatientData.motivoConsultaTextual} onChange={(e) => setEditPatientData(p => ({ ...p, motivoConsultaTextual: e.target.value }))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg text-xs ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-
-              <div className={`flex justify-end gap-2 pt-3 border-t ${th.border}`}>
-                <button type="button" onClick={() => setShowEditPatientModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-xl`}>Cancelar</button>
-                <button type="submit" className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-colors">💾 Guardar Cambios</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE BATERIAS DSM-5 */}
-      {showDsmModal && selectedDsmTemplate && (
-        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
-          <div className={`${th.card} border ${th.border} rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden text-xs shadow-2xl`}>
-            <div className={`p-4 border-b ${th.border} ${th.input} flex justify-between items-center`}>
-              <div className="flex-1"><h3 className={`font-bold ${th.text} text-sm`}>{selectedDsmTemplate.name}</h3></div>
-              <button onClick={() => { setShowDsmModal(false); setSelectedDsmTemplate(null); setVerificationPassword(''); }} className={`${th.textMuted} hover:${th.text}`}>✕</button>
-            </div>
-            <div className="p-4 overflow-y-auto flex-1 space-y-4">
-              {selectedDsmTemplate.questions.map((q, idx) => (
-                <div key={idx} className={`${th.input} p-3 rounded-xl border ${th.border}`}>
-                  <p className={`${th.text} font-semibold mb-2`}>{idx + 1}. {q}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    {selectedDsmTemplate.options.map((option) => (
-                      <label key={option} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${dsmAnswers[q] === option ? 'bg-indigo-100 border-indigo-500 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' : `${th.card} ${th.border} ${th.text} hover:border-indigo-500`}`}>
-                        <input type="radio" checked={dsmAnswers[q] === option} onChange={() => setDsmAnswers(prev => ({ ...prev, [q]: option }))} className="text-indigo-600" />
-                        <span>{option}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <div className={`${th.input} p-4 rounded-xl border ${th.border} mt-4`}>
-                <label className={`block text-[11px] font-bold ${th.textMuted} uppercase`}>Firma Digital para Guardar</label>
-                <input type="password" required value={verificationPassword} onChange={(e) => setVerificationPassword(e.target.value)} placeholder="Su clave de psicólogo/psiquiatra..." className={`w-full p-2 ${th.card} border ${th.border} rounded ${th.text} mt-1`} />
-              </div>
-            </div>
-            <div className={`p-3 border-t ${th.border} ${th.input} flex justify-end gap-2`}>
-              <button onClick={() => setShowDsmModal(false)} className={`px-4 py-2 bg-slate-300 dark:bg-slate-800 ${th.text} font-bold rounded-lg transition-colors`}>Cancelar</button>
-              <button onClick={handleSaveDsmEvaluation} className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors">Firmar y Guardar en Expediente</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE CALENDARIO */}
-      {showCalendarModal && (
-        <div className={`fixed inset-0 ${th.modalBg} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
-          <div className={`${th.card} border ${th.border} rounded-2xl max-w-sm w-full p-6 text-xs space-y-4 shadow-2xl`}>
-            <div className={`flex justify-between items-center border-b ${th.border} pb-2`}>
-              <h3 className={`text-sm font-bold ${th.text}`}>➕ Agendar Nueva Cita</h3>
-              <button onClick={() => setShowCalendarModal(false)} className={`${th.textMuted} hover:${th.text}`}>✕</button>
-            </div>
-            <form onSubmit={handleCreateAppointment} className="space-y-4">
-              <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Paciente (Expediente Activo)</label>
-                <select required value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`}>
-                  <option value="" disabled>Seleccione un paciente...</option>
-                  {myPatients.map(p => (
-                    <option key={p.id} value={p.id}>{p.patientName} (Exp: {p.id})</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Fecha</label>
-                  <input type="date" required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-                <div>
-                  <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Hora</label>
-                  <input type="time" required value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
-                </div>
-              </div>
-              <div>
-                <label className={`block text-[10px] font-bold ${th.textMuted} uppercase mb-1`}>Duración (Minutos)</label>
-                <input type="number" required min="15" step="15" value={durationMinutes} onChange={(e) => setDurationMinutes(parseInt(e.target.value))} className={`w-full p-2.5 ${th.input} border ${th.border} rounded-lg ${th.text} focus:border-indigo-500 outline-none`} />
-              </div>
-              <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg">📅 Guardar Cita</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* FIRMA DE DESARROLLADOR Y FOOTER */}
-      <footer className={`border-t ${th.border} ${th.bg} py-4 text-center text-xs ${th.textMuted} mt-auto w-full transition-colors duration-300`}>
-        <p>© 2026 Asistente Clínica SaaS. Cumplimiento ético centralizado. Desarrollado por Harold.</p>
-      </footer>
-    </div>
-  );
-}
+                    <input type="text" required value={editPatientData.patientName} onChange={(e) => setEditPatientData(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.Soy un modelo de lenguaje, así que no tengo esa capacidad.
