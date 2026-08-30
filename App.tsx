@@ -11,7 +11,11 @@ import {
   processVoiceNotesToEvolution,
   dismissEmergencyAlert
 } from './services/geminiService';
-
+import { 
+  getAvailableMessages, 
+  consumeMessageCredit, 
+  refundMessageCredit 
+} from './services/quotaService';
 // ============================================================================
 // FUNCIONES AUXILIARES DE TIEMPO Y EXPORTACIÓN
 // ============================================================================
@@ -184,7 +188,13 @@ export default function App() {
   const [isFullscreenDashboard, setIsFullscreenDashboard] = useState<'BASE' | 'SPECIALTY' | 'PHARMA' | 'PERSPECTIVES' | 'EVOLUTIONARY' | 'PREVENTION' | null>(null);
   const [specialtyFocus, setSpecialtyFocus] = useState('TRASTORNOS_NEURODESARROLLO');
   const [perspectivesFocus, setPerspectivesFocus] = useState('FREUD'); 
+// Estados para gestión de bolsas de mensajes IA
+  const [editingQuotaUsername, setEditingQuotaUsername] = useState<string | null>(null);
+  const [editPlanMensualInput, setEditPlanMensualInput] = useState<number>(200);
+  const [editBolsonExtraInput, setEditBolsonExtraInput] = useState<number>(0);
 
+  const [regPlanMensual, setRegPlanMensual] = useState<number>(200);
+  const [regBolsonExtra, setRegBolsonExtra] = useState<number>(0);
   const th = {
     bg: isDarkMode ? 'bg-slate-950' : 'bg-slate-50',
     card: isDarkMode ? 'bg-slate-900' : 'bg-white',
@@ -1653,10 +1663,30 @@ export default function App() {
       const lastSession = activeCase.sessions[activeCase.sessions.length - 1];
       let fullNotesPayload = `=== HISTORIAL ===\nPaciente: ${activeCase.patientName}\n`;
       activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
-      const result = await processClinicalNotes(fullNotesPayload, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
+      
+      const result = await processClinicalNotes(
+        fullNotesPayload, 
+        lastSession.baiScore || 'Pendiente', 
+        lastSession.bdiScore || 'Pendiente', 
+        currentUser?.fullName || 'Profesional', 
+        currentUser?.colegiado || 'N/A',
+        currentUser,
+        setPsychologists,
+        setCurrentUser
+      );
+      
       const updatedCase = { ...activeCase, structuredOutput: result };
-      handleUpdateActiveCase(updatedCase); setNotesResult(result);
-    } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingNotes(false); }
+      handleUpdateActiveCase(updatedCase); 
+      setNotesResult(result);
+    } catch (e: any) { 
+      if (e.message === "BOLSA_AGOTADA") {
+        alert("⚠️ Has agotado la bolsa de mensajes de IA. Solicita una recarga al administrador.");
+      } else {
+        alert("Error: " + e.message); 
+      }
+    } finally { 
+      setIsProcessingNotes(false); 
+    }
   };
 
   const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY') => {
