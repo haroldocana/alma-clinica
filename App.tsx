@@ -62,7 +62,9 @@ const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: 
   <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
     <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
       <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
-      <p style="font-size: 14px; color: #4b5563; margin: 5px 0 0 0;">${specialty \vert{}\vert{} 'Especialista en Salud Mental'} \vert{} Colegiado Activo:${colegiado}</p>
+  <p style={{ fontSize: '14px', color: '#4b5563', margin: '5px 0 0 0' }}>
+  {`${specialty || 'Especialista en Salud Mental'} | Colegiado Activo: ${colegiado}`}
+</p>
       <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
     </div>
     <h2 style="text-align: center; font-size: 16px; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-decoration: underline;">${title}</h2>
