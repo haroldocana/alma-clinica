@@ -1881,29 +1881,44 @@ const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY
     setShowDsmModal(false); setSelectedDsmTemplate(null); setDsmAnswers({}); setVerificationPassword(''); alert(`Evaluación guardada.`);
   };
 
-  const handleAiDictationAssist = async () => {
+const handleAiDictationAssist = async () => {
     if (!voiceInputText.trim() || !currentUser) return;
     setIsDictatingVoice(true);
     try {
-     const refinedNotes = await processVoiceNotesToEvolution(
-  voiceInputText, 
-  currentUser.fullName, 
-  currentUser.colegiado,
-  currentUser,
-  setPsychologists,
-  setCurrentUser
-);
+      const refinedNotes = await processVoiceNotesToEvolution(
+        voiceInputText, 
+        currentUser.fullName, 
+        currentUser.colegiado,
+        currentUser,
+        setPsychologists,
+        setCurrentUser
+      );
+      setNewSessionData((prev: any) => ({ ...prev, rawNotes: refinedNotes })); 
+      setVoiceInputText('');
+    } catch (e: any) { 
+      alert("Error detallado: " + e.message); 
+    } finally { 
+      setIsDictatingVoice(false); 
+    }
+  };
 
   const handleScientificQuery = async () => {
     if (!scientificQuery.queryText.trim()) return;
     setScientificQuery(prev => ({ ...prev, loading: true }));
     try {
-   const res = await queryScientificDatabase(
-          scientificQuery.queryText,
-          currentUser,
-          setPsychologists,
-          setCurrentUser
-        );
+      const res = await queryScientificDatabase(
+        scientificQuery.queryText,
+        currentUser,
+        setPsychologists,
+        setCurrentUser
+      );
+      setScientificQuery(prev => ({ ...prev, responseText: res }));
+    } catch (e: any) { 
+      alert("Error detallado: " + e.message); 
+    } finally { 
+      setScientificQuery(prev => ({ ...prev, loading: false })); 
+    }
+  };
 
   const handleOpenCertificateModal = (type: 'ATTENDANCE' | 'REFERRAL') => {
     if (!activeCase || !currentUser) return;
