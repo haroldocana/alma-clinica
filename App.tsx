@@ -989,14 +989,19 @@ export default function App() {
             {dashboardType === 'PERSPECTIVES' && (
               <div className="flex items-center gap-2 mr-2">
                  <span className="text-[10px] font-bold text-fuchsia-400 uppercase hidden sm:inline">Corriente:</span>
-                 <select value={perspectivesFocus} onChange={(e) => setPerspectivesFocus(e.target.value)} className="bg-slate-800 text-xs text-white font-bold p-1.5 rounded-lg border border-fuchsia-500/50 outline-none cursor-pointer hover:bg-slate-700 transition">
-                    <option value="FREUD">Psicoanálisis (Freud / Jung)</option>
-                    <option value="ERIKSON">Desarrollo Psicosocial (Erikson)</option>
-                    <option value="CBT">Cognitivo-Conductual (CBT)</option>
-                    <option value="HUMANISTA">Humanista-Existencial</option>
-                    <option value="SISTEMICA">Sistémica / Familiar</option>
-                    <option value="GESTALT">Gestalt</option>
-                 </select>
+                <select value={perspectivesFocus} onChange={(e) => setPerspectivesFocus(e.target.value)} className="bg-slate-800 text-xs text-white font-bold p-1.5 rounded-lg border border-fuchsia-500/50 outline-none cursor-pointer hover:bg-slate-700 transition">
+              <option value="FREUD">Psicoanálisis (Freud / Klein)</option>
+              <option value="JUNGIANA">Psicología Analítica (Jung)</option>
+              <option value="ERIKSON">Desarrollo Psicosocial (Erikson)</option>
+              <option value="CBT">Cognitivo-Conductual (CBT)</option>
+              <option value="DBT">Dialéctico Conductual (DBT)</option>
+              <option value="ACT">Aceptación y Compromiso (ACT)</option>
+              <option value="HUMANISTA">Humanista / Existencial / Logoterapia</option>
+              <option value="GESTALT">Gestalt</option>
+              <option value="SISTEMICA">Sistémica / Familiar</option>
+              <option value="NEUROPSICOLOGIA">Neuropsicología / Neurociencias</option>
+              <option value="ADLERIANA">Psicología Individual (Adler)</option>
+            </select>
               </div>
             )}
 
