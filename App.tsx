@@ -1733,7 +1733,7 @@ export default function App() {
     }
   };
 
-  const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY') => {
+const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY') => {
     if (!activeCase || activeCase.sessions.length === 0) return;
     setIsProcessingNotes(true);
     try {
@@ -1743,22 +1743,37 @@ export default function App() {
       
       let specialInstruction = "";
       if (type === 'THEORETICAL') {
-          const corrienteMap: any = {
-             'FREUD': 'Psicoanálisis (Freud / Jung)',
-             'ERIKSON': 'Desarrollo Psicosocial (Erikson)',
-             'CBT': 'Terapia Cognitivo-Conductual (CBT)',
-             'HUMANISTA': 'Humanismo / Existencial (Rogers / Frankl)',
-             'SISTEMICA': 'Terapia Sistémica / Familiar',
-             'GESTALT': 'Terapia Gestalt'
+          const corrienteMap: Record<string, string> = {
+             'FREUD': 'Psicoanálisis Ortodoxo y Psicodinámica (Freud / Klein)',
+             'JUNGIANA': 'Psicología Analítica (Carl Jung - Arquetipos e Inconsciente Colectivo)',
+             'ERIKSON': 'Desarrollo Psicosocial y Ciclo Vital (Erikson)',
+             'CBT': 'Terapia Cognitivo-Conductual Clásica (Beck / Ellis)',
+             'DBT': 'Terapia Dialéctico Conductual (DBT - Linehan)',
+             'ACT': 'Terapia de Aceptación y Compromiso (ACT - Tercera Generación)',
+             'HUMANISTA': 'Humanismo y Logoterapia Existencial (Rogers / Frankl)',
+             'GESTALT': 'Terapia Gestalt (Perls - Darse cuenta y Cierre de Figuras)',
+             'SISTEMICA': 'Terapia Sistémica / Relacional (Minuchin / Bowen)',
+             'NEUROPSICOLOGIA': 'Neuropsicología Clínica y Neurociencias Afectivas',
+             'ADLERIANA': 'Psicología Individual (Alfred Adler - Estilo de Vida y Complejos)'
           };
           const corrienteStr = corrienteMap[perspectivesFocus] || 'Psicología Clínica';
-          specialInstruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un experto en ${corrienteStr}. Analiza profunda y detalladamente este caso DESDE ESTA ÚNICA PERSPECTIVA TEÓRICA. Da tus comentarios y opinión clínica sobre el origen, mantenimiento de los síntomas y posibles mecanismos subyacentes. Ignora el formato de dictamen estándar. Escribe un ensayo analítico estructurado y profesional de unos 3 párrafos.\n\n`;
+          specialInstruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un experto en ${corrienteStr}. Analiza profunda y detalladamente este caso DESDE ESTA ÚNICA PERSPECTIVA TEÓRICA. Da tus comentarios y opinión clínica sobre el origen, mantenimiento de los síntomas, construcciones teóricas clave y posibles mecanismos subyacentes. Ignora el formato de dictamen estándar. Escribe un ensayo analítico estructurado y profesional de unos 3 párrafos.\n\n`;
       } else {
           specialInstruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un experto en Psicología Evolutiva Darwiniana y Psicobiología. Analiza este caso explicando el "valor adaptativo" o "propósito de supervivencia" de los síntomas del paciente (ej. ansiedad como alerta temprana, depresión como conservación de energía). Ignora el formato estándar. Escribe un ensayo evolutivo profundo de unos 3 párrafos.\n\n`;
       }
 
       const payloadWithInstruction = specialInstruction + fullNotesPayload;
       
+      const result = await processClinicalNotes(
+        payloadWithInstruction, 
+        lastSession.baiScore || 'Pendiente', 
+        lastSession.bdiScore || 'Pendiente', 
+        currentUser?.fullName || 'Profesional', 
+        currentUser?.colegiado || 'N/A',
+        currentUser,
+        setPsychologists,
+        setCurrentUser
+      );
       
       const updatedCase = { ...activeCase };
       if (type === 'THEORETICAL') {
@@ -1769,7 +1784,15 @@ export default function App() {
          setEvolutionaryAnalysisResult(result);
       }
       handleUpdateActiveCase(updatedCase); 
-    } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingNotes(false); }
+    } catch (e: any) { 
+      if (e.message === "BOLSA_AGOTADA") {
+        alert("⚠️ Has agotado la bolsa de mensajes de IA. Solicita una recarga al administrador.");
+      } else {
+        alert("Error: " + e.message); 
+      }
+    } finally { 
+      setIsProcessingNotes(false); 
+    }
   };
 
   const handleGenerateSpecialtyAi = async (focus: string) => {
