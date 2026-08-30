@@ -1885,19 +1885,25 @@ const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY
     if (!voiceInputText.trim() || !currentUser) return;
     setIsDictatingVoice(true);
     try {
-      const refinedNotes = await processVoiceNotesToEvolution(voiceInputText, currentUser.fullName, currentUser.colegiado);
-      setNewSessionData((prev:any) => ({ ...prev, rawNotes: refinedNotes })); setVoiceInputText('');
-    } catch (e: any) { alert("Error detallado: " + e.message); console.error(e); } finally { setIsDictatingVoice(false); }
-  };
+     const refinedNotes = await processVoiceNotesToEvolution(
+  voiceInputText, 
+  currentUser.fullName, 
+  currentUser.colegiado,
+  currentUser,
+  setPsychologists,
+  setCurrentUser
+);
 
   const handleScientificQuery = async () => {
     if (!scientificQuery.queryText.trim()) return;
     setScientificQuery(prev => ({ ...prev, loading: true }));
     try {
-      const res = await queryScientificDatabase(scientificQuery.queryText);
-      setScientificQuery(prev => ({ ...prev, responseText: res }));
-    } catch (e: any) { alert("Error detallado: " + e.message); console.error(e); } finally { setScientificQuery(prev => ({ ...prev, loading: false })); }
-  };
+   const res = await queryScientificDatabase(
+          scientificQuery.queryText,
+          currentUser,
+          setPsychologists,
+          setCurrentUser
+        );
 
   const handleOpenCertificateModal = (type: 'ATTENDANCE' | 'REFERRAL') => {
     if (!activeCase || !currentUser) return;
