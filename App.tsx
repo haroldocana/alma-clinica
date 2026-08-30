@@ -1487,11 +1487,55 @@ export default function App() {
     const expiry = new Date();
     if (regLicenseType === 'DEMO') expiry.setDate(expiry.getDate() + 15); else expiry.setDate(expiry.getDate() + 365);
     const newPsychologist: any = { 
-      username: userClean, passwordHash: passClean, fullName: regFullName.trim(), colegiado: regColegiado.trim(), licenseType: regLicenseType as any, licenseExpiry: expiry.toISOString().split('T')[0], isActive: true, professionType: regProfessionType, specialty: '', professionalReview: '', abandonmentThreshold: 30 
+      username: userClean, 
+      passwordHash: passClean, 
+      fullName: regFullName.trim(), 
+      colegiado: regColegiado.trim(), 
+      licenseType: regLicenseType as any, 
+      licenseExpiry: expiry.toISOString().split('T')[0], 
+      isActive: true, 
+      professionType: regProfessionType, 
+      specialty: '', 
+      professionalReview: '', 
+      abandonmentThreshold: 30,
+      mensajesPlanMensual: Number(regPlanMensual) || 200,
+      mensajesConsumidosMes: 0,
+      mensajesBolsonExtra: Number(regBolsonExtra) || 0
     };
     const updatedDb = { ...psychologists, [newPsychologist.username]: newPsychologist };
     setPsychologists(updatedDb); localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
     try { await savePsychologistsRemote(updatedDb); alert(`Licencia activada para: ${newPsychologist.fullName}`); } catch (error) {}
+  };
+
+  const handleUpdateUserQuotaAdmin = async (username: string) => {
+    const targetUser = psychologists[username];
+    if (!targetUser) return;
+    const updatedDb = {
+      ...psychologists,
+      [username]: {
+        ...targetUser,
+        mensajesPlanMensual: Number(editPlanMensualInput),
+        mensajesBolsonExtra: Number(editBolsonExtraInput),
+      },
+    };
+    setPsychologists(updatedDb);
+    localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
+    await savePsychologistsRemote(updatedDb);
+    alert(`Bolsa de mensajes actualizada para ${targetUser.fullName}`);
+    setEditingQuotaUsername(null);
+  };
+
+  const handleResetUserConsumidosAdmin = async (username: string) => {
+    const targetUser = psychologists[username];
+    if (!targetUser) return;
+    const updatedDb = {
+      ...psychologists,
+      [username]: { ...targetUser, mensajesConsumidosMes: 0 },
+    };
+    setPsychologists(updatedDb);
+    localStorage.setItem('psychologists_db', JSON.stringify(updatedDb));
+    await savePsychologistsRemote(updatedDb);
+    alert(`Contador mensual reseteado a 0 para ${targetUser.fullName}`);
   };
 
   const handleUpdateUserPasswordAdmin = async (username: string) => {
