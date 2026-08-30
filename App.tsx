@@ -1714,7 +1714,7 @@ export default function App() {
       activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
       
      const result = await processClinicalNotes(
-  payloadWithInstruction, 
+  fullNotesPayload, 
   lastSession.baiScore || 'Pendiente', 
   lastSession.bdiScore || 'Pendiente', 
   currentUser?.fullName || 'Profesional', 
