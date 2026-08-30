@@ -81,8 +81,9 @@ const getPrescriptionLetterhead = (patientName: string, date: string, diagnostic
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 15px; margin-bottom: 20px;">
       <div>
         <h1 style="font-size: 20px; color: #059669; margin: 0;">${doctorName}</h1>
-        <p style="font-size: 12px; margin: 3px 0 0 0;">${specialty \vert{}\vert{} 'Médico Psiquiatra'} \vert{} Col: ${colegiado}</p>
-      </div>
+        <p style={{ fontSize: '12px', margin: '3px 0 0 0' }}>
+  {specialty || 'Médico Psiquiatra'} | Col: {colegiado}
+</p>
       <div style="text-align: right;">
         <h2 style="font-size: 32px; color: #059669; margin: 0; font-family: serif;">Rx</h2>
       </div>
