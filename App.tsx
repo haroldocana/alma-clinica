@@ -61,9 +61,8 @@ const exportHTMLToWord = (htmlContent: string, filename: string) => {
 const getProfessionalLetterhead = (title: string, bodyHtml: string, doctorName: string, colegiado: string, specialty: string) => `
   <div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #000;">
     <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 30px;">
-      <h1 style="font-size: 24px; color: #1e3a8a; margin: 0;">${doctorName}</h1>
-  <p style={{ fontSize: '14px', color: '#4b5563', margin: '5px 0 0 0' }}>
-  {`${specialty || 'Especialista en Salud Mental'} | Colegiado Activo: ${colegiado}`}
+     <p style={{ fontSize: '14px', color: '#4b5563', margin: '5px 0 0 0' }}>
+  {specialty || 'Especialista en Salud Mental'} | Colegiado Activo: {colegiado}
 </p>
       <p style="font-size: 12px; color: #6b7280; margin: 5px 0 0 0;">Atención Clínica Profesional y Ética</p>
     </div>
