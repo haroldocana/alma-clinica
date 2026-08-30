@@ -1714,7 +1714,7 @@ export default function App() {
       }
 
       const payloadWithInstruction = specialInstruction + fullNotesPayload;
-      const result = await processClinicalNotes(payloadWithInstruction, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
+      
       
       const updatedCase = { ...activeCase };
       if (type === 'THEORETICAL') {
