@@ -2810,4 +2810,10 @@ const handleAiDictationAssist = async () => {
                   </div>
                   <div className="sm:col-span-3">
                     <label className={`text-[9px] ${th.textMuted} font-bold block mb-1`}>Nombre Completo</label>
-                    <input type="text" required value={editPatientData.patientName} onChange={(e) => setEditPatientData(p => ({ ...p, patientName: e.target.value }))} className={`w-full p-2.Soy un modelo de lenguaje, así que no tengo esa capacidad.
+                    <input 
+  type="text" 
+  required 
+  value={editPatientData.patientName} 
+  onChange={(e) => setEditPatientData(p => ({ ...p, patientName: e.target.value }))} 
+  className={`w-full p-2 ${th.card} border ${th.border} rounded text-xs ${th.text}`} 
+/>
