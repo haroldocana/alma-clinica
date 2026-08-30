@@ -1713,16 +1713,16 @@ export default function App() {
       let fullNotesPayload = `=== HISTORIAL ===\nPaciente: ${activeCase.patientName}\n`;
       activeCase.sessions.forEach((s) => { fullNotesPayload += `Sesión ${s.sessionNumber}: ${s.rawNotes}\n`; });
       
-      const result = await processClinicalNotes(
-        fullNotesPayload, 
-        lastSession.baiScore || 'Pendiente', 
-        lastSession.bdiScore || 'Pendiente', 
-        currentUser?.fullName || 'Profesional', 
-        currentUser?.colegiado || 'N/A',
-        currentUser,
-        setPsychologists,
-        setCurrentUser
-      );
+     const result = await processClinicalNotes(
+  payloadWithInstruction, 
+  lastSession.baiScore || 'Pendiente', 
+  lastSession.bdiScore || 'Pendiente', 
+  currentUser?.fullName || 'Profesional', 
+  currentUser?.colegiado || 'N/A',
+  currentUser,
+  setPsychologists,
+  setCurrentUser
+);
       
       const updatedCase = { ...activeCase, structuredOutput: result };
       handleUpdateActiveCase(updatedCase); 
