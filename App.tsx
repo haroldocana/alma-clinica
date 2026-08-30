@@ -1830,16 +1830,24 @@ const handleProcessTheoreticalNotes = async (type: 'THEORETICAL' | 'EVOLUTIONARY
       const instruction = `INSTRUCCIÓN CLÍNICA ESTRICTA: Actúa como un especialista estricto en ${focusMap[focus] || focus} según el manual DSM-5. Analiza este caso centrándote ÚNICAMENTE en esta familia de trastornos. Evalúa los síntomas presentados, el riesgo asociado y la evolución. Sé muy conciso, clínico y directo (máximo 2 párrafos).\n\n`;
       
       const payloadWithInstruction = instruction + fullNotesPayload;
-      const result = await processClinicalNotes(payloadWithInstruction, lastSession.baiScore || 'Pendiente', lastSession.bdiScore || 'Pendiente', currentUser?.fullName || 'Profesional', currentUser?.colegiado || 'N/A');
-      
+ const result = await processClinicalNotes(
+        payloadWithInstruction, 
+        lastSession.baiScore || 'Pendiente', 
+        lastSession.bdiScore || 'Pendiente', 
+        currentUser?.fullName || 'Profesional', 
+        currentUser?.colegiado || 'N/A',
+        currentUser,
+        setPsychologists,
+        setCurrentUser
+      );
+
       const updatedCase = { ...activeCase };
       if (!(updatedCase as any).specialtyAiSummaries) (updatedCase as any).specialtyAiSummaries = {};
       (updatedCase as any).specialtyAiSummaries[focus] = result;
-      
+
       handleUpdateActiveCase(updatedCase);
     } catch (e: any) { alert("Error: " + e.message); } finally { setIsProcessingSpecialtyAi(false); }
   };
-
   const handleSaveDsmEvaluation = () => {
     if (!activeCase || !selectedDsmTemplate || !currentUser) return;
     if (verificationPassword !== currentUser.passwordHash) { alert("Firma inválida."); return; }
